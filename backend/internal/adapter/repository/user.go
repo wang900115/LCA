@@ -6,7 +6,6 @@ import (
 	"LCA/internal/domain/irepository"
 	"time"
 
-	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -20,22 +19,22 @@ func NewUserRepository(gorm *gorm.DB) irepository.IUserRepository {
 	}
 }
 
-func (r *UserRepository) CreateUser(username, channelUUID string) (entities.User, error) {
-	userUUID := uuid.New().String()
-	createdAt := time.Now()
-	user := model.User{
-		UUID:        userUUID,
-		Username:    username,
-		ChannelUUID: channelUUID,
-		Status:      "online",
-		CreatedAt:   createdAt,
-		UpdatedAt:   createdAt,
+func (r *UserRepository) CreateUser(user entities.User) (entities.User, error) {
+	currentTime := time.Now()
+	userModel := model.User{
+		UUID:        user.UUID,
+		Username:    user.Username,
+		ChannelUUID: user.ChannelUUID,
+		Status:      user.Status,
+		CreatedAt:   currentTime,
+		UpdatedAt:   currentTime,
 	}
 
-	if err := r.gorm.Create(&user).Error; err != nil {
+	if err := r.gorm.Create(&userModel).Error; err != nil {
 		return entities.User{}, err
 	}
-	return user.ToDomain(), nil
+
+	return userModel.ToDomain(), nil
 }
 
 func (r *UserRepository) DeleteUser(userUUID string) (entities.User, error) {

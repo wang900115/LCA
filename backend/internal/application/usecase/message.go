@@ -1,1 +1,44 @@
 package usecase
+
+import (
+	"LCA/internal/domain/entities"
+	"LCA/internal/domain/irepository"
+)
+
+type MessageUsecase struct {
+	messageRepo irepository.IMessageRepository
+}
+
+func NewMessageUsecase(messageRepo irepository.IMessageRepository) *MessageUsecase {
+	return &MessageUsecase{
+		messageRepo: messageRepo,
+	}
+}
+
+func (m *MessageUsecase) CreateMessage(message entities.Message) (string, error) {
+	message, err := m.messageRepo.CreateMessage(message)
+	if err != nil {
+		return "", err
+	}
+	return message.UUID, nil
+}
+
+func (m *MessageUsecase) DeleteMessage(messageUUID string) error {
+	err := m.messageRepo.DeleteMessage(messageUUID)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *MessageUsecase) QueryMessages(channelUUID string) ([]string, error) {
+	messages, err := m.messageRepo.QueryMessages(channelUUID)
+	if err != nil {
+		return nil, err
+	}
+	var Content []string
+	for _, message := range messages {
+		Content = append(Content, message.Content)
+	}
+	return Content, nil
+}

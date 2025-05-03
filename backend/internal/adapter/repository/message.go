@@ -6,7 +6,6 @@ import (
 	"LCA/internal/domain/irepository"
 	"time"
 
-	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -20,22 +19,21 @@ func NewMessageRepository(gorm *gorm.DB) irepository.IMessageRepository {
 	}
 }
 
-func (r *MessageRepository) CreateMessage(channelUUID, userUUID, content string) (entities.Message, error) {
-	messageUUID := uuid.New().String()
-	createdAt := time.Now()
+func (r *MessageRepository) CreateMessage(message entities.Message) (entities.Message, error) {
+	currentTime := time.Now()
 
-	message := model.Message{
-		UUID:        messageUUID,
-		ChannelUUID: channelUUID,
-		UserUUID:    userUUID,
-		Content:     content,
-		CreatedAt:   createdAt,
-		UpdatedAt:   createdAt,
+	messageModel := model.Message{
+		UUID:        message.UUID,
+		ChannelUUID: message.ChannelUUID,
+		UserUUID:    message.UserUUID,
+		Content:     message.Content,
+		CreatedAt:   currentTime,
+		UpdatedAt:   currentTime,
 	}
 	if err := r.gorm.Create(&message).Error; err != nil {
 		return entities.Message{}, err
 	}
-	return message.ToDomain(), nil
+	return messageModel.ToDomain(), nil
 }
 
 func (r *MessageRepository) DeleteMessage(messageUUID string) error {

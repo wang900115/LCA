@@ -1,6 +1,9 @@
 package model
 
-import "time"
+import (
+	"LCA/internal/domain/entities"
+	"time"
+)
 
 type User struct {
 	ID          uint   `json:"id" gorm:"primaryKey"`
@@ -12,4 +15,17 @@ type User struct {
 	CreatedAt time.Time  `json:"created_at"`
 	DeletedAt *time.Time `json:"deleted_at,omitempty" gorm:"index"`
 	UpdatedAt time.Time  `json:"updated_at"`
+}
+
+func (u User) TableName() string {
+	return "users"
+}
+
+func (u User) ToDomain() entities.User {
+	return entities.User{
+		UUID:        u.UUID,
+		Username:    u.Username,
+		ChannelUUID: u.ChannelUUID,
+		Status:      u.Status,
+	}
 }

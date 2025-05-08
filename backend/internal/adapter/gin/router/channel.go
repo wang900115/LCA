@@ -15,10 +15,10 @@ func NewChannelRouter(channelController controller.ChannelController) *ChannelRo
 }
 
 func (cr *ChannelRouter) Setup(router *gin.RouterGroup) {
-	userGroup := router.Group("v1/Channel/")
+	channelGroup := router.Group("v1/Channel/")
 	{
-		userGroup.POST("/create", cr.channelController.CreateChannel)
-		userGroup.GET("/query", cr.channelController.DeleteChannel)
-		userGroup.DELETE("/delete", cr.channelController.QueryChannel)
+		channelGroup.POST("/create", cr.channelController.CreateChannel)
+		channelGroup.GET("/query", cr.channelController.DeleteChannel)
+		channelGroup.DELETE("/delete", cr.channelController.QueryChannel)
 	}
 }

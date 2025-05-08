@@ -1,0 +1,57 @@
+package jwt
+
+import (
+	iresponse "LCA/internal/adapter/gin/controller/response"
+	"LCA/internal/adapter/gin/middleware"
+	"LCA/internal/application/usecase"
+	"errors"
+	"strings"
+
+	"github.com/gin-gonic/gin"
+)
+
+type JWT struct {
+	response iresponse.IResponse
+	token    usecase.TokenUsecase
+}
+
+func NewJWT(response iresponse.IResponse, token usecase.TokenUsecase) middleware.IMiddleware {
+	return &JWT{response: response, token: token}
+}
+
+func (j *JWT) Middleware(c *gin.Context) {
+	token, err := j.extract(c)
+	if err != nil {
+		j.response.AuthFail(c, err.Error())
+		c.Abort()
+		return
+	}
+
+	tokenClaims, err := j.token.ValidateToken(token)
+	if err != nil {
+		j.response.AuthFail(c, err.Error())
+		c.Abort()
+		return
+	}
+
+	c.Set("channel_uuid", tokenClaims.ChannelUUID)
+	c.Set("user_uuid", tokenClaims.UserUUID)
+	c.Set("username", tokenClaims.Username)
+	c.Set("expired_at", tokenClaims.ExpiredAt)
+
+	c.Next()
+
+}
+
+func (JWT) extract(c *gin.Context) (string, error) {
+	authorization := c.GetHeader("Authorization")
+	if authorization == "" {
+		return "", errors.New("no token")
+	}
+
+	if !strings.HasPrefix(authorization, "Bearer ") {
+		return "", errors.New("invalid authorization format")
+	}
+
+	return strings.TrimPrefix(authorization, "Bearer "), nil
+}

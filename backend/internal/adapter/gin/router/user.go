@@ -2,6 +2,7 @@ package router
 
 import (
 	"LCA/internal/adapter/gin/controller"
+	"LCA/internal/adapter/gin/middleware/jwt"
 
 	"github.com/gin-gonic/gin"
 )

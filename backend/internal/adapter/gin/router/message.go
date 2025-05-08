@@ -2,6 +2,7 @@ package router
 
 import (
 	"LCA/internal/adapter/gin/controller"
+	"LCA/internal/adapter/gin/middleware/jwt"
 
 	"github.com/gin-gonic/gin"
 )
@@ -16,10 +17,11 @@ func NewMessageRouter(messageController controller.MessageController, jwt jwt.JW
 }
 
 func (mr *MessageRouter) Setup(router *gin.RouterGroup) {
-	userGroup := router.Group("v1/message/")
+	messageGroup := router.Group("v1/message/")
 	{
-		userGroup.POST("/create", mr.jwt.Middleware, mr.messageController.CreateMessage)
-		userGroup.DELETE("/delete", mr.jwt.Middleware, mr.messageController.DeleteMessage)
-		userGroup.GET("/query", mr.jwt.Middleware, mr.messageController.QueryMessage)
+		messageGroup.POST("/create", mr.jwt.Middleware, mr.messageController.CreateMessage)
+		messageGroup.DELETE("/delete", mr.jwt.Middleware, mr.messageController.DeleteMessage)
+		messageGroup.GET("/query", mr.jwt.Middleware, mr.messageController.QueryMessage)
 	}
+
 }

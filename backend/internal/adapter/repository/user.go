@@ -4,7 +4,6 @@ import (
 	"LCA/internal/adapter/model"
 	"LCA/internal/domain/entities"
 	"LCA/internal/domain/irepository"
-	"time"
 
 	"gorm.io/gorm"
 )
@@ -20,14 +19,11 @@ func NewUserRepository(gorm *gorm.DB) irepository.IUserRepository {
 }
 
 func (r *UserRepository) CreateUser(user entities.User) (entities.User, error) {
-	currentTime := time.Now()
 	userModel := model.User{
 		UUID:        user.UUID,
 		Username:    user.Username,
 		ChannelUUID: user.ChannelUUID,
 		Status:      user.Status,
-		CreatedAt:   currentTime,
-		UpdatedAt:   currentTime,
 	}
 
 	if err := r.gorm.Create(&userModel).Error; err != nil {

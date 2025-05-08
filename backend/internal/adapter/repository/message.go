@@ -4,7 +4,6 @@ import (
 	"LCA/internal/adapter/model"
 	"LCA/internal/domain/entities"
 	"LCA/internal/domain/irepository"
-	"time"
 
 	"gorm.io/gorm"
 )
@@ -20,15 +19,11 @@ func NewMessageRepository(gorm *gorm.DB) irepository.IMessageRepository {
 }
 
 func (r *MessageRepository) CreateMessage(message entities.Message) (entities.Message, error) {
-	currentTime := time.Now()
-
 	messageModel := model.Message{
 		UUID:        message.UUID,
 		ChannelUUID: message.ChannelUUID,
 		UserUUID:    message.UserUUID,
 		Content:     message.Content,
-		CreatedAt:   currentTime,
-		UpdatedAt:   currentTime,
 	}
 	if err := r.gorm.Create(&message).Error; err != nil {
 		return entities.Message{}, err

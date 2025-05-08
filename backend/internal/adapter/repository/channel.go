@@ -4,7 +4,6 @@ import (
 	"LCA/internal/adapter/model"
 	"LCA/internal/domain/entities"
 	"LCA/internal/domain/irepository"
-	"time"
 
 	"github.com/google/uuid"
 	"gorm.io/gorm"
@@ -22,10 +21,8 @@ func NewChannelRepository(gorm *gorm.DB) irepository.IChannelRepository {
 
 func (r *ChannelRepository) CreateChannel() (entities.Channel, error) {
 	channelUUID := uuid.New().String()
-	createdAt := time.Now()
 	channel := model.Channel{
-		UUID:      channelUUID,
-		CreatedAt: createdAt,
+		UUID: channelUUID,
 	}
 	if err := r.gorm.Create(&channel).Error; err != nil {
 		return entities.Channel{}, err

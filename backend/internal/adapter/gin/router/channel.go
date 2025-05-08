@@ -18,7 +18,7 @@ func (cr *ChannelRouter) Setup(router *gin.RouterGroup) {
 	userGroup := router.Group("v1/Channel/")
 	{
 		userGroup.POST("/create", cr.channelController.CreateChannel)
-		userGroup.GET("/query", cr.channelController.DeleteChannel)
-		userGroup.DELETE("/delete", cr.channelController.QueryChannel)
+		userGroup.POST("/queryuser", cr.channelController.QueryUsers)
+		userGroup.POST("/query", cr.channelController.QueryChannel)
 	}
 }

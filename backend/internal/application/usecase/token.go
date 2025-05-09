@@ -15,7 +15,12 @@ func NewTokenUsecase(tokenRepo irepository.ITokenRepository) *TokenUsecase {
 	}
 }
 
-func (t *TokenUsecase) CreateToken(tokenClaims entities.TokenClaims) (string, error) {
+func (t *TokenUsecase) CreateToken(userUUID, channelUUID, username string) (string, error) {
+	tokenClaims := entities.TokenClaims{
+		UserUUID:    userUUID,
+		ChannelUUID: channelUUID,
+		Username:    username,
+	}
 	return t.tokenRepo.CreateToken(tokenClaims)
 }
 

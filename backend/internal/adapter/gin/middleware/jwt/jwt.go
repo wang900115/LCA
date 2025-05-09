@@ -2,7 +2,6 @@ package jwt
 
 import (
 	iresponse "LCA/internal/adapter/gin/controller/response"
-	"LCA/internal/adapter/gin/middleware"
 	"LCA/internal/application/usecase"
 	"errors"
 	"strings"
@@ -15,8 +14,8 @@ type JWT struct {
 	token    usecase.TokenUsecase
 }
 
-func NewJWT(response iresponse.IResponse, token usecase.TokenUsecase) middleware.IMiddleware {
-	return &JWT{response: response, token: token}
+func NewJWT(response iresponse.IResponse, token *usecase.TokenUsecase) *JWT {
+	return &JWT{response: response, token: *token}
 }
 
 func (j *JWT) Middleware(c *gin.Context) {

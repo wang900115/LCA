@@ -12,8 +12,8 @@ type MessageRouter struct {
 	jwt               jwt.JWT
 }
 
-func NewMessageRouter(messageController controller.MessageController, jwt jwt.JWT) *MessageRouter {
-	return &MessageRouter{messageController: messageController, jwt: jwt}
+func NewMessageRouter(messageController *controller.MessageController, jwt *jwt.JWT) IRoute {
+	return &MessageRouter{messageController: *messageController, jwt: *jwt}
 }
 
 func (mr *MessageRouter) Setup(router *gin.RouterGroup) {

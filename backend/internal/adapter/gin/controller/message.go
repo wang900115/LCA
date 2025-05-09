@@ -1,7 +1,7 @@
 package controller
 
 import (
-	response "LCA/internal/adapter/gin/controller/response/json"
+	iresponse "LCA/internal/adapter/gin/controller/response"
 	"LCA/internal/adapter/gin/validator"
 	"LCA/internal/application/usecase"
 
@@ -9,27 +9,28 @@ import (
 )
 
 type MessageController struct {
-	response response.JSONResponse
+	response iresponse.IResponse
 	message  usecase.MessageUsecase
 }
 
-func NewMessageController(response response.JSONResponse, message usecase.MessageUsecase) *MessageController {
-	return &MessageController{response: response, message: message}
+func NewMessageController(response iresponse.IResponse, message *usecase.MessageUsecase) *MessageController {
+	return &MessageController{response: response, message: *message}
 }
 
 func (mc *MessageController) CreateMessage(c *gin.Context) {
+	ChannelUUID := c.GetString("channel_uuid")
+	UserUUID := c.GetString("user_uuid")
 	var request validator.MessageCreateRequest
 	if err := c.ShouldBindJSON(&request); err != nil {
 		mc.response.ValidatorFail(c, validatorFail)
 		return
 	}
-	messageUUID, err := mc.message.CreateMessage(request.UserUUID, request.ChannelUUID, request.Content)
+	messageUUID, err := mc.message.CreateMessage(ChannelUUID, UserUUID, request.Content)
 	if err != nil {
 		mc.response.FailWithError(c, createFail, err)
 		return
 	}
 	mc.response.SuccessWithData(c, createSuccess, messageUUID)
-	return
 }
 
 func (mc *MessageController) DeleteMessage(c *gin.Context) {
@@ -43,20 +44,14 @@ func (mc *MessageController) DeleteMessage(c *gin.Context) {
 		return
 	}
 	mc.response.Success(c, deleteSuccess)
-	return
 }
 
 func (mc *MessageController) QueryMessage(c *gin.Context) {
-	var request validator.MessageQueryRequest
-	if err := c.ShouldBindJSON(&request); err != nil {
-		mc.response.ValidatorFail(c, validatorFail)
-		return
-	}
-	messages, err := mc.message.QueryMessages(request.ChannelUUID)
+	channelUUID := c.GetString("channel_uuid")
+	messages, err := mc.message.QueryMessages(channelUUID)
 	if err != nil {
 		mc.response.FailWithError(c, queryFail, err)
 		return
 	}
 	mc.response.SuccessWithData(c, querySuccess, messages)
-	return
 }

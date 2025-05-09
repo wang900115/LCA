@@ -8,7 +8,7 @@ import (
 
 type Message struct {
 	gorm.Model
-	UUID        string `json:"uuid" gorm:"unique;not null"`
+	UUID        string `json:"uuid" gorm:"unique;not null;index"`
 	ChannelUUID string `json:"channel_uuid" gorm:"not null"`
 	UserUUID    string `json:"user_uuid" gorm:"not null"`
 	Content     string `json:"content" gorm:"not null"`

@@ -15,8 +15,14 @@ func NewMessageUsecase(messageRepo irepository.IMessageRepository) *MessageUseca
 	}
 }
 
-func (m *MessageUsecase) CreateMessage(message entities.Message) (string, error) {
-	message, err := m.messageRepo.CreateMessage(message)
+func (m *MessageUsecase) CreateMessage(channelUUID, userUUID, content string) (string, error) {
+	messageDomain := entities.Message{
+		ChannelUUID: channelUUID,
+		UserUUID:    userUUID,
+		Content:     content,
+	}
+
+	message, err := m.messageRepo.CreateMessage(messageDomain)
 	if err != nil {
 		return "", err
 	}

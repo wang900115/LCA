@@ -8,7 +8,7 @@ import (
 
 type Channel struct {
 	gorm.Model
-	UUID  string `json:"uuid" gorm:"unique;not null"`
+	UUID  string `json:"uuid" gorm:"unique;not null;index"`
 	Users []User `json:"users" gorm:"foreignKey:channel_uuid;reference:uuid"`
 }
 
@@ -17,7 +17,7 @@ func (c Channel) TableName() string {
 }
 
 func (c Channel) ToDomain() entities.Channel {
-	usersDomain := make([]entities.User, len(c.Users))
+	usersDomain := make([]entities.User, 0, len(c.Users))
 	for _, user := range c.Users {
 		usersDomain = append(usersDomain, user.ToDomain())
 	}

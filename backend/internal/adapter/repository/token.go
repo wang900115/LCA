@@ -4,12 +4,13 @@ import (
 	"LCA/internal/adapter/model"
 	"LCA/internal/domain/entities"
 	"LCA/internal/domain/irepository"
+	"context"
 	"crypto/rand"
 	"errors"
 	"time"
 
-	"github.com/go-redis/redis"
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/redis/go-redis/v9"
 )
 
 const (
@@ -52,7 +53,7 @@ func (r *TokenRepository) CreateToken(tokenClaims entities.TokenClaims) (string,
 	}
 	tokenClaimsModel.ExpiresAt = jwt.NewNumericDate(time.Now().Add(r.expiration))
 
-	_, err := r.redis.Set(jwtsaltPrefix+tokenClaims.UserUUID+tokenClaims.ChannelUUID, string(salt), r.expiration).Result()
+	_, err := r.redis.Set(context.Background(), jwtsaltPrefix+tokenClaims.UserUUID+tokenClaims.ChannelUUID, string(salt), r.expiration).Result()
 	if err != nil {
 		return "", err
 	}
@@ -79,7 +80,7 @@ func (r *TokenRepository) ValidateToken(token string) (entities.TokenClaims, err
 		return entities.TokenClaims{}, ErrInvalidToken
 	}
 
-	salt, err := r.redis.Get(jwtsaltPrefix + userUUID + channelUUID).Result()
+	salt, err := r.redis.Get(context.Background(), jwtsaltPrefix+userUUID+channelUUID).Result()
 	if err != nil {
 		return entities.TokenClaims{}, err
 	}
@@ -105,6 +106,6 @@ func (r *TokenRepository) ValidateToken(token string) (entities.TokenClaims, err
 }
 
 func (r *TokenRepository) DeleteToken(userUUID, channelUUID string) error {
-	return r.redis.Del(jwtsaltPrefix + userUUID + channelUUID).Err()
+	return r.redis.Del(context.Background(), jwtsaltPrefix+userUUID+channelUUID).Err()
 
 }

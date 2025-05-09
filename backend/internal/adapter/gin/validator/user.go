@@ -6,5 +6,4 @@ type UserCreateRequest struct {
 }
 
 type UserDeleteRequest struct {
-	UserUUID string `json:"user_uuid" binding:"required"`
 }

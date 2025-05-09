@@ -10,8 +10,8 @@ type ChannelRouter struct {
 	channelController controller.ChannelController
 }
 
-func NewChannelRouter(channelController controller.ChannelController) *ChannelRouter {
-	return &ChannelRouter{channelController: channelController}
+func NewChannelRouter(channelController *controller.ChannelController) IRoute {
+	return &ChannelRouter{channelController: *channelController}
 }
 
 func (cr *ChannelRouter) Setup(router *gin.RouterGroup) {

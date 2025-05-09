@@ -15,8 +15,14 @@ func NewUserUsecase(userRepo irepository.IUserRepository) *UserUsecase {
 	}
 }
 
-func (u *UserUsecase) CreateUser(user entities.User) (string, error) {
-	user, err := u.userRepo.CreateUser(user)
+func (u *UserUsecase) CreateUser(channelUUID, username string) (string, error) {
+	userDomain := entities.User{
+		UUID:        " ",
+		Username:    username,
+		ChannelUUID: channelUUID,
+		Status:      "online",
+	}
+	user, err := u.userRepo.CreateUser(userDomain)
 	if err != nil {
 		return "", err
 	}

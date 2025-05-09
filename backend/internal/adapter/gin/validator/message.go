@@ -1,9 +1,7 @@
 package validator
 
 type MessageCreateRequest struct {
-	ChannelUUID string `json:"channel_uuid" binding:"required"`
-	UserUUID    string `json:"user_uuid" binding:"required"`
-	Content     string `json:"content" binding:"required"`
+	Content string `json:"content" binding:"required"`
 }
 
 type MessageDeleteRequest struct {
@@ -11,5 +9,4 @@ type MessageDeleteRequest struct {
 }
 
 type MessageQueryRequest struct {
-	ChannelUUID string `json:"channel_uuid" binding:"required"`
 }

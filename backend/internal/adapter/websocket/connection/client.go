@@ -2,6 +2,7 @@ package connection
 
 import (
 	"LCA/internal/adapter/websocket/event"
+	"LCA/internal/application/usecase"
 	"encoding/json"
 	"time"
 
@@ -14,15 +15,18 @@ type Client struct {
 	Username    string
 	Conn        *websocket.Conn
 	Send        chan []byte
+
+	messageUsecase *usecase.MessageUsecase
 }
 
-func NewClient(userUUID, channelUUID, userName string, conn *websocket.Conn) *Client {
+func NewClient(userUUID, channelUUID, userName string, conn *websocket.Conn, messageUsecase *usecase.MessageUsecase) *Client {
 	return &Client{
-		UserUUID:    userUUID,
-		ChannelUUID: channelUUID,
-		Username:    userName,
-		Conn:        conn,
-		Send:        make(chan []byte, 256),
+		UserUUID:       userUUID,
+		ChannelUUID:    channelUUID,
+		Username:       userName,
+		Conn:           conn,
+		Send:           make(chan []byte, 256),
+		messageUsecase: messageUsecase,
 	}
 }
 
@@ -47,6 +51,11 @@ func (c *Client) ReadPump(hub *Hub) {
 		payload.Type = event.EventMessage
 		payload.Sender = c.Username
 		payload.Timestamp = time.Now().Format(time.RFC3339)
+		messageUUID, err := c.messageUsecase.CreateMessage(c.ChannelUUID, c.UserUUID, payload.Content)
+
+		if err != nil {
+			continue
+		}
 
 		encoded, err := json.Marshal(payload)
 		if err != nil {
@@ -57,6 +66,8 @@ func (c *Client) ReadPump(hub *Hub) {
 			ChannelUUID: c.ChannelUUID,
 			Message:     encoded,
 		}
+
+		payload.UUID = messageUUID
 	}
 }
 

@@ -1,7 +1,7 @@
 package controller
 
 import (
-	response "LCA/internal/adapter/gin/controller/response/json"
+	iresponse "LCA/internal/adapter/gin/controller/response"
 	"LCA/internal/adapter/gin/validator"
 	"LCA/internal/application/usecase"
 
@@ -9,12 +9,12 @@ import (
 )
 
 type ChannelController struct {
-	response response.JSONResponse
+	response iresponse.IResponse
 	channel  usecase.ChannelUsecase
 }
 
-func NewChannelController(reponse response.JSONResponse, channel usecase.ChannelUsecase) *ChannelController {
-	return &ChannelController{response: reponse, channel: channel}
+func NewChannelController(reponse iresponse.IResponse, channel *usecase.ChannelUsecase) *ChannelController {
+	return &ChannelController{response: reponse, channel: *channel}
 }
 
 func (cc *ChannelController) CreateChannel(c *gin.Context) {
@@ -24,7 +24,6 @@ func (cc *ChannelController) CreateChannel(c *gin.Context) {
 		return
 	}
 	cc.response.SuccessWithData(c, createSuccess, channelUUID)
-	return
 }
 
 func (cc *ChannelController) QueryUsers(c *gin.Context) {
@@ -40,7 +39,6 @@ func (cc *ChannelController) QueryUsers(c *gin.Context) {
 		return
 	}
 	cc.response.SuccessWithData(c, querySuccess, users)
-	return
 }
 
 func (cc *ChannelController) QueryChannel(c *gin.Context) {
@@ -50,5 +48,4 @@ func (cc *ChannelController) QueryChannel(c *gin.Context) {
 		return
 	}
 	cc.response.SuccessWithData(c, querySuccess, channels)
-	return
 }

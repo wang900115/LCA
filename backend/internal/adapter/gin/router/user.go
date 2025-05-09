@@ -12,8 +12,8 @@ type UserRouter struct {
 	jwt            jwt.JWT
 }
 
-func NewUserRouter(userController controller.UserController, jwt jwt.JWT) *UserRouter {
-	return &UserRouter{userController: userController, jwt: jwt}
+func NewUserRouter(userController *controller.UserController, jwt *jwt.JWT) IRoute {
+	return &UserRouter{userController: *userController, jwt: *jwt}
 }
 
 func (ur *UserRouter) Setup(router *gin.RouterGroup) {

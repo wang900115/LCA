@@ -1,0 +1,2372 @@
+{
+	"project_id": "462955f11802000",
+	"name": "LCA",
+	"intro": "",
+	"global": {
+		"envs": [
+			{
+				"env_id": "1",
+				"name": "Default Environment",
+				"is_private": -1,
+				"sort": 0,
+				"server_list": [
+					{
+						"server_id": "1",
+						"name": "Default Services",
+						"sort": 0,
+						"uri": ""
+					}
+				],
+				"env_var_list": {
+					"localhost": {
+						"value": "",
+						"current_value": null,
+						"description": ""
+					}
+				}
+			},
+			{
+				"env_id": "2",
+				"name": "Mock Environment",
+				"is_private": -1,
+				"sort": 0,
+				"server_list": [
+					{
+						"server_id": "1",
+						"name": "Default Services",
+						"sort": 1000,
+						"uri": "https://mock.echoapi.com/mock/462955f11802000"
+					}
+				],
+				"env_var_list": {}
+			}
+		],
+		"servers": [
+			{
+				"server_id": "1",
+				"name": "Default Services",
+				"sort": 1000
+			}
+		],
+		"global_vars": {},
+		"global_param": {
+			"header": {
+				"parameter": []
+			},
+			"query": {
+				"parameter": []
+			},
+			"body": {
+				"parameter": []
+			},
+			"cookie": {
+				"parameter": []
+			},
+			"auth": {
+				"type": "noauth",
+				"kv": {
+					"key": "",
+					"value": "",
+					"in": ""
+				},
+				"bearer": {
+					"key": ""
+				},
+				"basic": {
+					"username": "",
+					"password": ""
+				},
+				"digest": {
+					"username": "",
+					"password": "",
+					"realm": "",
+					"nonce": "",
+					"algorithm": "",
+					"qop": "",
+					"nc": "",
+					"cnonce": "",
+					"opaque": ""
+				},
+				"hawk": {
+					"authId": "",
+					"authKey": "",
+					"algorithm": "",
+					"user": "",
+					"nonce": "",
+					"extraData": "",
+					"default": "",
+					"delegation": "",
+					"timestamp": "",
+					"includePayloadHash": false
+				},
+				"awsv4": {
+					"accessKey": "",
+					"secretKey": "",
+					"region": "",
+					"service": "",
+					"sessionToken": "",
+					"addAuthDataToQuery": false
+				},
+				"ntlm": {
+					"username": "",
+					"password": "",
+					"entity": "",
+					"workstation": "",
+					"disableRetryRequest": false
+				},
+				"edgegrid": {
+					"accessToken": "",
+					"clientToken": "",
+					"clientSecret": "",
+					"nonce": "",
+					"timestamp": "",
+					"baseURi": "",
+					"headersToSign": ""
+				},
+				"oauth1": {
+					"consumerKey": "",
+					"consumerSecret": "",
+					"signatureMethod": "",
+					"addEmptyParamsToSign": false,
+					"includeBodyHash": false,
+					"addParamsToHeader": false,
+					"disableHeaderEncoding": false,
+					"realm": "",
+					"version": "",
+					"nonce": "",
+					"timestamp": "",
+					"verifier": "",
+					"callback": "",
+					"tokenSecret": "",
+					"token": ""
+				},
+				"jwt": {
+					"addTokenTo": "",
+					"algorithm": "",
+					"secret": "",
+					"isSecretBase64Encoded": false,
+					"payload": "",
+					"headerPrefix": "",
+					"queryParamKey": "",
+					"header": ""
+				},
+				"asap": {
+					"alg": "",
+					"iss": "",
+					"aud": "",
+					"kid": "",
+					"privateKey": "",
+					"sub": "",
+					"claims": "",
+					"exp": ""
+				}
+			},
+			"pre_tasks": [],
+			"post_tasks": []
+		},
+		"codes": [],
+		"marks": [
+			{
+				"mark_id": "1",
+				"project_id": "0",
+				"name": "In Progress",
+				"color": "#2857FF",
+				"is_sys_default": 1,
+				"is_default_mark": 1
+			},
+			{
+				"mark_id": "2",
+				"project_id": "0",
+				"name": "Completed",
+				"color": "#26CEA4",
+				"is_sys_default": 1,
+				"is_default_mark": -1
+			},
+			{
+				"mark_id": "3",
+				"project_id": "0",
+				"name": "To Revise",
+				"color": "#FFC01E",
+				"is_sys_default": 1,
+				"is_default_mark": -1
+			},
+			{
+				"mark_id": "4",
+				"project_id": "0",
+				"name": "Discarded",
+				"color": "#FF2200",
+				"is_sys_default": 1,
+				"is_default_mark": -1
+			}
+		],
+		"attributes": [],
+		"mock_custom_rules": [],
+		"db_link": [],
+		"describe_library": []
+	},
+	"models": [],
+	"apis": [
+		{
+			"target_id": "2296498d31f007",
+			"project_id": "462955f11802000",
+			"parent_id": "22962c8b71f006",
+			"target_type": "api",
+			"name": "Create",
+			"version": 22,
+			"sort": 1000,
+			"method": "POST",
+			"url": "http://{{localhost}}/api/v1/User/participate",
+			"protocol": "http/1.1",
+			"mark_id": "1",
+			"description": "",
+			"request": {
+				"auth": {
+					"type": "inherit",
+					"kv": {
+						"key": "",
+						"value": "",
+						"in": "header"
+					},
+					"bearer": {
+						"key": ""
+					},
+					"basic": {
+						"username": "",
+						"password": ""
+					},
+					"digest": {
+						"username": "",
+						"password": "",
+						"realm": "",
+						"nonce": "",
+						"algorithm": "",
+						"qop": "",
+						"nc": "",
+						"cnonce": "",
+						"opaque": ""
+					},
+					"hawk": {
+						"authId": "",
+						"authKey": "",
+						"algorithm": "",
+						"user": "",
+						"nonce": "",
+						"extraData": "",
+						"default": "",
+						"delegation": "",
+						"timestamp": "",
+						"includePayloadHash": false
+					},
+					"awsv4": {
+						"accessKey": "",
+						"secretKey": "",
+						"region": "",
+						"service": "",
+						"sessionToken": "",
+						"addAuthDataToQuery": false
+					},
+					"ntlm": {
+						"username": "",
+						"password": "",
+						"entity": "",
+						"workstation": "",
+						"disableRetryRequest": false
+					},
+					"edgegrid": {
+						"accessToken": "",
+						"clientToken": "",
+						"clientSecret": "",
+						"nonce": "",
+						"timestamp": "",
+						"baseURi": "",
+						"headersToSign": ""
+					},
+					"oauth1": {
+						"consumerKey": "",
+						"consumerSecret": "",
+						"signatureMethod": "HMAC-SHA1",
+						"addEmptyParamsToSign": true,
+						"includeBodyHash": true,
+						"addParamsToHeader": false,
+						"disableHeaderEncoding": false,
+						"realm": "",
+						"version": "1.0",
+						"nonce": "",
+						"timestamp": "",
+						"verifier": "",
+						"callback": "",
+						"tokenSecret": "",
+						"token": ""
+					},
+					"jwt": {
+						"addTokenTo": "header",
+						"algorithm": "HS256",
+						"secret": "",
+						"isSecretBase64Encoded": false,
+						"payload": "",
+						"headerPrefix": "Bearer",
+						"queryParamKey": "token",
+						"header": ""
+					},
+					"asap": {
+						"alg": "HS256",
+						"iss": "",
+						"aud": "",
+						"kid": "",
+						"privateKey": "",
+						"sub": "",
+						"claims": "",
+						"exp": ""
+					}
+				},
+				"body": {
+					"mode": "json",
+					"parameter": [],
+					"raw": "{\r\n    \"username\": \"Candy\",\r\n    \"channel_uuid\": \"ab8e2f2d-9640-4165-8e39-431d5b5515b3\"\r\n}",
+					"raw_parameter": [],
+					"raw_schema": {
+						"type": "object"
+					},
+					"binary": null
+				},
+				"pre_tasks": [],
+				"post_tasks": [],
+				"header": {
+					"parameter": []
+				},
+				"query": {
+					"query_add_equal": 1,
+					"parameter": []
+				},
+				"cookie": {
+					"cookie_encode": 1,
+					"parameter": []
+				},
+				"restful": {
+					"parameter": []
+				}
+			},
+			"response": {
+				"example": [
+					{
+						"example_id": "1",
+						"raw": "",
+						"raw_parameter": [],
+						"headers": [],
+						"expect": {
+							"code": "200",
+							"content_type": "json",
+							"is_default": 1,
+							"mock": "",
+							"name": "Success",
+							"schema": {
+								"type": "object",
+								"properties": {}
+							},
+							"verify_type": "schema",
+							"sleep": 0
+						}
+					},
+					{
+						"example_id": "2",
+						"raw": "",
+						"raw_parameter": [],
+						"headers": [],
+						"expect": {
+							"code": "404",
+							"content_type": "json",
+							"is_default": -1,
+							"mock": "",
+							"name": "Failure",
+							"schema": {
+								"type": "object",
+								"properties": {}
+							},
+							"verify_type": "schema",
+							"sleep": 0
+						}
+					}
+				],
+				"is_check_result": 1
+			},
+			"mock_server_enable": -1,
+			"attribute_info": {}
+		},
+		{
+			"target_id": "22962c8b71f006",
+			"project_id": "462955f11802000",
+			"parent_id": "0",
+			"target_type": "folder",
+			"name": "User",
+			"version": 1,
+			"sort": 1000,
+			"server_id": "0",
+			"description": "",
+			"request": {
+				"auth": {
+					"type": "inherit",
+					"kv": {
+						"key": "",
+						"value": "",
+						"in": "header"
+					},
+					"bearer": {
+						"key": ""
+					},
+					"basic": {
+						"username": "",
+						"password": ""
+					},
+					"digest": {
+						"username": "",
+						"password": "",
+						"realm": "",
+						"nonce": "",
+						"algorithm": "",
+						"qop": "",
+						"nc": "",
+						"cnonce": "",
+						"opaque": ""
+					},
+					"hawk": {
+						"authId": "",
+						"authKey": "",
+						"algorithm": "",
+						"user": "",
+						"nonce": "",
+						"extraData": "",
+						"default": "",
+						"delegation": "",
+						"timestamp": "",
+						"includePayloadHash": false
+					},
+					"awsv4": {
+						"accessKey": "",
+						"secretKey": "",
+						"region": "",
+						"service": "",
+						"sessionToken": "",
+						"addAuthDataToQuery": false
+					},
+					"ntlm": {
+						"username": "",
+						"password": "",
+						"entity": "",
+						"workstation": "",
+						"disableRetryRequest": false
+					},
+					"edgegrid": {
+						"accessToken": "",
+						"clientToken": "",
+						"clientSecret": "",
+						"nonce": "",
+						"timestamp": "",
+						"baseURi": "",
+						"headersToSign": ""
+					},
+					"oauth1": {
+						"consumerKey": "",
+						"consumerSecret": "",
+						"signatureMethod": "HMAC-SHA1",
+						"addEmptyParamsToSign": true,
+						"includeBodyHash": true,
+						"addParamsToHeader": false,
+						"disableHeaderEncoding": false,
+						"realm": "",
+						"version": "1.0",
+						"nonce": "",
+						"timestamp": "",
+						"verifier": "",
+						"callback": "",
+						"tokenSecret": "",
+						"token": ""
+					},
+					"jwt": {
+						"addTokenTo": "header",
+						"algorithm": "HS256",
+						"secret": "",
+						"isSecretBase64Encoded": false,
+						"payload": "",
+						"headerPrefix": "Bearer",
+						"queryParamKey": "token",
+						"header": ""
+					},
+					"asap": {
+						"alg": "HS256",
+						"iss": "",
+						"aud": "",
+						"kid": "",
+						"privateKey": "",
+						"sub": "",
+						"claims": "",
+						"exp": ""
+					}
+				},
+				"pre_tasks": [],
+				"post_tasks": [],
+				"body": {
+					"parameter": []
+				},
+				"header": {
+					"parameter": []
+				},
+				"query": {
+					"parameter": []
+				},
+				"cookie": {
+					"parameter": []
+				}
+			}
+		},
+		{
+			"target_id": "2297385231f014",
+			"project_id": "462955f11802000",
+			"parent_id": "22970b78b1f013",
+			"target_type": "api",
+			"name": "Create",
+			"version": 6,
+			"sort": 1000,
+			"method": "POST",
+			"url": "http://{{localhost}}/api/v1/Channel/create",
+			"protocol": "http/1.1",
+			"mark_id": "1",
+			"description": "",
+			"request": {
+				"auth": {
+					"type": "inherit",
+					"kv": {
+						"key": "",
+						"value": "",
+						"in": "header"
+					},
+					"bearer": {
+						"key": ""
+					},
+					"basic": {
+						"username": "",
+						"password": ""
+					},
+					"digest": {
+						"username": "",
+						"password": "",
+						"realm": "",
+						"nonce": "",
+						"algorithm": "",
+						"qop": "",
+						"nc": "",
+						"cnonce": "",
+						"opaque": ""
+					},
+					"hawk": {
+						"authId": "",
+						"authKey": "",
+						"algorithm": "",
+						"user": "",
+						"nonce": "",
+						"extraData": "",
+						"default": "",
+						"delegation": "",
+						"timestamp": "",
+						"includePayloadHash": false
+					},
+					"awsv4": {
+						"accessKey": "",
+						"secretKey": "",
+						"region": "",
+						"service": "",
+						"sessionToken": "",
+						"addAuthDataToQuery": false
+					},
+					"ntlm": {
+						"username": "",
+						"password": "",
+						"entity": "",
+						"workstation": "",
+						"disableRetryRequest": false
+					},
+					"edgegrid": {
+						"accessToken": "",
+						"clientToken": "",
+						"clientSecret": "",
+						"nonce": "",
+						"timestamp": "",
+						"baseURi": "",
+						"headersToSign": ""
+					},
+					"oauth1": {
+						"consumerKey": "",
+						"consumerSecret": "",
+						"signatureMethod": "HMAC-SHA1",
+						"addEmptyParamsToSign": true,
+						"includeBodyHash": true,
+						"addParamsToHeader": false,
+						"disableHeaderEncoding": false,
+						"realm": "",
+						"version": "1.0",
+						"nonce": "",
+						"timestamp": "",
+						"verifier": "",
+						"callback": "",
+						"tokenSecret": "",
+						"token": ""
+					},
+					"jwt": {
+						"addTokenTo": "header",
+						"algorithm": "HS256",
+						"secret": "",
+						"isSecretBase64Encoded": false,
+						"payload": "",
+						"headerPrefix": "Bearer",
+						"queryParamKey": "token",
+						"header": ""
+					},
+					"asap": {
+						"alg": "HS256",
+						"iss": "",
+						"aud": "",
+						"kid": "",
+						"privateKey": "",
+						"sub": "",
+						"claims": "",
+						"exp": ""
+					}
+				},
+				"body": {
+					"mode": "none",
+					"parameter": [],
+					"raw": "",
+					"raw_parameter": [],
+					"raw_schema": {
+						"type": "object"
+					},
+					"binary": null
+				},
+				"pre_tasks": [],
+				"post_tasks": [],
+				"header": {
+					"parameter": []
+				},
+				"query": {
+					"query_add_equal": 1,
+					"parameter": []
+				},
+				"cookie": {
+					"cookie_encode": 1,
+					"parameter": []
+				},
+				"restful": {
+					"parameter": []
+				}
+			},
+			"response": {
+				"example": [
+					{
+						"example_id": "1",
+						"raw": "",
+						"raw_parameter": [],
+						"headers": [],
+						"expect": {
+							"code": "200",
+							"content_type": "json",
+							"is_default": 1,
+							"mock": "",
+							"name": "Success",
+							"schema": {
+								"type": "object",
+								"properties": {}
+							},
+							"verify_type": "schema",
+							"sleep": 0
+						}
+					},
+					{
+						"example_id": "2",
+						"raw": "",
+						"raw_parameter": [],
+						"headers": [],
+						"expect": {
+							"code": "404",
+							"content_type": "json",
+							"is_default": -1,
+							"mock": "",
+							"name": "Failure",
+							"schema": {
+								"type": "object",
+								"properties": {}
+							},
+							"verify_type": "schema",
+							"sleep": 0
+						}
+					}
+				],
+				"is_check_result": 1
+			},
+			"mock_server_enable": -1,
+			"attribute_info": {}
+		},
+		{
+			"target_id": "22970b78b1f013",
+			"project_id": "462955f11802000",
+			"parent_id": "0",
+			"target_type": "folder",
+			"name": "Channel",
+			"version": 5,
+			"sort": 2000,
+			"server_id": "0",
+			"description": "",
+			"request": {
+				"auth": {
+					"type": "inherit",
+					"kv": {
+						"key": "",
+						"value": "",
+						"in": "header"
+					},
+					"bearer": {
+						"key": ""
+					},
+					"basic": {
+						"username": "",
+						"password": ""
+					},
+					"digest": {
+						"username": "",
+						"password": "",
+						"realm": "",
+						"nonce": "",
+						"algorithm": "",
+						"qop": "",
+						"nc": "",
+						"cnonce": "",
+						"opaque": ""
+					},
+					"hawk": {
+						"authId": "",
+						"authKey": "",
+						"algorithm": "",
+						"user": "",
+						"nonce": "",
+						"extraData": "",
+						"default": "",
+						"delegation": "",
+						"timestamp": "",
+						"includePayloadHash": false
+					},
+					"awsv4": {
+						"accessKey": "",
+						"secretKey": "",
+						"region": "",
+						"service": "",
+						"sessionToken": "",
+						"addAuthDataToQuery": false
+					},
+					"ntlm": {
+						"username": "",
+						"password": "",
+						"entity": "",
+						"workstation": "",
+						"disableRetryRequest": false
+					},
+					"edgegrid": {
+						"accessToken": "",
+						"clientToken": "",
+						"clientSecret": "",
+						"nonce": "",
+						"timestamp": "",
+						"baseURi": "",
+						"headersToSign": ""
+					},
+					"oauth1": {
+						"consumerKey": "",
+						"consumerSecret": "",
+						"signatureMethod": "HMAC-SHA1",
+						"addEmptyParamsToSign": true,
+						"includeBodyHash": true,
+						"addParamsToHeader": false,
+						"disableHeaderEncoding": false,
+						"realm": "",
+						"version": "1.0",
+						"nonce": "",
+						"timestamp": "",
+						"verifier": "",
+						"callback": "",
+						"tokenSecret": "",
+						"token": ""
+					},
+					"jwt": {
+						"addTokenTo": "header",
+						"algorithm": "HS256",
+						"secret": "",
+						"isSecretBase64Encoded": false,
+						"payload": "",
+						"headerPrefix": "Bearer",
+						"queryParamKey": "token",
+						"header": ""
+					},
+					"asap": {
+						"alg": "HS256",
+						"iss": "",
+						"aud": "",
+						"kid": "",
+						"privateKey": "",
+						"sub": "",
+						"claims": "",
+						"exp": ""
+					}
+				},
+				"pre_tasks": [],
+				"post_tasks": [],
+				"body": {
+					"parameter": []
+				},
+				"header": {
+					"parameter": []
+				},
+				"query": {
+					"parameter": []
+				},
+				"cookie": {
+					"parameter": []
+				}
+			}
+		},
+		{
+			"target_id": "229cc20af1f0de",
+			"project_id": "462955f11802000",
+			"parent_id": "2297b3b3b1f026",
+			"target_type": "api",
+			"name": "Create",
+			"version": 11,
+			"sort": 1000,
+			"method": "POST",
+			"url": "http://{{localhost}}/api/v1/message/create",
+			"protocol": "http/1.1",
+			"mark_id": "1",
+			"description": "",
+			"request": {
+				"auth": {
+					"type": "inherit",
+					"kv": {
+						"key": "",
+						"value": "",
+						"in": "header"
+					},
+					"bearer": {
+						"key": ""
+					},
+					"basic": {
+						"username": "",
+						"password": ""
+					},
+					"digest": {
+						"username": "",
+						"password": "",
+						"realm": "",
+						"nonce": "",
+						"algorithm": "",
+						"qop": "",
+						"nc": "",
+						"cnonce": "",
+						"opaque": ""
+					},
+					"hawk": {
+						"authId": "",
+						"authKey": "",
+						"algorithm": "",
+						"user": "",
+						"nonce": "",
+						"extraData": "",
+						"default": "",
+						"delegation": "",
+						"timestamp": "",
+						"includePayloadHash": false
+					},
+					"awsv4": {
+						"accessKey": "",
+						"secretKey": "",
+						"region": "",
+						"service": "",
+						"sessionToken": "",
+						"addAuthDataToQuery": false
+					},
+					"ntlm": {
+						"username": "",
+						"password": "",
+						"entity": "",
+						"workstation": "",
+						"disableRetryRequest": false
+					},
+					"edgegrid": {
+						"accessToken": "",
+						"clientToken": "",
+						"clientSecret": "",
+						"nonce": "",
+						"timestamp": "",
+						"baseURi": "",
+						"headersToSign": ""
+					},
+					"oauth1": {
+						"consumerKey": "",
+						"consumerSecret": "",
+						"signatureMethod": "HMAC-SHA1",
+						"addEmptyParamsToSign": true,
+						"includeBodyHash": true,
+						"addParamsToHeader": false,
+						"disableHeaderEncoding": false,
+						"realm": "",
+						"version": "1.0",
+						"nonce": "",
+						"timestamp": "",
+						"verifier": "",
+						"callback": "",
+						"tokenSecret": "",
+						"token": ""
+					},
+					"jwt": {
+						"addTokenTo": "header",
+						"algorithm": "HS256",
+						"secret": "",
+						"isSecretBase64Encoded": false,
+						"payload": "",
+						"headerPrefix": "Bearer",
+						"queryParamKey": "token",
+						"header": ""
+					},
+					"asap": {
+						"alg": "HS256",
+						"iss": "",
+						"aud": "",
+						"kid": "",
+						"privateKey": "",
+						"sub": "",
+						"claims": "",
+						"exp": ""
+					}
+				},
+				"body": {
+					"mode": "none",
+					"parameter": [],
+					"raw": "",
+					"raw_parameter": [],
+					"raw_schema": {
+						"type": "object"
+					},
+					"binary": null
+				},
+				"pre_tasks": [],
+				"post_tasks": [],
+				"header": {
+					"parameter": []
+				},
+				"query": {
+					"query_add_equal": 1,
+					"parameter": []
+				},
+				"cookie": {
+					"cookie_encode": 1,
+					"parameter": []
+				},
+				"restful": {
+					"parameter": []
+				}
+			},
+			"response": {
+				"example": [
+					{
+						"example_id": "1",
+						"raw": "",
+						"raw_parameter": [],
+						"headers": [],
+						"expect": {
+							"code": "200",
+							"content_type": "json",
+							"is_default": 1,
+							"mock": "",
+							"name": "Success",
+							"schema": {
+								"type": "object",
+								"properties": {}
+							},
+							"verify_type": "schema",
+							"sleep": 0
+						}
+					},
+					{
+						"example_id": "2",
+						"raw": "",
+						"raw_parameter": [],
+						"headers": [],
+						"expect": {
+							"code": "404",
+							"content_type": "json",
+							"is_default": -1,
+							"mock": "",
+							"name": "Failure",
+							"schema": {
+								"type": "object",
+								"properties": {}
+							},
+							"verify_type": "schema",
+							"sleep": 0
+						}
+					}
+				],
+				"is_check_result": 1
+			},
+			"mock_server_enable": -1,
+			"attribute_info": {}
+		},
+		{
+			"target_id": "2297b3b3b1f026",
+			"project_id": "462955f11802000",
+			"parent_id": "0",
+			"target_type": "folder",
+			"name": "Message",
+			"version": 9,
+			"sort": 3000,
+			"server_id": "0",
+			"description": "",
+			"request": {
+				"auth": {
+					"type": "inherit",
+					"kv": {
+						"key": "",
+						"value": "",
+						"in": "header"
+					},
+					"bearer": {
+						"key": ""
+					},
+					"basic": {
+						"username": "",
+						"password": ""
+					},
+					"digest": {
+						"username": "",
+						"password": "",
+						"realm": "",
+						"nonce": "",
+						"algorithm": "",
+						"qop": "",
+						"nc": "",
+						"cnonce": "",
+						"opaque": ""
+					},
+					"hawk": {
+						"authId": "",
+						"authKey": "",
+						"algorithm": "",
+						"user": "",
+						"nonce": "",
+						"extraData": "",
+						"default": "",
+						"delegation": "",
+						"timestamp": "",
+						"includePayloadHash": false
+					},
+					"awsv4": {
+						"accessKey": "",
+						"secretKey": "",
+						"region": "",
+						"service": "",
+						"sessionToken": "",
+						"addAuthDataToQuery": false
+					},
+					"ntlm": {
+						"username": "",
+						"password": "",
+						"entity": "",
+						"workstation": "",
+						"disableRetryRequest": false
+					},
+					"edgegrid": {
+						"accessToken": "",
+						"clientToken": "",
+						"clientSecret": "",
+						"nonce": "",
+						"timestamp": "",
+						"baseURi": "",
+						"headersToSign": ""
+					},
+					"oauth1": {
+						"consumerKey": "",
+						"consumerSecret": "",
+						"signatureMethod": "HMAC-SHA1",
+						"addEmptyParamsToSign": true,
+						"includeBodyHash": true,
+						"addParamsToHeader": false,
+						"disableHeaderEncoding": false,
+						"realm": "",
+						"version": "1.0",
+						"nonce": "",
+						"timestamp": "",
+						"verifier": "",
+						"callback": "",
+						"tokenSecret": "",
+						"token": ""
+					},
+					"jwt": {
+						"addTokenTo": "header",
+						"algorithm": "HS256",
+						"secret": "",
+						"isSecretBase64Encoded": false,
+						"payload": "",
+						"headerPrefix": "Bearer",
+						"queryParamKey": "token",
+						"header": ""
+					},
+					"asap": {
+						"alg": "HS256",
+						"iss": "",
+						"aud": "",
+						"kid": "",
+						"privateKey": "",
+						"sub": "",
+						"claims": "",
+						"exp": ""
+					}
+				},
+				"pre_tasks": [],
+				"post_tasks": [],
+				"body": {
+					"parameter": []
+				},
+				"header": {
+					"parameter": []
+				},
+				"query": {
+					"parameter": []
+				},
+				"cookie": {
+					"parameter": []
+				}
+			}
+		},
+		{
+			"target_id": "2296e707f1f00e",
+			"project_id": "462955f11802000",
+			"parent_id": "22962c8b71f006",
+			"target_type": "api",
+			"name": "Delete",
+			"version": 4,
+			"sort": 2000,
+			"method": "DELETE",
+			"url": "http://{{localhost}}/api/v1/User/leave",
+			"protocol": "http/1.1",
+			"mark_id": "1",
+			"description": "",
+			"request": {
+				"auth": {
+					"type": "inherit",
+					"kv": {
+						"key": "",
+						"value": "",
+						"in": "header"
+					},
+					"bearer": {
+						"key": ""
+					},
+					"basic": {
+						"username": "",
+						"password": ""
+					},
+					"digest": {
+						"username": "",
+						"password": "",
+						"realm": "",
+						"nonce": "",
+						"algorithm": "",
+						"qop": "",
+						"nc": "",
+						"cnonce": "",
+						"opaque": ""
+					},
+					"hawk": {
+						"authId": "",
+						"authKey": "",
+						"algorithm": "",
+						"user": "",
+						"nonce": "",
+						"extraData": "",
+						"default": "",
+						"delegation": "",
+						"timestamp": "",
+						"includePayloadHash": false
+					},
+					"awsv4": {
+						"accessKey": "",
+						"secretKey": "",
+						"region": "",
+						"service": "",
+						"sessionToken": "",
+						"addAuthDataToQuery": false
+					},
+					"ntlm": {
+						"username": "",
+						"password": "",
+						"entity": "",
+						"workstation": "",
+						"disableRetryRequest": false
+					},
+					"edgegrid": {
+						"accessToken": "",
+						"clientToken": "",
+						"clientSecret": "",
+						"nonce": "",
+						"timestamp": "",
+						"baseURi": "",
+						"headersToSign": ""
+					},
+					"oauth1": {
+						"consumerKey": "",
+						"consumerSecret": "",
+						"signatureMethod": "HMAC-SHA1",
+						"addEmptyParamsToSign": true,
+						"includeBodyHash": true,
+						"addParamsToHeader": false,
+						"disableHeaderEncoding": false,
+						"realm": "",
+						"version": "1.0",
+						"nonce": "",
+						"timestamp": "",
+						"verifier": "",
+						"callback": "",
+						"tokenSecret": "",
+						"token": ""
+					},
+					"jwt": {
+						"addTokenTo": "header",
+						"algorithm": "HS256",
+						"secret": "",
+						"isSecretBase64Encoded": false,
+						"payload": "",
+						"headerPrefix": "Bearer",
+						"queryParamKey": "token",
+						"header": ""
+					},
+					"asap": {
+						"alg": "HS256",
+						"iss": "",
+						"aud": "",
+						"kid": "",
+						"privateKey": "",
+						"sub": "",
+						"claims": "",
+						"exp": ""
+					}
+				},
+				"body": {
+					"mode": "none",
+					"parameter": [],
+					"raw": "",
+					"raw_parameter": [],
+					"raw_schema": {
+						"type": "object"
+					},
+					"binary": null
+				},
+				"pre_tasks": [],
+				"post_tasks": [],
+				"header": {
+					"parameter": []
+				},
+				"query": {
+					"query_add_equal": 1,
+					"parameter": []
+				},
+				"cookie": {
+					"cookie_encode": 1,
+					"parameter": []
+				},
+				"restful": {
+					"parameter": []
+				}
+			},
+			"response": {
+				"example": [
+					{
+						"example_id": "1",
+						"raw": "",
+						"raw_parameter": [],
+						"headers": [],
+						"expect": {
+							"code": "200",
+							"content_type": "json",
+							"is_default": 1,
+							"mock": "",
+							"name": "Success",
+							"schema": {
+								"type": "object",
+								"properties": {}
+							},
+							"verify_type": "schema",
+							"sleep": 0
+						}
+					},
+					{
+						"example_id": "2",
+						"raw": "",
+						"raw_parameter": [],
+						"headers": [],
+						"expect": {
+							"code": "404",
+							"content_type": "json",
+							"is_default": -1,
+							"mock": "",
+							"name": "Failure",
+							"schema": {
+								"type": "object",
+								"properties": {}
+							},
+							"verify_type": "schema",
+							"sleep": 0
+						}
+					}
+				],
+				"is_check_result": 1
+			},
+			"mock_server_enable": -1,
+			"attribute_info": {}
+		},
+		{
+			"target_id": "2297647731f019",
+			"project_id": "462955f11802000",
+			"parent_id": "22970b78b1f013",
+			"target_type": "api",
+			"name": "QueryChannels",
+			"version": 21,
+			"sort": 2000,
+			"method": "POST",
+			"url": "http://{{localhost}}/api/v1/Channel/query",
+			"protocol": "http/1.1",
+			"mark_id": "1",
+			"description": "",
+			"request": {
+				"auth": {
+					"type": "inherit",
+					"kv": {
+						"key": "",
+						"value": "",
+						"in": "header"
+					},
+					"bearer": {
+						"key": ""
+					},
+					"basic": {
+						"username": "",
+						"password": ""
+					},
+					"digest": {
+						"username": "",
+						"password": "",
+						"realm": "",
+						"nonce": "",
+						"algorithm": "",
+						"qop": "",
+						"nc": "",
+						"cnonce": "",
+						"opaque": ""
+					},
+					"hawk": {
+						"authId": "",
+						"authKey": "",
+						"algorithm": "",
+						"user": "",
+						"nonce": "",
+						"extraData": "",
+						"default": "",
+						"delegation": "",
+						"timestamp": "",
+						"includePayloadHash": false
+					},
+					"awsv4": {
+						"accessKey": "",
+						"secretKey": "",
+						"region": "",
+						"service": "",
+						"sessionToken": "",
+						"addAuthDataToQuery": false
+					},
+					"ntlm": {
+						"username": "",
+						"password": "",
+						"entity": "",
+						"workstation": "",
+						"disableRetryRequest": false
+					},
+					"edgegrid": {
+						"accessToken": "",
+						"clientToken": "",
+						"clientSecret": "",
+						"nonce": "",
+						"timestamp": "",
+						"baseURi": "",
+						"headersToSign": ""
+					},
+					"oauth1": {
+						"consumerKey": "",
+						"consumerSecret": "",
+						"signatureMethod": "HMAC-SHA1",
+						"addEmptyParamsToSign": true,
+						"includeBodyHash": true,
+						"addParamsToHeader": false,
+						"disableHeaderEncoding": false,
+						"realm": "",
+						"version": "1.0",
+						"nonce": "",
+						"timestamp": "",
+						"verifier": "",
+						"callback": "",
+						"tokenSecret": "",
+						"token": ""
+					},
+					"jwt": {
+						"addTokenTo": "header",
+						"algorithm": "HS256",
+						"secret": "",
+						"isSecretBase64Encoded": false,
+						"payload": "",
+						"headerPrefix": "Bearer",
+						"queryParamKey": "token",
+						"header": ""
+					},
+					"asap": {
+						"alg": "HS256",
+						"iss": "",
+						"aud": "",
+						"kid": "",
+						"privateKey": "",
+						"sub": "",
+						"claims": "",
+						"exp": ""
+					}
+				},
+				"body": {
+					"mode": "json",
+					"parameter": [],
+					"raw": "",
+					"raw_parameter": [],
+					"raw_schema": {
+						"type": "object"
+					},
+					"binary": null
+				},
+				"pre_tasks": [],
+				"post_tasks": [],
+				"header": {
+					"parameter": []
+				},
+				"query": {
+					"query_add_equal": 1,
+					"parameter": []
+				},
+				"cookie": {
+					"cookie_encode": 1,
+					"parameter": []
+				},
+				"restful": {
+					"parameter": []
+				}
+			},
+			"response": {
+				"example": [
+					{
+						"example_id": "1",
+						"raw": "",
+						"raw_parameter": [],
+						"headers": [],
+						"expect": {
+							"code": "200",
+							"content_type": "json",
+							"is_default": 1,
+							"mock": "",
+							"name": "Success",
+							"schema": {
+								"type": "object",
+								"properties": {}
+							},
+							"verify_type": "schema",
+							"sleep": 0
+						}
+					},
+					{
+						"example_id": "2",
+						"raw": "",
+						"raw_parameter": [],
+						"headers": [],
+						"expect": {
+							"code": "404",
+							"content_type": "json",
+							"is_default": -1,
+							"mock": "",
+							"name": "Failure",
+							"schema": {
+								"type": "object",
+								"properties": {}
+							},
+							"verify_type": "schema",
+							"sleep": 0
+						}
+					}
+				],
+				"is_check_result": 1
+			},
+			"mock_server_enable": -1,
+			"attribute_info": {}
+		},
+		{
+			"target_id": "229ce3f0b1f0e3",
+			"project_id": "462955f11802000",
+			"parent_id": "2297b3b3b1f026",
+			"target_type": "api",
+			"name": "Query",
+			"version": 12,
+			"sort": 2000,
+			"method": "POST",
+			"url": "http://{{localhost}}/api/v1/message/query",
+			"protocol": "http/1.1",
+			"mark_id": "1",
+			"description": "",
+			"request": {
+				"auth": {
+					"type": "inherit",
+					"kv": {
+						"key": "",
+						"value": "",
+						"in": "header"
+					},
+					"bearer": {
+						"key": ""
+					},
+					"basic": {
+						"username": "",
+						"password": ""
+					},
+					"digest": {
+						"username": "",
+						"password": "",
+						"realm": "",
+						"nonce": "",
+						"algorithm": "",
+						"qop": "",
+						"nc": "",
+						"cnonce": "",
+						"opaque": ""
+					},
+					"hawk": {
+						"authId": "",
+						"authKey": "",
+						"algorithm": "",
+						"user": "",
+						"nonce": "",
+						"extraData": "",
+						"default": "",
+						"delegation": "",
+						"timestamp": "",
+						"includePayloadHash": false
+					},
+					"awsv4": {
+						"accessKey": "",
+						"secretKey": "",
+						"region": "",
+						"service": "",
+						"sessionToken": "",
+						"addAuthDataToQuery": false
+					},
+					"ntlm": {
+						"username": "",
+						"password": "",
+						"entity": "",
+						"workstation": "",
+						"disableRetryRequest": false
+					},
+					"edgegrid": {
+						"accessToken": "",
+						"clientToken": "",
+						"clientSecret": "",
+						"nonce": "",
+						"timestamp": "",
+						"baseURi": "",
+						"headersToSign": ""
+					},
+					"oauth1": {
+						"consumerKey": "",
+						"consumerSecret": "",
+						"signatureMethod": "HMAC-SHA1",
+						"addEmptyParamsToSign": true,
+						"includeBodyHash": true,
+						"addParamsToHeader": false,
+						"disableHeaderEncoding": false,
+						"realm": "",
+						"version": "1.0",
+						"nonce": "",
+						"timestamp": "",
+						"verifier": "",
+						"callback": "",
+						"tokenSecret": "",
+						"token": ""
+					},
+					"jwt": {
+						"addTokenTo": "header",
+						"algorithm": "HS256",
+						"secret": "",
+						"isSecretBase64Encoded": false,
+						"payload": "",
+						"headerPrefix": "Bearer",
+						"queryParamKey": "token",
+						"header": ""
+					},
+					"asap": {
+						"alg": "HS256",
+						"iss": "",
+						"aud": "",
+						"kid": "",
+						"privateKey": "",
+						"sub": "",
+						"claims": "",
+						"exp": ""
+					}
+				},
+				"body": {
+					"mode": "none",
+					"parameter": [],
+					"raw": "",
+					"raw_parameter": [],
+					"raw_schema": {
+						"type": "object"
+					},
+					"binary": null
+				},
+				"pre_tasks": [],
+				"post_tasks": [],
+				"header": {
+					"parameter": []
+				},
+				"query": {
+					"query_add_equal": 1,
+					"parameter": []
+				},
+				"cookie": {
+					"cookie_encode": 1,
+					"parameter": []
+				},
+				"restful": {
+					"parameter": []
+				}
+			},
+			"response": {
+				"example": [
+					{
+						"example_id": "1",
+						"raw": "",
+						"raw_parameter": [],
+						"headers": [],
+						"expect": {
+							"code": "200",
+							"content_type": "json",
+							"is_default": 1,
+							"mock": "",
+							"name": "Success",
+							"schema": {
+								"type": "object",
+								"properties": {}
+							},
+							"verify_type": "schema",
+							"sleep": 0
+						}
+					},
+					{
+						"example_id": "2",
+						"raw": "",
+						"raw_parameter": [],
+						"headers": [],
+						"expect": {
+							"code": "404",
+							"content_type": "json",
+							"is_default": -1,
+							"mock": "",
+							"name": "Failure",
+							"schema": {
+								"type": "object",
+								"properties": {}
+							},
+							"verify_type": "schema",
+							"sleep": 0
+						}
+					}
+				],
+				"is_check_result": 1
+			},
+			"mock_server_enable": -1,
+			"attribute_info": {}
+		},
+		{
+			"target_id": "2297853ef1f01e",
+			"project_id": "462955f11802000",
+			"parent_id": "22970b78b1f013",
+			"target_type": "api",
+			"name": "QueryUsers",
+			"version": 20,
+			"sort": 3000,
+			"method": "POST",
+			"url": "http://{{localhost}}/api/v1/Channel/queryuser",
+			"protocol": "http/1.1",
+			"mark_id": "1",
+			"description": "",
+			"request": {
+				"auth": {
+					"type": "inherit",
+					"kv": {
+						"key": "",
+						"value": "",
+						"in": "header"
+					},
+					"bearer": {
+						"key": ""
+					},
+					"basic": {
+						"username": "",
+						"password": ""
+					},
+					"digest": {
+						"username": "",
+						"password": "",
+						"realm": "",
+						"nonce": "",
+						"algorithm": "",
+						"qop": "",
+						"nc": "",
+						"cnonce": "",
+						"opaque": ""
+					},
+					"hawk": {
+						"authId": "",
+						"authKey": "",
+						"algorithm": "",
+						"user": "",
+						"nonce": "",
+						"extraData": "",
+						"default": "",
+						"delegation": "",
+						"timestamp": "",
+						"includePayloadHash": false
+					},
+					"awsv4": {
+						"accessKey": "",
+						"secretKey": "",
+						"region": "",
+						"service": "",
+						"sessionToken": "",
+						"addAuthDataToQuery": false
+					},
+					"ntlm": {
+						"username": "",
+						"password": "",
+						"entity": "",
+						"workstation": "",
+						"disableRetryRequest": false
+					},
+					"edgegrid": {
+						"accessToken": "",
+						"clientToken": "",
+						"clientSecret": "",
+						"nonce": "",
+						"timestamp": "",
+						"baseURi": "",
+						"headersToSign": ""
+					},
+					"oauth1": {
+						"consumerKey": "",
+						"consumerSecret": "",
+						"signatureMethod": "HMAC-SHA1",
+						"addEmptyParamsToSign": true,
+						"includeBodyHash": true,
+						"addParamsToHeader": false,
+						"disableHeaderEncoding": false,
+						"realm": "",
+						"version": "1.0",
+						"nonce": "",
+						"timestamp": "",
+						"verifier": "",
+						"callback": "",
+						"tokenSecret": "",
+						"token": ""
+					},
+					"jwt": {
+						"addTokenTo": "header",
+						"algorithm": "HS256",
+						"secret": "",
+						"isSecretBase64Encoded": false,
+						"payload": "",
+						"headerPrefix": "Bearer",
+						"queryParamKey": "token",
+						"header": ""
+					},
+					"asap": {
+						"alg": "HS256",
+						"iss": "",
+						"aud": "",
+						"kid": "",
+						"privateKey": "",
+						"sub": "",
+						"claims": "",
+						"exp": ""
+					}
+				},
+				"body": {
+					"mode": "json",
+					"parameter": [],
+					"raw": "{\r\n    \"channel_uuid\":\"ab8e2f2d-9640-4165-8e39-431d5b5515b3\"\r\n}",
+					"raw_parameter": [],
+					"raw_schema": {
+						"type": "object"
+					},
+					"binary": null
+				},
+				"pre_tasks": [],
+				"post_tasks": [],
+				"header": {
+					"parameter": []
+				},
+				"query": {
+					"query_add_equal": 1,
+					"parameter": []
+				},
+				"cookie": {
+					"cookie_encode": 1,
+					"parameter": []
+				},
+				"restful": {
+					"parameter": []
+				}
+			},
+			"response": {
+				"example": [
+					{
+						"example_id": "1",
+						"raw": "",
+						"raw_parameter": [],
+						"headers": [],
+						"expect": {
+							"code": "200",
+							"content_type": "json",
+							"is_default": 1,
+							"mock": "",
+							"name": "Success",
+							"schema": {
+								"type": "object",
+								"properties": {}
+							},
+							"verify_type": "schema",
+							"sleep": 0
+						}
+					},
+					{
+						"example_id": "2",
+						"raw": "",
+						"raw_parameter": [],
+						"headers": [],
+						"expect": {
+							"code": "404",
+							"content_type": "json",
+							"is_default": -1,
+							"mock": "",
+							"name": "Failure",
+							"schema": {
+								"type": "object",
+								"properties": {}
+							},
+							"verify_type": "schema",
+							"sleep": 0
+						}
+					}
+				],
+				"is_check_result": 1
+			},
+			"mock_server_enable": -1,
+			"attribute_info": {}
+		},
+		{
+			"target_id": "229d0c0371f0e7",
+			"project_id": "462955f11802000",
+			"parent_id": "2297b3b3b1f026",
+			"target_type": "api",
+			"name": "Delete",
+			"version": 13,
+			"sort": 3000,
+			"method": "DELETE",
+			"url": "http://{{localhost}}/api/v1/message/delete",
+			"protocol": "http/1.1",
+			"mark_id": "1",
+			"description": "",
+			"request": {
+				"auth": {
+					"type": "inherit",
+					"kv": {
+						"key": "",
+						"value": "",
+						"in": "header"
+					},
+					"bearer": {
+						"key": ""
+					},
+					"basic": {
+						"username": "",
+						"password": ""
+					},
+					"digest": {
+						"username": "",
+						"password": "",
+						"realm": "",
+						"nonce": "",
+						"algorithm": "",
+						"qop": "",
+						"nc": "",
+						"cnonce": "",
+						"opaque": ""
+					},
+					"hawk": {
+						"authId": "",
+						"authKey": "",
+						"algorithm": "",
+						"user": "",
+						"nonce": "",
+						"extraData": "",
+						"default": "",
+						"delegation": "",
+						"timestamp": "",
+						"includePayloadHash": false
+					},
+					"awsv4": {
+						"accessKey": "",
+						"secretKey": "",
+						"region": "",
+						"service": "",
+						"sessionToken": "",
+						"addAuthDataToQuery": false
+					},
+					"ntlm": {
+						"username": "",
+						"password": "",
+						"entity": "",
+						"workstation": "",
+						"disableRetryRequest": false
+					},
+					"edgegrid": {
+						"accessToken": "",
+						"clientToken": "",
+						"clientSecret": "",
+						"nonce": "",
+						"timestamp": "",
+						"baseURi": "",
+						"headersToSign": ""
+					},
+					"oauth1": {
+						"consumerKey": "",
+						"consumerSecret": "",
+						"signatureMethod": "HMAC-SHA1",
+						"addEmptyParamsToSign": true,
+						"includeBodyHash": true,
+						"addParamsToHeader": false,
+						"disableHeaderEncoding": false,
+						"realm": "",
+						"version": "1.0",
+						"nonce": "",
+						"timestamp": "",
+						"verifier": "",
+						"callback": "",
+						"tokenSecret": "",
+						"token": ""
+					},
+					"jwt": {
+						"addTokenTo": "header",
+						"algorithm": "HS256",
+						"secret": "",
+						"isSecretBase64Encoded": false,
+						"payload": "",
+						"headerPrefix": "Bearer",
+						"queryParamKey": "token",
+						"header": ""
+					},
+					"asap": {
+						"alg": "HS256",
+						"iss": "",
+						"aud": "",
+						"kid": "",
+						"privateKey": "",
+						"sub": "",
+						"claims": "",
+						"exp": ""
+					}
+				},
+				"body": {
+					"mode": "none",
+					"parameter": [],
+					"raw": "",
+					"raw_parameter": [],
+					"raw_schema": {
+						"type": "object"
+					},
+					"binary": null
+				},
+				"pre_tasks": [],
+				"post_tasks": [],
+				"header": {
+					"parameter": []
+				},
+				"query": {
+					"query_add_equal": 1,
+					"parameter": []
+				},
+				"cookie": {
+					"cookie_encode": 1,
+					"parameter": []
+				},
+				"restful": {
+					"parameter": []
+				}
+			},
+			"response": {
+				"example": [
+					{
+						"example_id": "1",
+						"raw": "",
+						"raw_parameter": [],
+						"headers": [],
+						"expect": {
+							"code": "200",
+							"content_type": "json",
+							"is_default": 1,
+							"mock": "",
+							"name": "Success",
+							"schema": {
+								"type": "object",
+								"properties": {}
+							},
+							"verify_type": "schema",
+							"sleep": 0
+						}
+					},
+					{
+						"example_id": "2",
+						"raw": "",
+						"raw_parameter": [],
+						"headers": [],
+						"expect": {
+							"code": "404",
+							"content_type": "json",
+							"is_default": -1,
+							"mock": "",
+							"name": "Failure",
+							"schema": {
+								"type": "object",
+								"properties": {}
+							},
+							"verify_type": "schema",
+							"sleep": 0
+						}
+					}
+				],
+				"is_check_result": 1
+			},
+			"mock_server_enable": -1,
+			"attribute_info": {}
+		},
+		{
+			"target_id": "22f13a5c71f2e0",
+			"project_id": "462955f11802000",
+			"parent_id": "0",
+			"target_type": "websocket2",
+			"name": "User1",
+			"version": 17,
+			"sort": 3500,
+			"method": "",
+			"url": "http://{{localhost}}/api/v1/ws/connect?user_uuid=02c78c65-c17e-4ea7-8b22-3686be3a377c&channel_uuid=ab8e2f2d-9640-4165-8e39-431d5b5515b3&username=Alice",
+			"mark_id": "1",
+			"description": "",
+			"request": {
+				"header": {
+					"parameter": []
+				},
+				"query": {
+					"parameter": [
+						{
+							"param_id": "22f14c9bf9b2f2",
+							"description": "",
+							"field_type": "string",
+							"is_checked": 1,
+							"key": "user_uuid",
+							"not_null": 1,
+							"value": "02c78c65-c17e-4ea7-8b22-3686be3a377c",
+							"schema": {
+								"type": "string"
+							}
+						},
+						{
+							"param_id": "22f1525e79b2fd",
+							"description": "",
+							"field_type": "string",
+							"is_checked": 1,
+							"key": "channel_uuid",
+							"not_null": 1,
+							"value": "ab8e2f2d-9640-4165-8e39-431d5b5515b3",
+							"schema": {
+								"type": "string"
+							}
+						},
+						{
+							"param_id": "22f159c6b9b311",
+							"description": "",
+							"field_type": "string",
+							"is_checked": 1,
+							"key": "username",
+							"not_null": 1,
+							"value": "Alice",
+							"schema": {
+								"type": "string"
+							}
+						}
+					]
+				},
+				"cookie": {
+					"parameter": []
+				}
+			},
+			"message": [
+				{
+					"name": "Message",
+					"param_id": "2296023a71f000",
+					"request": {
+						"mode": "text",
+						"raw": "Hello, My name is Alice",
+						"raw_parameter": [],
+						"raw_schema": {
+							"type": "object"
+						}
+					},
+					"response": {
+						"mode": "text",
+						"raw": "",
+						"raw_parameter": [],
+						"raw_schema": {
+							"type": "object"
+						}
+					}
+				}
+			],
+			"config": {
+				"certificate_verification": -1,
+				"information_size": 5,
+				"reconnect_num": 5,
+				"reconnect_time": 5000,
+				"shake_hands_timeout": 0
+			},
+			"attribute_info": {}
+		},
+		{
+			"target_id": "2297cc5c71f02b",
+			"project_id": "462955f11802000",
+			"parent_id": "0",
+			"target_type": "websocket2",
+			"name": "User2",
+			"version": 18,
+			"sort": 4000,
+			"method": "",
+			"url": "http://{{localhost}}/api/v1/ws/connect?user_uuid=36a2b689-0487-4fdb-8dde-4e46b8967bc7&channel_uuid=ab8e2f2d-9640-4165-8e39-431d5b5515b3&username=Perry",
+			"mark_id": "1",
+			"description": "",
+			"request": {
+				"header": {
+					"parameter": [
+						{
+							"param_id": "2298998636e0d0",
+							"description": "",
+							"field_type": "any",
+							"is_checked": -1,
+							"key": "Authorization",
+							"not_null": 1,
+							"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX3V1aWQiOiIzNmEyYjY4OS0wNDg3LTRmZGItOGRkZS00ZTQ2Yjg5NjdiYzciLCJjaGFubmVsX3V1aWQiOiJhYjhlMmYyZC05NjQwLTQxNjUtOGUzOS00MzFkNWI1NTE1YjMiLCJ1c2VybmFtZSI6IlBlcnJ5IiwiZXhwIjoxNzQ2OTgyNDUwfQ.J1aTZ_tLEHIAC9x7Op84ib98hFHxKfIeOQ1z6NimN5I",
+							"schema": {
+								"type": [
+									"string",
+									"integer",
+									"boolean",
+									"array",
+									"object",
+									"number",
+									"null"
+								]
+							}
+						}
+					]
+				},
+				"query": {
+					"parameter": [
+						{
+							"param_id": "22f05a42f9b289",
+							"description": "",
+							"field_type": "string",
+							"is_checked": 1,
+							"key": "user_uuid",
+							"not_null": 1,
+							"value": "36a2b689-0487-4fdb-8dde-4e46b8967bc7",
+							"schema": {
+								"type": "string"
+							}
+						},
+						{
+							"param_id": "22f0dccdf9b2a5",
+							"description": "",
+							"field_type": "string",
+							"is_checked": 1,
+							"key": "channel_uuid",
+							"not_null": 1,
+							"value": "ab8e2f2d-9640-4165-8e39-431d5b5515b3",
+							"schema": {
+								"type": "string"
+							}
+						},
+						{
+							"param_id": "22f0e57579b2b3",
+							"description": "",
+							"field_type": "string",
+							"is_checked": 1,
+							"key": "username",
+							"not_null": 1,
+							"value": "Perry",
+							"schema": {
+								"type": "string"
+							}
+						}
+					]
+				},
+				"cookie": {
+					"parameter": []
+				}
+			},
+			"message": [
+				{
+					"name": "Message",
+					"param_id": "2296023a71f000",
+					"request": {
+						"mode": "text",
+						"raw": "{\r\n  \"type\": \"join\",\r\n  \"sender\": \"\",\r\n  \"content\": \"hello, I am Perry\",\r\n  \"timestamp\": \"\"\r\n}",
+						"raw_parameter": [],
+						"raw_schema": {
+							"type": "object"
+						}
+					},
+					"response": {
+						"mode": "text",
+						"raw": "",
+						"raw_parameter": [],
+						"raw_schema": {
+							"type": "object"
+						}
+					}
+				}
+			],
+			"config": {
+				"certificate_verification": -1,
+				"information_size": 5,
+				"reconnect_num": 5,
+				"reconnect_time": 5000,
+				"shake_hands_timeout": 0
+			},
+			"attribute_info": {}
+		},
+		{
+			"target_id": "23e9e55771fdd4",
+			"project_id": "462955f11802000",
+			"parent_id": "0",
+			"target_type": "websocket2",
+			"name": "User3",
+			"version": 19,
+			"sort": 6000,
+			"method": "",
+			"url": "http://{{localhost}}/api/v1/ws/connect?user_uuid=04be4bc9-d2b6-4bbd-bce2-6187a6495ebb&channel_uuid=ab8e2f2d-9640-4165-8e39-431d5b5515b3&username=Candy",
+			"mark_id": "1",
+			"description": "",
+			"request": {
+				"header": {
+					"parameter": []
+				},
+				"query": {
+					"parameter": [
+						{
+							"param_id": "23e9eef3b9bdf3",
+							"description": "",
+							"field_type": "string",
+							"is_checked": 1,
+							"key": "user_uuid",
+							"not_null": 1,
+							"value": "04be4bc9-d2b6-4bbd-bce2-6187a6495ebb",
+							"schema": {
+								"type": "string"
+							}
+						},
+						{
+							"param_id": "23e9f58df9bdff",
+							"description": "",
+							"field_type": "string",
+							"is_checked": 1,
+							"key": "channel_uuid",
+							"not_null": 1,
+							"value": "ab8e2f2d-9640-4165-8e39-431d5b5515b3",
+							"schema": {
+								"type": "string"
+							}
+						},
+						{
+							"param_id": "23e9fa85b9be0c",
+							"description": "",
+							"field_type": "string",
+							"is_checked": 1,
+							"key": "username",
+							"not_null": 1,
+							"value": "Candy",
+							"schema": {
+								"type": "string"
+							}
+						}
+					]
+				},
+				"cookie": {
+					"parameter": []
+				}
+			},
+			"message": [
+				{
+					"name": "Message",
+					"param_id": "2296023a71f000",
+					"request": {
+						"mode": "text",
+						"raw": "",
+						"raw_parameter": [],
+						"raw_schema": {
+							"type": "object"
+						}
+					},
+					"response": {
+						"mode": "text",
+						"raw": "",
+						"raw_parameter": [],
+						"raw_schema": {
+							"type": "object"
+						}
+					}
+				}
+			],
+			"config": {
+				"certificate_verification": -1,
+				"information_size": 5,
+				"reconnect_num": 5,
+				"reconnect_time": 5000,
+				"shake_hands_timeout": 0
+			},
+			"attribute_info": {}
+		}
+	],
+	"samples": [],
+	"automated_testings": []
+}

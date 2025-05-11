@@ -4,7 +4,7 @@ A concise and lightweight open chat system powered by Go.
 
 ## 🚀 Overview
 
-LCA is a simple and extensible WebSocket-based chat system written in Go. It is designed to be easily deployable and modifiable for various real-time communication use cases.
+LCA is a simple and extensible WebSocket-based and RestFul chat system written in Go. It is designed to be easily deployable and modifiable for various real-time communication use cases.
 
 ## Get Started
 

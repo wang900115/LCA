@@ -9,7 +9,7 @@ import (
 type Channel struct {
 	gorm.Model
 	UUID  string `json:"uuid" gorm:"unique;not null;index"`
-	Users []User `json:"users" gorm:"foreignKey:channel_uuid;reference:uuid"`
+	Users []User `json:"users" gorm:"foreignKey:ChannelUUID;references:UUID"`
 }
 
 func (c Channel) TableName() string {

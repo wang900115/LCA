@@ -1,7 +1,7 @@
 package repository
 
 import (
-	"LCA/internal/adapter/model"
+	"LCA/internal/adapter/gorm/model"
 	"LCA/internal/domain/entities"
 	"LCA/internal/domain/irepository"
 

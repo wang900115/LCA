@@ -39,11 +39,14 @@ func (uc *UserController) CreateUser(c *gin.Context) {
 
 func (uc *UserController) DeleteUser(c *gin.Context) {
 	UserUUID := c.GetString("user_uuid")
+	ChannelUUID := c.GetString("channel_uuid")
+
 	userUUID, err := uc.user.DeleteUser(UserUUID)
 	if err != nil {
 		uc.response.FailWithError(c, deleteFail, err)
 		return
 	}
 
+	uc.token.DeleteToken(userUUID, ChannelUUID)
 	uc.response.SuccessWithData(c, deleteSuccess, userUUID)
 }

@@ -7,15 +7,17 @@ import (
 	"LCA/internal/adapter/gin/middleware"
 	corsMid "LCA/internal/adapter/gin/middleware/cors"
 	jwtMid "LCA/internal/adapter/gin/middleware/jwt"
-	redisrate "LCA/internal/adapter/gin/middleware/redis_rate"
+	"LCA/internal/adapter/gorm"
+
+	// redisrate "LCA/internal/adapter/gin/middleware/redis_rate"
 	secureheader "LCA/internal/adapter/gin/middleware/secure_header"
 	"LCA/internal/adapter/gin/router"
 	"LCA/internal/adapter/redispool"
 	"LCA/internal/adapter/repository"
 	"LCA/internal/adapter/websocket/connection"
 	"LCA/internal/application/usecase"
+
 	"LCA/pkg/config"
-	"LCA/pkg/gorm"
 	"LCA/pkg/logger"
 )
 
@@ -49,12 +51,12 @@ func main() {
 	jwtMiddle := jwtMid.NewJWT(response, tokenUsecase)
 	corsMiddle := corsMid.NewCORS(corsMid.NewOption((conf)))
 	secureHeaderMiddle := secureheader.NewSecureHeader()
-	redisRateMiddle := redisrate.NewRateLimiter(redispool, zaplogger, redisrate.NewOption(conf))
+	// redisRateMiddle := redisrate.NewRateLimiter(redispool, zaplogger, redisrate.NewOption(conf))
 
 	userRouter := router.NewUserRouter(userController, jwtMiddle)
 	messageRouter := router.NewMessageRouter(messageController, jwtMiddle)
 	channelRouter := router.NewChannelRouter(channelController)
-	websocketRouter := router.NewWebSocketRouter(websocketController, jwtMiddle)
+	websocketRouter := router.NewWebSocketRouter(websocketController)
 
 	app := gin.NewApp(
 		[]router.IRoute{
@@ -66,7 +68,6 @@ func main() {
 		[]middleware.IMiddleware{
 			corsMiddle,
 			secureHeaderMiddle,
-			redisRateMiddle,
 		},
 	)
 

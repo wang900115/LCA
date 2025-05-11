@@ -18,6 +18,7 @@ func NewMessageController(response iresponse.IResponse, message *usecase.Message
 }
 
 func (mc *MessageController) CreateMessage(c *gin.Context) {
+
 	ChannelUUID := c.GetString("channel_uuid")
 	UserUUID := c.GetString("user_uuid")
 	var request validator.MessageCreateRequest

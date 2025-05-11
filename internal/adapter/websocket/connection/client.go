@@ -42,7 +42,6 @@ func (c *Client) ReadPump(hub *Hub) {
 		if err != nil {
 			break
 		}
-
 		var payload event.MessagePayload
 		if err := json.Unmarshal(message, &payload); err != nil {
 			continue
@@ -51,6 +50,7 @@ func (c *Client) ReadPump(hub *Hub) {
 		payload.Type = event.EventMessage
 		payload.Sender = c.Username
 		payload.Timestamp = time.Now().Format(time.RFC3339)
+
 		messageUUID, err := c.messageUsecase.CreateMessage(c.ChannelUUID, c.UserUUID, payload.Content)
 
 		if err != nil {

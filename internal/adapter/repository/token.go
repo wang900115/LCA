@@ -1,7 +1,7 @@
 package repository
 
 import (
-	"LCA/internal/adapter/model"
+	"LCA/internal/adapter/gorm/model"
 	"LCA/internal/domain/entities"
 	"LCA/internal/domain/irepository"
 	"context"
@@ -67,17 +67,17 @@ func (r *TokenRepository) ValidateToken(token string) (entities.TokenClaims, err
 	}
 	mapClaims, ok := unvertifiedToken.Claims.(jwt.MapClaims)
 	if !ok {
-		return entities.TokenClaims{}, ErrInvalidToken
+		return entities.TokenClaims{}, errors.New("token map failed")
 	}
 
-	userUUID, ok := mapClaims["userUUID"].(string)
+	userUUID, ok := mapClaims["user_uuid"].(string)
 	if !ok {
-		return entities.TokenClaims{}, ErrInvalidToken
+		return entities.TokenClaims{}, errors.New("token map userUUID failed")
 	}
 
-	channelUUID, ok := mapClaims["channelUUID"].(string)
+	channelUUID, ok := mapClaims["channel_uuid"].(string)
 	if !ok {
-		return entities.TokenClaims{}, ErrInvalidToken
+		return entities.TokenClaims{}, errors.New("token map channelUUID failed")
 	}
 
 	salt, err := r.redis.Get(context.Background(), jwtsaltPrefix+userUUID+channelUUID).Result()
@@ -95,7 +95,6 @@ func (r *TokenRepository) ValidateToken(token string) (entities.TokenClaims, err
 
 	if !tokenClaims.Valid {
 		return entities.TokenClaims{}, ErrTokenExpired
-
 	}
 
 	tokenClaimsModel, ok := tokenClaims.Claims.(*model.TokenClaims)

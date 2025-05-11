@@ -30,6 +30,7 @@ func NewHub() *Hub {
 func (h *Hub) Run() {
 	for {
 		select {
+
 		// Register a new client
 		case client := <-h.Register:
 			if h.Clients[client.ChannelUUID] == nil {
@@ -48,6 +49,7 @@ func (h *Hub) Run() {
 			for c := range h.Clients[client.ChannelUUID] {
 				c.Send <- msg
 			}
+
 		// Unregister a client
 		case client := <-h.Unregister:
 			if clients, ok := h.Clients[client.ChannelUUID]; ok {

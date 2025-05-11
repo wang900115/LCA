@@ -1,10 +1,11 @@
 package repository
 
 import (
-	"LCA/internal/adapter/model"
+	"LCA/internal/adapter/gorm/model"
 	"LCA/internal/domain/entities"
 	"LCA/internal/domain/irepository"
 
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -19,11 +20,11 @@ func NewUserRepository(gorm *gorm.DB) irepository.IUserRepository {
 }
 
 func (r *UserRepository) CreateUser(user entities.User) (entities.User, error) {
+	userUUID := uuid.New().String()
 	userModel := model.User{
-		UUID:        user.UUID,
+		UUID:        userUUID,
 		Username:    user.Username,
 		ChannelUUID: user.ChannelUUID,
-		Status:      user.Status,
 	}
 
 	if err := r.gorm.Create(&userModel).Error; err != nil {
@@ -39,7 +40,7 @@ func (r *UserRepository) DeleteUser(userUUID string) (entities.User, error) {
 		return entities.User{}, err
 	}
 
-	if err := r.gorm.Delete(&user).Error; err != nil {
+	if err := r.gorm.Unscoped().Delete(&user).Error; err != nil {
 		return entities.User{}, err
 	}
 

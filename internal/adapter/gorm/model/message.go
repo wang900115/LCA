@@ -12,6 +12,9 @@ type Message struct {
 	ChannelUUID string `json:"channel_uuid" gorm:"not null"`
 	UserUUID    string `json:"user_uuid" gorm:"not null"`
 	Content     string `json:"content" gorm:"not null"`
+
+	Channel Channel `gorm:"foreignKey:ChannelUUID;references:UUID"`
+	User    User    `gorm:"foreignKey:UserUUID;references:UUID"`
 }
 
 func (m Message) TableName() string {

@@ -29,9 +29,10 @@ var upgrader = websocket.Upgrader{
 }
 
 func (wsc *WebSocketController) Handle(c *gin.Context) {
-	userUUID := c.GetString("user_uuid")
-	channelUUID := c.GetString("channel_uuid")
-	username := c.GetString("username")
+
+	userUUID, _ := c.GetQuery("user_uuid")
+	channelUUID, _ := c.GetQuery("channel_uuid")
+	username, _ := c.GetQuery("username")
 
 	conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
 	if err != nil {

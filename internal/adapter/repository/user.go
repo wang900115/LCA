@@ -1,9 +1,9 @@
 package repository
 
 import (
-	"LCA/internal/adapter/gorm/model"
-	"LCA/internal/domain/entities"
-	"LCA/internal/domain/irepository"
+	"github.com/wang900115/LCA/internal/adapter/gorm/model"
+	"github.com/wang900115/LCA/internal/domain/entities"
+	"github.com/wang900115/LCA/internal/domain/irepository"
 
 	"github.com/google/uuid"
 	"gorm.io/gorm"

@@ -1,7 +1,7 @@
 package model
 
 import (
-	"LCA/internal/domain/entities"
+	"github.com/wang900115/LCA/internal/domain/entities"
 
 	"github.com/golang-jwt/jwt/v5"
 )

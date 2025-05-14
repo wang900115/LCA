@@ -1,10 +1,11 @@
 package connection
 
 import (
-	"LCA/internal/adapter/websocket/event"
-	"LCA/internal/application/usecase"
 	"encoding/json"
 	"time"
+
+	"github.com/wang900115/LCA/internal/adapter/websocket/event"
+	"github.com/wang900115/LCA/internal/application/usecase"
 
 	"github.com/gorilla/websocket"
 )

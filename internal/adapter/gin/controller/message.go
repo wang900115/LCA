@@ -1,9 +1,9 @@
 package controller
 
 import (
-	iresponse "LCA/internal/adapter/gin/controller/response"
-	"LCA/internal/adapter/gin/validator"
-	"LCA/internal/application/usecase"
+	iresponse "github.com/wang900115/LCA/internal/adapter/gin/controller/response"
+	"github.com/wang900115/LCA/internal/adapter/gin/validator"
+	"github.com/wang900115/LCA/internal/application/usecase"
 
 	"github.com/gin-gonic/gin"
 )

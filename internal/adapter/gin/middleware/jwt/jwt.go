@@ -1,10 +1,11 @@
 package jwt
 
 import (
-	iresponse "LCA/internal/adapter/gin/controller/response"
-	"LCA/internal/application/usecase"
 	"errors"
 	"strings"
+
+	iresponse "github.com/wang900115/LCA/internal/adapter/gin/controller/response"
+	"github.com/wang900115/LCA/internal/application/usecase"
 
 	"github.com/gin-gonic/gin"
 )

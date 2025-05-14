@@ -1,24 +1,24 @@
 package main
 
 import (
-	"LCA/internal/adapter/gin"
-	"LCA/internal/adapter/gin/controller"
-	response "LCA/internal/adapter/gin/controller/response/json"
-	"LCA/internal/adapter/gin/middleware"
-	corsMid "LCA/internal/adapter/gin/middleware/cors"
-	jwtMid "LCA/internal/adapter/gin/middleware/jwt"
-	"LCA/internal/adapter/gorm"
+	"github.com/wang900115/LCA/internal/adapter/gin"
+	"github.com/wang900115/LCA/internal/adapter/gin/controller"
+	response "github.com/wang900115/LCA/internal/adapter/gin/controller/response/json"
+	"github.com/wang900115/LCA/internal/adapter/gin/middleware"
+	corsMid "github.com/wang900115/LCA/internal/adapter/gin/middleware/cors"
+	jwtMid "github.com/wang900115/LCA/internal/adapter/gin/middleware/jwt"
+	"github.com/wang900115/LCA/internal/adapter/gorm"
 
 	// redisrate "LCA/internal/adapter/gin/middleware/redis_rate"
-	secureheader "LCA/internal/adapter/gin/middleware/secure_header"
-	"LCA/internal/adapter/gin/router"
-	"LCA/internal/adapter/redispool"
-	"LCA/internal/adapter/repository"
-	"LCA/internal/adapter/websocket/connection"
-	"LCA/internal/application/usecase"
+	secureheader "github.com/wang900115/LCA/internal/adapter/gin/middleware/secure_header"
+	"github.com/wang900115/LCA/internal/adapter/gin/router"
+	"github.com/wang900115/LCA/internal/adapter/redispool"
+	"github.com/wang900115/LCA/internal/adapter/repository"
+	"github.com/wang900115/LCA/internal/adapter/websocket/connection"
+	"github.com/wang900115/LCA/internal/application/usecase"
 
-	"LCA/pkg/config"
-	"LCA/pkg/logger"
+	"github.com/wang900115/LCA/pkg/config"
+	"github.com/wang900115/LCA/pkg/logger"
 )
 
 func main() {

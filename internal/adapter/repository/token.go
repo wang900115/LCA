@@ -1,13 +1,14 @@
 package repository
 
 import (
-	"LCA/internal/adapter/gorm/model"
-	"LCA/internal/domain/entities"
-	"LCA/internal/domain/irepository"
 	"context"
 	"crypto/rand"
 	"errors"
 	"time"
+
+	"github.com/wang900115/LCA/internal/adapter/gorm/model"
+	"github.com/wang900115/LCA/internal/domain/entities"
+	"github.com/wang900115/LCA/internal/domain/irepository"
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/redis/go-redis/v9"

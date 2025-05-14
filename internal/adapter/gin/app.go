@@ -1,14 +1,15 @@
 package gin
 
 import (
-	"LCA/internal/adapter/gin/middleware"
-	"LCA/internal/adapter/gin/router"
 	"log"
 	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
+
+	"github.com/wang900115/LCA/internal/adapter/gin/middleware"
+	"github.com/wang900115/LCA/internal/adapter/gin/router"
 
 	"github.com/gin-contrib/pprof"
 

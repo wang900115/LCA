@@ -1,8 +1,9 @@
 package response
 
 import (
-	iresponse "LCA/internal/adapter/gin/controller/response"
 	"net/http"
+
+	iresponse "github.com/wang900115/LCA/internal/adapter/gin/controller/response"
 
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"

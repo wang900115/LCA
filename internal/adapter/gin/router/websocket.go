@@ -1,7 +1,7 @@
 package router
 
 import (
-	"LCA/internal/adapter/gin/controller"
+	"github.com/wang900115/LCA/internal/adapter/gin/controller"
 
 	"github.com/gin-gonic/gin"
 )

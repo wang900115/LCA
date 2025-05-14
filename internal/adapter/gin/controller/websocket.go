@@ -1,10 +1,11 @@
 package controller
 
 import (
-	iresponse "LCA/internal/adapter/gin/controller/response"
-	"LCA/internal/adapter/websocket/connection"
-	"LCA/internal/application/usecase"
 	"net/http"
+
+	iresponse "github.com/wang900115/LCA/internal/adapter/gin/controller/response"
+	"github.com/wang900115/LCA/internal/adapter/websocket/connection"
+	"github.com/wang900115/LCA/internal/application/usecase"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"

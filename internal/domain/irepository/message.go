@@ -1,6 +1,6 @@
 package irepository
 
-import "LCA/internal/domain/entities"
+import "github.com/wang900115/LCA/internal/domain/entities"
 
 type IMessageRepository interface {
 	// Create Message

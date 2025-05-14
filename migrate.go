@@ -1,8 +1,9 @@
 package main
 
 import (
-	"LCA/internal/adapter/gorm/model"
 	"log"
+
+	"github.com/wang900115/LCA/internal/adapter/gorm/model"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"

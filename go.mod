@@ -1,4 +1,4 @@
-module LCA
+module github.com/wang900115/LCA
 
 go 1.24.0
 

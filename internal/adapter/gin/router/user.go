@@ -1,8 +1,8 @@
 package router
 
 import (
-	"LCA/internal/adapter/gin/controller"
-	"LCA/internal/adapter/gin/middleware/jwt"
+	"github.com/wang900115/LCA/internal/adapter/gin/controller"
+	"github.com/wang900115/LCA/internal/adapter/gin/middleware/jwt"
 
 	"github.com/gin-gonic/gin"
 )

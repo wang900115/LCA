@@ -1,6 +1,6 @@
 package usecase
 
-import "LCA/internal/domain/irepository"
+import "github.com/wang900115/LCA/internal/domain/irepository"
 
 type ChannelUsecase struct {
 	channelRepo irepository.IChannelRepository

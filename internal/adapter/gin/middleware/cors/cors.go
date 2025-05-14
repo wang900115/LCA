@@ -1,8 +1,9 @@
 package cors
 
 import (
-	"LCA/internal/adapter/gin/middleware"
 	"net/http"
+
+	"github.com/wang900115/LCA/internal/adapter/gin/middleware"
 
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/viper"

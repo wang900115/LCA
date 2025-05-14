@@ -1,6 +1,6 @@
 package irepository
 
-import "LCA/internal/domain/entities"
+import "github.com/wang900115/LCA/internal/domain/entities"
 
 type IUserRepository interface {
 	// Create User with username and channelUUID

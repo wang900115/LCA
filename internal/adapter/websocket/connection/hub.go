@@ -1,9 +1,10 @@
 package connection
 
 import (
-	"LCA/internal/adapter/websocket/event"
 	"encoding/json"
 	"time"
+
+	"github.com/wang900115/LCA/internal/adapter/websocket/event"
 )
 
 type BroadcastMessage struct {

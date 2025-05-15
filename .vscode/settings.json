@@ -1,0 +1,10 @@
+{
+  "editor.formatOnSave": true,
+  "go.formatTool": "goimports",
+
+  "go.lintTool": "golangci-lint",
+  "go.lintFlags": ["run"],
+
+  "go.useLanguageServer": true,
+  "go.toolsManagement.autoUpdate": true
+}

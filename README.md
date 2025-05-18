@@ -1,6 +1,6 @@
 # LCA
 
-A concise and lightweight open chat system powered by Go.
+A concise and lightweight open message chat system powered by Go.
 
 ## 🚀 Overview
 

@@ -1,7 +1,5 @@
-*.exe
-
-*.yaml
-*.log
-
-test/
 build/
+test/
+
+*.exe
+*.log

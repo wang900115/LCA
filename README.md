@@ -16,19 +16,12 @@
         <code>git clone https://github.com/wang900115/LCA.git</code>
       <h2><li>Change to the new path</li></h2>
         <code>cd LCA</code>
-      <h2><li>Build application</li></h2>
-        <ul>
-        <h3><li>Linux</li></h3>
-          <code>docker build -t lca . </code>
-        <h3><li>Windows</li></h3>
-          <code>go build ./cmd/LCA/main.go</code>
-        </ul>
-      <h2><li>Run application</li></h2>
-        <ul>
-        <h3><li>Linux</li></h3>
-          <code>docker run --name lca-container -p 8080:8080 lca</code>
-        <h3><li>Windows</li></h3>
-          <code> ./main </code>
+      <h2><li>Build and Run application</li></h2>
+      <ul>
+        <h3><li>Run</li></h3>
+          <code>docker-compose up --build </code>
+        <h3><li>Shut Down </li></h3>
+          <code>docker-compose down -v</code>
         </ul>
       </ol>
     </section>

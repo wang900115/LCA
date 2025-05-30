@@ -28,6 +28,8 @@ func main() {
 	zaplogger := logger.NewZapLogger(logger.NewOption(conf))
 	postgresql := gorm.NewPostgresql(gorm.NewOption(conf))
 
+	gorm.RunMigrations(postgresql)
+
 	userRepo := repository.NewUserRepository(postgresql)
 	messageRepo := repository.NewMessageRepository(postgresql)
 	channelRepo := repository.NewChannelRepository(postgresql)

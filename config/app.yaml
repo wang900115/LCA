@@ -1,0 +1,33 @@
+app:
+  run_mode: "debug"
+  cancel_timeout: "5s"
+
+server:
+  http_port: 8080
+  read_header_timeout: "5s"
+
+postgresql:
+  host: "postgres"
+  port: 5432
+  user: "postgres"
+  password: "example"
+  dbname: "LCA"
+  sslmode: "disable"
+
+redis:
+  user: ""
+  password: ""
+  host: "redis:6379"
+  database: 0
+  idleTimeout: "200s"
+
+log:
+  log_path: "../log/app.log"
+  application_name: "LCA"
+  debug: true
+
+ratelimit:
+  limit_per_minute: 600
+
+jwt:
+  expiration: "24h"

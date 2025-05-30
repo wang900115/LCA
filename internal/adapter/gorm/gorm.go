@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"github.com/spf13/viper"
+	"github.com/wang900115/LCA/internal/adapter/gorm/model"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -40,4 +41,14 @@ func NewPostgresql(option Option) *gorm.DB {
 	}
 
 	return db
+}
+
+func RunMigrations(db *gorm.DB) {
+	err := db.AutoMigrate(
+		&model.Channel{}, &model.User{}, &model.Message{},
+	)
+	if err != nil {
+		log.Fatalf("migration failed: %v", err)
+	}
+	log.Println("✅ database migrated")
 }

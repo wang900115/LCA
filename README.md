@@ -1,9 +1,5 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <title>LCA</title>
-  </head>
-
   <Body>
     <h1 align="center"><strong>Lightweight Chat Application</strong></h1> 
     <p align="center">

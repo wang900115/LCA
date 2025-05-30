@@ -1,5 +1,8 @@
-# LCA
+<p align="center">
+  <img src="assets/banner.png" alt="LCA Banner" width="300"/>
+</p>
 
+# LCA
 A concise and lightweight open message chat system powered by Go.
 
 ## 🚀 Overview

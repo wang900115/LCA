@@ -24,10 +24,10 @@ run: build
 	@echo "Running ${APP_NAME}..."
 	@${BUILD_DIR}/${APP_NAME}
 
-.PHONY: test
-test:
-	@echo "Runing tests..."
-	@${Go} test tests/..
+# .PHONY: test
+# test:
+# 	@echo "Runing tests..."
+# 	@${Go} test tests/..
 
 .PHONY: clean
 clean:

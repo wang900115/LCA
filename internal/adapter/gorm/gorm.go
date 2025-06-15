@@ -44,11 +44,15 @@ func NewPostgresql(option Option) *gorm.DB {
 }
 
 func RunMigrations(db *gorm.DB) {
-	err := db.AutoMigrate(
+	err := db.Migrator().DropTable(&model.Channel{}, &model.User{}, &model.Message{})
+	if err != nil {
+		log.Fatalf("drop failed: %v", err)
+	}
+	err = db.AutoMigrate(
 		&model.Channel{}, &model.User{}, &model.Message{},
 	)
 	if err != nil {
 		log.Fatalf("migration failed: %v", err)
 	}
-	log.Println("✅ database migrated")
+	log.Println("✅ database reset migrated")
 }

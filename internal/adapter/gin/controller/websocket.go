@@ -31,9 +31,8 @@ var upgrader = websocket.Upgrader{
 
 func (wsc *WebSocketController) Handle(c *gin.Context) {
 
-	userUUID, _ := c.GetQuery("user_uuid")
-	channelUUID, _ := c.GetQuery("channel_uuid")
-	username, _ := c.GetQuery("username")
+	userName, _ := c.GetQuery("username")
+	channelName, _ := c.GetQuery("channelname")
 
 	conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
 	if err != nil {
@@ -41,7 +40,7 @@ func (wsc *WebSocketController) Handle(c *gin.Context) {
 		return
 	}
 
-	client := connection.NewClient(userUUID, channelUUID, username, conn, &wsc.message)
+	client := connection.NewClient(userName, channelName, conn, &wsc.message)
 	wsc.hub.Register <- client
 
 	go client.ReadPump(&wsc.hub)

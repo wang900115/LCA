@@ -8,8 +8,8 @@ import (
 )
 
 type BroadcastMessage struct {
-	ChannelUUID string
-	Message     []byte
+	Channel string
+	Message []byte
 }
 
 type Hub struct {
@@ -34,37 +34,37 @@ func (h *Hub) Run() {
 
 		// Register a new client
 		case client := <-h.Register:
-			if h.Clients[client.ChannelUUID] == nil {
-				h.Clients[client.ChannelUUID] = make(map[*Client]bool)
+			if h.Clients[client.Channel] == nil {
+				h.Clients[client.Channel] = make(map[*Client]bool)
 			}
-			h.Clients[client.ChannelUUID][client] = true
+			h.Clients[client.Channel][client] = true
 
 			payload := event.MessagePayload{
 				Type:      event.EventJoin,
-				Sender:    client.Username,
+				Sender:    client.User,
 				Content:   "join the channel",
 				Timestamp: time.Now().Format(time.RFC3339),
 			}
 			msg, _ := json.Marshal(payload)
 
-			for c := range h.Clients[client.ChannelUUID] {
+			for c := range h.Clients[client.Channel] {
 				c.Send <- msg
 			}
 
 		// Unregister a client
 		case client := <-h.Unregister:
-			if clients, ok := h.Clients[client.ChannelUUID]; ok {
+			if clients, ok := h.Clients[client.Channel]; ok {
 				if _, ok := clients[client]; ok {
 
 					payload := event.MessagePayload{
 						Type:      event.EventLeave,
-						Sender:    client.Username,
+						Sender:    client.User,
 						Content:   "leave the channel",
 						Timestamp: time.Now().Format(time.RFC3339),
 					}
 
 					msg, _ := json.Marshal(payload)
-					for c := range h.Clients[client.ChannelUUID] {
+					for c := range h.Clients[client.Channel] {
 						c.Send <- msg
 					}
 
@@ -72,13 +72,13 @@ func (h *Hub) Run() {
 					close(client.Send)
 
 					if len(clients) == 0 {
-						delete(h.Clients, client.ChannelUUID)
+						delete(h.Clients, client.Channel)
 					}
 				}
 			}
 		// Broadcast a message to all clients in the channel
 		case message := <-h.Broadcast:
-			if clients, ok := h.Clients[message.ChannelUUID]; ok {
+			if clients, ok := h.Clients[message.Channel]; ok {
 				for c := range clients {
 					c.Send <- message.Message
 				}

@@ -1,8 +1,7 @@
 package entities
 
 type User struct {
-	UUID        string `json:"uuid"`
-	Username    string `json:"username"`
-	ChannelUUID string `json:"channel_uuid"`
-	Status      string `json:"status"`
+	Username string `json:"username"`
+	Channel  string `json:"channel"`
+	Status   string `json:"status"`
 }

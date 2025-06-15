@@ -1,6 +1,6 @@
 package entities
 
 type Channel struct {
-	UUID  string `json:"uuid"`
+	Name  string `json:"name"`
 	Users []User `json:"users"`
 }

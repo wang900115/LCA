@@ -8,13 +8,11 @@ import (
 
 type Message struct {
 	gorm.Model
-	UUID        string `json:"uuid" gorm:"unique;not null;index"`
-	ChannelUUID string `json:"channel_uuid" gorm:"not null"`
-	UserUUID    string `json:"user_uuid" gorm:"not null"`
-	Content     string `json:"content" gorm:"not null"`
 
-	Channel Channel `gorm:"foreignKey:ChannelUUID;references:UUID"`
-	User    User    `gorm:"foreignKey:UserUUID;references:UUID"`
+	ChannelName string `json:"channel_name" gorm:"not null"`
+	Username    string `json:"user_name" gorm:"not null"`
+
+	Content string `json:"content" gorm:"not null"`
 }
 
 func (m Message) TableName() string {
@@ -23,9 +21,8 @@ func (m Message) TableName() string {
 
 func (m Message) ToDomain() entities.Message {
 	return entities.Message{
-		UUID:        m.UUID,
-		ChannelUUID: m.ChannelUUID,
-		UserUUID:    m.UserUUID,
-		Content:     m.Content,
+		Channel: m.ChannelName,
+		User:    m.Username,
+		Content: m.Content,
 	}
 }

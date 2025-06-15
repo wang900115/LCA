@@ -7,18 +7,16 @@ import (
 )
 
 type TokenClaims struct {
-	UserUUID    string `json:"user_uuid"`
-	ChannelUUID string `json:"channel_uuid"`
-	Username    string `json:"username"`
+	User    string `json:"user"`
+	Channel string `json:"channel"`
 
 	jwt.RegisteredClaims
 }
 
 func (t TokenClaims) ToDomain() entities.TokenClaims {
 	return entities.TokenClaims{
-		UserUUID:    t.UserUUID,
-		ChannelUUID: t.ChannelUUID,
-		Username:    t.Username,
-		ExpiredAt:   t.ExpiresAt.Unix(),
+		User:      t.User,
+		Channel:   t.Channel,
+		ExpiredAt: t.ExpiresAt.Unix(),
 	}
 }

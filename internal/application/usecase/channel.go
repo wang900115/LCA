@@ -12,12 +12,12 @@ func NewChannelUsecase(channelRepo irepository.IChannelRepository) *ChannelUseca
 	}
 }
 
-func (c *ChannelUsecase) CreateChannel() (string, error) {
-	channel, err := c.channelRepo.CreateChannel()
+func (c *ChannelUsecase) CreateChannel(name string) (string, error) {
+	channel, err := c.channelRepo.CreateChannel(name)
 	if err != nil {
 		return "", err
 	}
-	return channel.UUID, nil
+	return channel.Name, nil
 }
 
 func (c *ChannelUsecase) QueryChannels() ([]string, error) {
@@ -25,15 +25,15 @@ func (c *ChannelUsecase) QueryChannels() ([]string, error) {
 	if err != nil {
 		return nil, err
 	}
-	var uuids []string
+	var names []string
 	for _, channel := range channels {
-		uuids = append(uuids, channel.UUID)
+		names = append(names, channel.Name)
 	}
-	return uuids, nil
+	return names, nil
 }
 
-func (c *ChannelUsecase) QueryUsers(channelUUID string) ([]string, error) {
-	users, err := c.channelRepo.QueryUsers(channelUUID)
+func (c *ChannelUsecase) QueryUsers(channelName string) ([]string, error) {
+	users, err := c.channelRepo.QueryUsers(channelName)
 	if err != nil {
 		return nil, err
 	}

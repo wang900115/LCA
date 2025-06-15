@@ -34,9 +34,8 @@ func (j *JWT) Middleware(c *gin.Context) {
 		return
 	}
 
-	c.Set("channel_uuid", tokenClaims.ChannelUUID)
-	c.Set("user_uuid", tokenClaims.UserUUID)
-	c.Set("username", tokenClaims.Username)
+	c.Set("channel", tokenClaims.Channel)
+	c.Set("user", tokenClaims.User)
 	c.Set("expired_at", tokenClaims.ExpiredAt)
 
 	c.Next()

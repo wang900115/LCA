@@ -5,7 +5,6 @@ import (
 	"github.com/wang900115/LCA/internal/domain/entities"
 	"github.com/wang900115/LCA/internal/domain/irepository"
 
-	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -19,10 +18,9 @@ func NewChannelRepository(gorm *gorm.DB) irepository.IChannelRepository {
 	}
 }
 
-func (r *ChannelRepository) CreateChannel() (entities.Channel, error) {
-	channelUUID := uuid.New().String()
+func (r *ChannelRepository) CreateChannel(name string) (entities.Channel, error) {
 	channel := model.Channel{
-		UUID: channelUUID,
+		Name: name,
 	}
 	if err := r.gorm.Create(&channel).Error; err != nil {
 		return entities.Channel{}, err
@@ -43,9 +41,9 @@ func (r *ChannelRepository) QueryChannels() ([]entities.Channel, error) {
 	return result, nil
 }
 
-func (r *ChannelRepository) QueryUsers(channelUUID string) ([]entities.User, error) {
+func (r *ChannelRepository) QueryUsers(channelName string) ([]entities.User, error) {
 	var channel model.Channel
-	if err := r.gorm.Preload("Users").Where("uuid = ?", channelUUID).First(&channel).Error; err != nil {
+	if err := r.gorm.Preload("Users").Where("name = ?", channelName).First(&channel).Error; err != nil {
 		return nil, err
 	}
 

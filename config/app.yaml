@@ -7,17 +7,19 @@ server:
   read_header_timeout: "5s"
 
 postgresql:
-  host: "postgres"
+  # "postgres"
+  host: "localhost"
   port: 5432
   user: "postgres"
-  password: "example"
+  password: "wang900115"
   dbname: "LCA"
   sslmode: "disable"
 
 redis:
   user: ""
   password: ""
-  host: "redis:6379"
+  # "redis"
+  host: "localhost:6379"
   database: 0
   idleTimeout: "200s"
 

@@ -15,17 +15,16 @@ func NewTokenUsecase(tokenRepo irepository.ITokenRepository) *TokenUsecase {
 	}
 }
 
-func (t *TokenUsecase) CreateToken(userUUID, channelUUID, username string) (string, error) {
+func (t *TokenUsecase) CreateToken(username, channelname string) (string, error) {
 	tokenClaims := entities.TokenClaims{
-		UserUUID:    userUUID,
-		ChannelUUID: channelUUID,
-		Username:    username,
+		User:    username,
+		Channel: channelname,
 	}
 	return t.tokenRepo.CreateToken(tokenClaims)
 }
 
-func (t *TokenUsecase) DeleteToken(userUUID, channelUUID string) error {
-	return t.tokenRepo.DeleteToken(userUUID, channelUUID)
+func (t *TokenUsecase) DeleteToken(username, channelname string) error {
+	return t.tokenRepo.DeleteToken(username, channelname)
 }
 
 func (t *TokenUsecase) ValidateToken(token string) (entities.TokenClaims, error) {

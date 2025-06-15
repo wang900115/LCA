@@ -1,11 +1,12 @@
 package validator
 
 type ChannelCreateRequest struct {
+	Name string `json:"channel_name" binding:"required"`
 }
 
 type ChannelQueryRequest struct {
 }
 
 type ChannelQueryUserRequest struct {
-	ChannelUUID string `json:"channel_uuid" binding:"required"`
+	Name string `json:"channel_name" binding:"required"`
 }

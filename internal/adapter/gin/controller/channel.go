@@ -18,12 +18,17 @@ func NewChannelController(reponse iresponse.IResponse, channel *usecase.ChannelU
 }
 
 func (cc *ChannelController) CreateChannel(c *gin.Context) {
-	channelUUID, err := cc.channel.CreateChannel()
+	var request validator.ChannelCreateRequest
+	if err := c.ShouldBindJSON(&request); err != nil {
+		cc.response.ValidatorFail(c, validatorFail)
+	}
+
+	channelName, err := cc.channel.CreateChannel(request.Name)
 	if err != nil {
 		cc.response.FailWithError(c, createFail, err)
 		return
 	}
-	cc.response.SuccessWithData(c, createSuccess, channelUUID)
+	cc.response.SuccessWithData(c, createSuccess, channelName)
 }
 
 func (cc *ChannelController) QueryUsers(c *gin.Context) {
@@ -33,7 +38,7 @@ func (cc *ChannelController) QueryUsers(c *gin.Context) {
 		return
 	}
 
-	users, err := cc.channel.QueryUsers(request.ChannelUUID)
+	users, err := cc.channel.QueryUsers(request.Name)
 	if err != nil {
 		cc.response.FailWithError(c, queryFail, err)
 		return

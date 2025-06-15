@@ -15,18 +15,18 @@ func NewMessageUsecase(messageRepo irepository.IMessageRepository) *MessageUseca
 	}
 }
 
-func (m *MessageUsecase) CreateMessage(channelUUID, userUUID, content string) (string, error) {
+func (m *MessageUsecase) CreateMessage(channel, user, content string) (string, error) {
 	messageDomain := entities.Message{
-		ChannelUUID: channelUUID,
-		UserUUID:    userUUID,
-		Content:     content,
+		Channel: channel,
+		User:    user,
+		Content: content,
 	}
 
 	message, err := m.messageRepo.CreateMessage(messageDomain)
 	if err != nil {
 		return "", err
 	}
-	return message.UUID, nil
+	return message.User, nil
 }
 
 func (m *MessageUsecase) DeleteMessage(messageUUID string) error {
@@ -37,8 +37,8 @@ func (m *MessageUsecase) DeleteMessage(messageUUID string) error {
 	return nil
 }
 
-func (m *MessageUsecase) QueryMessages(channelUUID string) ([]string, error) {
-	messages, err := m.messageRepo.QueryMessages(channelUUID)
+func (m *MessageUsecase) QueryMessages(channel string) ([]string, error) {
+	messages, err := m.messageRepo.QueryMessages(channel)
 	if err != nil {
 		return nil, err
 	}

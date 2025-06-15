@@ -24,12 +24,13 @@ func (uc *UserController) CreateUser(c *gin.Context) {
 		uc.response.ValidatorFail(c, validatorFail)
 		return
 	}
-	userUUID, err := uc.user.CreateUser(request.ChannelUUID, request.Username)
+	userName, err := uc.user.CreateUser(request.ChannelName, request.Username)
 	if err != nil {
 		uc.response.FailWithError(c, createFail, err)
 		return
 	}
-	token, err := uc.token.CreateToken(userUUID, request.ChannelUUID, request.Username)
+
+	token, err := uc.token.CreateToken(userName, request.ChannelName)
 	if err != nil {
 		uc.response.FailWithError(c, createFail, err)
 		return
@@ -38,15 +39,15 @@ func (uc *UserController) CreateUser(c *gin.Context) {
 }
 
 func (uc *UserController) DeleteUser(c *gin.Context) {
-	UserUUID := c.GetString("user_uuid")
-	ChannelUUID := c.GetString("channel_uuid")
+	User := c.GetString("user")
+	Channel := c.GetString("channel")
 
-	userUUID, err := uc.user.DeleteUser(UserUUID)
+	userName, err := uc.user.DeleteUser(User)
 	if err != nil {
 		uc.response.FailWithError(c, deleteFail, err)
 		return
 	}
 
-	uc.token.DeleteToken(userUUID, ChannelUUID)
-	uc.response.SuccessWithData(c, deleteSuccess, userUUID)
+	uc.token.DeleteToken(User, Channel)
+	uc.response.SuccessWithData(c, deleteSuccess, userName)
 }

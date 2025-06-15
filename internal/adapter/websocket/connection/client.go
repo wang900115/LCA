@@ -11,20 +11,18 @@ import (
 )
 
 type Client struct {
-	UserUUID    string
-	ChannelUUID string
-	Username    string
-	Conn        *websocket.Conn
-	Send        chan []byte
+	User    string
+	Channel string
+	Conn    *websocket.Conn
+	Send    chan []byte
 
 	messageUsecase *usecase.MessageUsecase
 }
 
-func NewClient(userUUID, channelUUID, userName string, conn *websocket.Conn, messageUsecase *usecase.MessageUsecase) *Client {
+func NewClient(username, channelName string, conn *websocket.Conn, messageUsecase *usecase.MessageUsecase) *Client {
 	return &Client{
-		UserUUID:       userUUID,
-		ChannelUUID:    channelUUID,
-		Username:       userName,
+		User:           username,
+		Channel:        channelName,
 		Conn:           conn,
 		Send:           make(chan []byte, 256),
 		messageUsecase: messageUsecase,
@@ -49,10 +47,10 @@ func (c *Client) ReadPump(hub *Hub) {
 		}
 
 		payload.Type = event.EventMessage
-		payload.Sender = c.Username
+		payload.Sender = c.User
 		payload.Timestamp = time.Now().Format(time.RFC3339)
 
-		messageUUID, err := c.messageUsecase.CreateMessage(c.ChannelUUID, c.UserUUID, payload.Content)
+		messageUUID, err := c.messageUsecase.CreateMessage(c.Channel, c.User, payload.Content)
 
 		if err != nil {
 			continue
@@ -64,8 +62,8 @@ func (c *Client) ReadPump(hub *Hub) {
 		}
 
 		hub.Broadcast <- BroadcastMessage{
-			ChannelUUID: c.ChannelUUID,
-			Message:     encoded,
+			Channel: c.Channel,
+			Message: encoded,
 		}
 
 		payload.UUID = messageUUID

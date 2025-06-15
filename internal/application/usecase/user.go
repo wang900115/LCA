@@ -15,22 +15,22 @@ func NewUserUsecase(userRepo irepository.IUserRepository) *UserUsecase {
 	}
 }
 
-func (u *UserUsecase) CreateUser(channelUUID, username string) (string, error) {
+func (u *UserUsecase) CreateUser(channelname, username string) (string, error) {
 	userDomain := entities.User{
-		Username:    username,
-		ChannelUUID: channelUUID,
+		Username: username,
+		Channel:  channelname,
 	}
 	user, err := u.userRepo.CreateUser(userDomain)
 	if err != nil {
 		return "", err
 	}
-	return user.UUID, nil
+	return user.Username, nil
 }
 
-func (u *UserUsecase) DeleteUser(userUUID string) (string, error) {
-	user, err := u.userRepo.DeleteUser(userUUID)
+func (u *UserUsecase) DeleteUser(username string) (string, error) {
+	user, err := u.userRepo.DeleteUser(username)
 	if err != nil {
 		return "", err
 	}
-	return user.UUID, nil
+	return user.Username, nil
 }

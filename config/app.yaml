@@ -24,7 +24,7 @@ redis:
   idleTimeout: "200s"
 
 log:
-  log_path: "../log/app.log"
+  log_path: "./log/app.log"
   application_name: "LCA"
   debug: true
 

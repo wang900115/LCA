@@ -54,5 +54,5 @@ func RunMigrations(db *gorm.DB) {
 	if err != nil {
 		log.Fatalf("migration failed: %v", err)
 	}
-	log.Println("✅ database migrated")
+	log.Println("✅ database reset migrated")
 }

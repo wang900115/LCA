@@ -5,7 +5,6 @@ import (
 	"github.com/wang900115/LCA/internal/domain/entities"
 	"github.com/wang900115/LCA/internal/domain/irepository"
 
-	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -20,12 +19,9 @@ func NewMessageRepository(gorm *gorm.DB) irepository.IMessageRepository {
 }
 
 func (r *MessageRepository) CreateMessage(message entities.Message) (entities.Message, error) {
-	messageUUID := uuid.New().String()
-
 	messageModel := model.Message{
-		UUID:        messageUUID,
-		ChannelUUID: message.ChannelUUID,
-		UserUUID:    message.UserUUID,
+		ChannelName: message.Channel,
+		Username:    message.User,
 		Content:     message.Content,
 	}
 	if err := r.gorm.Create(&messageModel).Error; err != nil {
@@ -34,13 +30,13 @@ func (r *MessageRepository) CreateMessage(message entities.Message) (entities.Me
 	return messageModel.ToDomain(), nil
 }
 
-func (r *MessageRepository) DeleteMessage(messageUUID string) error {
-	return r.gorm.Where("uuid = ?", messageUUID).Delete(&model.Message{}).Error
+func (r *MessageRepository) DeleteMessage(messageID string) error {
+	return r.gorm.Where("id = ?", messageID).Delete(&model.Message{}).Error
 }
 
-func (r *MessageRepository) QueryMessages(channelUUID string) ([]entities.Message, error) {
+func (r *MessageRepository) QueryMessages(channelName string) ([]entities.Message, error) {
 	var messages []model.Message
-	if err := r.gorm.Where("channel_uuid = ?", channelUUID).Find(&messages).Error; err != nil {
+	if err := r.gorm.Where("channel_name = ?", channelName).Find(&messages).Error; err != nil {
 		return nil, err
 	}
 

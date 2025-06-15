@@ -48,17 +48,16 @@ func (TokenRepository) GenerateSalt(saltSize int) []byte {
 func (r *TokenRepository) CreateToken(tokenClaims entities.TokenClaims) (string, error) {
 	salt := r.GenerateSalt(saltSize)
 	tokenClaimsModel := model.TokenClaims{
-		UserUUID:    tokenClaims.UserUUID,
-		ChannelUUID: tokenClaims.ChannelUUID,
-		Username:    tokenClaims.Username,
+		User:    tokenClaims.User,
+		Channel: tokenClaims.Channel,
 	}
 	tokenClaimsModel.ExpiresAt = jwt.NewNumericDate(time.Now().Add(r.expiration))
 
-	_, err := r.redis.Set(context.Background(), jwtsaltPrefix+tokenClaims.UserUUID+tokenClaims.ChannelUUID, string(salt), r.expiration).Result()
+	_, err := r.redis.Set(context.Background(), jwtsaltPrefix+tokenClaims.User+tokenClaims.Channel, string(salt), r.expiration).Result()
 	if err != nil {
 		return "", err
 	}
-	return jwt.NewWithClaims(jwt.SigningMethodHS256, tokenClaimsModel).SignedString(append([]byte(tokenClaimsModel.UserUUID+tokenClaims.ChannelUUID), salt...))
+	return jwt.NewWithClaims(jwt.SigningMethodHS256, tokenClaimsModel).SignedString(append([]byte(tokenClaimsModel.User+tokenClaims.Channel), salt...))
 }
 
 func (r *TokenRepository) ValidateToken(token string) (entities.TokenClaims, error) {
@@ -71,22 +70,22 @@ func (r *TokenRepository) ValidateToken(token string) (entities.TokenClaims, err
 		return entities.TokenClaims{}, errors.New("token map failed")
 	}
 
-	userUUID, ok := mapClaims["user_uuid"].(string)
+	user, ok := mapClaims["user"].(string)
 	if !ok {
 		return entities.TokenClaims{}, errors.New("token map userUUID failed")
 	}
 
-	channelUUID, ok := mapClaims["channel_uuid"].(string)
+	channel, ok := mapClaims["channel"].(string)
 	if !ok {
 		return entities.TokenClaims{}, errors.New("token map channelUUID failed")
 	}
 
-	salt, err := r.redis.Get(context.Background(), jwtsaltPrefix+userUUID+channelUUID).Result()
+	salt, err := r.redis.Get(context.Background(), jwtsaltPrefix+user+channel).Result()
 	if err != nil {
 		return entities.TokenClaims{}, err
 	}
 
-	key := []byte(userUUID + channelUUID + salt)
+	key := []byte(user + channel + salt)
 	tokenClaims, parseErr := jwt.ParseWithClaims(token, &model.TokenClaims{}, func(token *jwt.Token) (interface{}, error) {
 		return key, nil
 	})
@@ -105,7 +104,7 @@ func (r *TokenRepository) ValidateToken(token string) (entities.TokenClaims, err
 	return tokenClaimsModel.ToDomain(), nil
 }
 
-func (r *TokenRepository) DeleteToken(userUUID, channelUUID string) error {
-	return r.redis.Del(context.Background(), jwtsaltPrefix+userUUID+channelUUID).Err()
+func (r *TokenRepository) DeleteToken(user, channel string) error {
+	return r.redis.Del(context.Background(), jwtsaltPrefix+user+channel).Err()
 
 }

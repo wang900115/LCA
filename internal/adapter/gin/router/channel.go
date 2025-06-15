@@ -19,6 +19,6 @@ func (cr *ChannelRouter) Setup(router *gin.RouterGroup) {
 	{
 		channelGroup.POST("/create", cr.channelController.CreateChannel)
 		channelGroup.POST("/queryuser", cr.channelController.QueryUsers)
-		channelGroup.POST("/query", cr.channelController.QueryChannel)
+		channelGroup.GET("/query", cr.channelController.QueryChannel)
 	}
 }

@@ -27,7 +27,7 @@ type Option struct {
 func defaultOption() Option {
 	return Option{
 		RunMode:           gin.DebugMode,
-		HTTPPort:          "80",
+		HTTPPort:          "8080",
 		CancelTimeout:     5 * time.Second,
 		ReadHeaderTimeout: 5 * time.Second,
 	}

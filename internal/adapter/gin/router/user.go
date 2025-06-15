@@ -17,7 +17,7 @@ func NewUserRouter(userController *controller.UserController, jwt *jwt.JWT) IRou
 }
 
 func (ur *UserRouter) Setup(router *gin.RouterGroup) {
-	userGroup := router.Group("v1/User/")
+	userGroup := router.Group("v1/user/")
 	{
 		userGroup.POST("/participate", ur.userController.CreateUser)
 		userGroup.DELETE("/leave", ur.jwt.Middleware, ur.userController.DeleteUser)

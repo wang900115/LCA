@@ -15,7 +15,7 @@ func NewChannelRouter(channelController *controller.ChannelController) IRoute {
 }
 
 func (cr *ChannelRouter) Setup(router *gin.RouterGroup) {
-	channelGroup := router.Group("v1/Channel/")
+	channelGroup := router.Group("v1/channel/")
 	{
 		channelGroup.POST("/create", cr.channelController.CreateChannel)
 		channelGroup.POST("/queryuser", cr.channelController.QueryUsers)

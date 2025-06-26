@@ -2,14 +2,14 @@ package usecase
 
 import (
 	"github.com/wang900115/LCA/internal/domain/entities"
-	"github.com/wang900115/LCA/internal/domain/irepository"
+	gorminterface "github.com/wang900115/LCA/internal/domain/interface/gorm"
 )
 
 type MessageUsecase struct {
-	messageRepo irepository.IMessageRepository
+	messageRepo gorminterface.MessageImplement
 }
 
-func NewMessageUsecase(messageRepo irepository.IMessageRepository) *MessageUsecase {
+func NewMessageUsecase(messageRepo gorminterface.MessageImplement) *MessageUsecase {
 	return &MessageUsecase{
 		messageRepo: messageRepo,
 	}

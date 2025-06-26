@@ -2,14 +2,14 @@ package usecase
 
 import (
 	"github.com/wang900115/LCA/internal/domain/entities"
-	"github.com/wang900115/LCA/internal/domain/irepository"
+	redisinterface "github.com/wang900115/LCA/internal/domain/interface/redis"
 )
 
 type TokenUsecase struct {
-	tokenRepo irepository.ITokenRepository
+	tokenRepo redisinterface.TokenImplement
 }
 
-func NewTokenUsecase(tokenRepo irepository.ITokenRepository) *TokenUsecase {
+func NewTokenUsecase(tokenRepo redisinterface.TokenImplement) *TokenUsecase {
 	return &TokenUsecase{
 		tokenRepo: tokenRepo,
 	}

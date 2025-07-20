@@ -6,7 +6,6 @@ on:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     steps:
@@ -29,3 +28,19 @@ jobs:
 
     - name: 執行靜態分析
       run: go vet ./...
+
+    - name: DC提示 (成功)
+      if: success()
+      run: |
+        curl -H "Content-Type: application/json" \
+          -X POST \
+          -d "{\"content\": \"✅ CI Pipeline Passed\nRepo: $GITHUB_REPOSITORY\nCommit: $GITHUB_SHA\nAuthor: $GITHUB_ACTOR\"}" \
+          ${{ secrets.DISCORD_WEBHOOK }}
+
+    - name: DC提示 (失敗)
+      if: failure()
+      run: |
+        curl -H "Content-Type: application/json" \
+          -X POST \
+          -d "{\"content\": \"❌ CI Pipeline Failed\nRepo: $GITHUB_REPOSITORY\nCommit: $GITHUB_SHA\nAuthor: $GITHUB_ACTOR\"}" \
+          ${{ secrets.DISCORD_WEBHOOK }}

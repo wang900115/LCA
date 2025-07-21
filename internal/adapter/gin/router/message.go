@@ -21,7 +21,7 @@ func (mr *MessageRouter) Setup(router *gin.RouterGroup) {
 	{
 		messageGroup.POST("/create", mr.jwt.Middleware, mr.messageController.CreateMessage)
 		messageGroup.DELETE("/delete", mr.jwt.Middleware, mr.messageController.DeleteMessage)
-		messageGroup.POST("/query", mr.jwt.Middleware, mr.messageController.QueryMessage)
+		messageGroup.GET("/query", mr.jwt.Middleware, mr.messageController.QueryMessage)
 	}
 
 }

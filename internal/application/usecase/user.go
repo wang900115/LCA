@@ -2,14 +2,14 @@ package usecase
 
 import (
 	"github.com/wang900115/LCA/internal/domain/entities"
-	"github.com/wang900115/LCA/internal/domain/irepository"
+	gorminterface "github.com/wang900115/LCA/internal/domain/interface/gorm"
 )
 
 type UserUsecase struct {
-	userRepo irepository.IUserRepository
+	userRepo gorminterface.UserImplement
 }
 
-func NewUserUsecase(userRepo irepository.IUserRepository) *UserUsecase {
+func NewUserUsecase(userRepo gorminterface.UserImplement) *UserUsecase {
 	return &UserUsecase{
 		userRepo: userRepo,
 	}

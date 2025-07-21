@@ -1,12 +1,12 @@
 package usecase
 
-import "github.com/wang900115/LCA/internal/domain/irepository"
+import gorminterface "github.com/wang900115/LCA/internal/domain/interface/gorm"
 
 type ChannelUsecase struct {
-	channelRepo irepository.IChannelRepository
+	channelRepo gorminterface.ChannelImplement
 }
 
-func NewChannelUsecase(channelRepo irepository.IChannelRepository) *ChannelUsecase {
+func NewChannelUsecase(channelRepo gorminterface.ChannelImplement) *ChannelUsecase {
 	return &ChannelUsecase{
 		channelRepo: channelRepo,
 	}

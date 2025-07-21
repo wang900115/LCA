@@ -1,4 +1,4 @@
-package model
+package gormmodel
 
 import (
 	"github.com/wang900115/LCA/internal/domain/entities"

@@ -1,39 +1,35 @@
 package main
 
 import (
-	"github.com/wang900115/LCA/internal/adapter/gin"
-	"github.com/wang900115/LCA/internal/adapter/gin/controller"
-	response "github.com/wang900115/LCA/internal/adapter/gin/controller/response/json"
-	"github.com/wang900115/LCA/internal/adapter/gin/middleware"
-	corsMid "github.com/wang900115/LCA/internal/adapter/gin/middleware/cors"
-	jwtMid "github.com/wang900115/LCA/internal/adapter/gin/middleware/jwt"
-	"github.com/wang900115/LCA/internal/adapter/gorm"
+	"github.com/wang900115/LCA/internal/adapter/controller"
+	response "github.com/wang900115/LCA/internal/adapter/controller/response/json"
+	"github.com/wang900115/LCA/internal/adapter/middleware"
+	corsMid "github.com/wang900115/LCA/internal/adapter/middleware/cors"
+	jwtMid "github.com/wang900115/LCA/internal/adapter/middleware/jwt"
+	"github.com/wang900115/LCA/internal/bootstrap"
+	gormimplement "github.com/wang900115/LCA/internal/implement/gorm"
+	redisimplement "github.com/wang900115/LCA/internal/implement/redis"
 
 	// redisrate "LCA/internal/adapter/gin/middleware/redis_rate"
-	secureheader "github.com/wang900115/LCA/internal/adapter/gin/middleware/secure_header"
-	"github.com/wang900115/LCA/internal/adapter/gin/router"
-	"github.com/wang900115/LCA/internal/adapter/redispool"
-	"github.com/wang900115/LCA/internal/adapter/repository"
+	secureheader "github.com/wang900115/LCA/internal/adapter/middleware/secure_header"
+	"github.com/wang900115/LCA/internal/adapter/router"
 	"github.com/wang900115/LCA/internal/adapter/websocket/connection"
 	"github.com/wang900115/LCA/internal/application/usecase"
-
-	"github.com/wang900115/LCA/pkg/config"
-	"github.com/wang900115/LCA/pkg/logger"
 )
 
 func main() {
-	conf := config.NewConfig()
+	conf := bootstrap.NewConfig()
 
-	redispool := redispool.NewRedisPool(redispool.NewOption(conf))
-	zaplogger := logger.NewZapLogger(logger.NewOption(conf))
-	postgresql := gorm.NewPostgresql(gorm.NewOption(conf))
+	redispool := bootstrap.NewRedisPool(bootstrap.NewRedisOption(conf))
+	zaplogger := bootstrap.NewLogger(bootstrap.NewLoggerOption(conf))
+	postgresql := bootstrap.NewPostgresql(bootstrap.NewPostgresqlOption(conf))
 
-	gorm.RunMigrations(postgresql)
+	// gorm.RunMigrations(postgresql)
 
-	userRepo := repository.NewUserRepository(postgresql)
-	messageRepo := repository.NewMessageRepository(postgresql)
-	channelRepo := repository.NewChannelRepository(postgresql)
-	tokenRepo := repository.NewTokenRepository(redispool, conf.GetDuration("jwt.expiration"))
+	userRepo := gormimplement.NewUserRepository(postgresql)
+	messageRepo := gormimplement.NewMessageRepository(postgresql)
+	channelRepo := gormimplement.NewChannelRepository(postgresql)
+	tokenRepo := redisimplement.NewTokenRepository(redispool, conf.GetDuration("jwt.expiration"))
 
 	userUsecase := usecase.NewUserUsecase(userRepo)
 	messageUsecase := usecase.NewMessageUsecase(messageRepo)
@@ -60,7 +56,7 @@ func main() {
 	channelRouter := router.NewChannelRouter(channelController)
 	websocketRouter := router.NewWebSocketRouter(websocketController)
 
-	app := gin.NewApp(
+	server := bootstrap.NewServer(
 		[]router.IRoute{
 			userRouter,
 			messageRouter,
@@ -73,5 +69,5 @@ func main() {
 		},
 	)
 
-	gin.Run(app, gin.NewOption(conf))
+	bootstrap.Run(server, bootstrap.NewServerOption(conf))
 }

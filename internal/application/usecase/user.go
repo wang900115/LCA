@@ -1,36 +1,54 @@
 package usecase
 
 import (
-	"github.com/wang900115/LCA/internal/domain/entities"
-	gorminterface "github.com/wang900115/LCA/internal/domain/interface/gorm"
+	"context"
+	"strconv"
+
+	"github.com/wang900115/LCA/pkg/domain"
+	"github.com/wang900115/LCA/pkg/implement"
 )
 
 type UserUsecase struct {
-	userRepo gorminterface.UserImplement
+	reader    implement.UserQueryService
+	writer    implement.UserCommandService
+	auth      implement.TokenAuthService
+	secretKey string
 }
 
-func NewUserUsecase(userRepo gorminterface.UserImplement) *UserUsecase {
-	return &UserUsecase{
-		userRepo: userRepo,
-	}
+func NewUserUsecase(reader *implement.UserQueryService, writer *implement.UserCommandService, auth *implement.TokenAuthService, secretKey string) *UserUsecase {
+	return &UserUsecase{reader: *reader, writer: *writer, auth: *auth, secretKey: secretKey}
 }
 
-func (u *UserUsecase) CreateUser(channelname, username string) (string, error) {
-	userDomain := entities.User{
-		Username: username,
-		Channel:  channelname,
-	}
-	user, err := u.userRepo.CreateUser(userDomain)
+func (uu *UserUsecase) QueryUser(c context.Context) ([]domain.User, error) {
+	return uu.reader.QueryUser(c)
+}
+
+func (uu *UserUsecase) DeleteUser(c context.Context, userID uint) error {
+	return uu.writer.DeleteUser(c, userID)
+}
+
+func (uu *UserUsecase) UpdateUser(c context.Context, toUpdate domain.User) (domain.User, error) {
+	return uu.writer.UpdateUser(c, toUpdate)
+}
+
+func (uu *UserUsecase) Register(c context.Context, toCreate domain.User) (domain.User, error) {
+	return uu.writer.CreateUser(c, toCreate)
+}
+
+func (uu *UserUsecase) Login(c context.Context, username, password string) (string, string, domain.User, error) {
+	user, err := uu.reader.CheckPassword(c, username, password)
 	if err != nil {
-		return "", err
+		return "", "", domain.User{}, err
 	}
-	return user.Username, nil
+
+	accessToken, refreshToken, err := uu.auth.Generate(c, strconv.FormatUint(uint64(user.ID), 10), user.Role, uu.secretKey)
+	if err != nil {
+		return "", "", domain.User{}, err
+	}
+
+	return accessToken, refreshToken, user, nil
 }
 
-func (u *UserUsecase) DeleteUser(username string) (string, error) {
-	user, err := u.userRepo.DeleteUser(username)
-	if err != nil {
-		return "", err
-	}
-	return user.Username, nil
+func (uu *UserUsecase) Logout(c context.Context, userID uint) error {
+	return uu.auth.Delete(c, strconv.FormatUint(uint64(userID), 10))
 }

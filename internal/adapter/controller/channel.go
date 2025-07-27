@@ -1,56 +1,90 @@
 package controller
 
 import (
-	iresponse "github.com/wang900115/LCA/internal/adapter/controller/response"
+	"github.com/gin-gonic/gin"
 	"github.com/wang900115/LCA/internal/adapter/validator"
 	"github.com/wang900115/LCA/internal/application/usecase"
-
-	"github.com/gin-gonic/gin"
+	"github.com/wang900115/LCA/pkg/common"
+	iresponse "github.com/wang900115/LCA/pkg/common/response"
+	"github.com/wang900115/LCA/pkg/domain"
 )
 
 type ChannelController struct {
-	response iresponse.IResponse
-	channel  usecase.ChannelUsecase
+	channel usecase.ChannelUsecase
+	resp    iresponse.IResponse
 }
 
-func NewChannelController(reponse iresponse.IResponse, channel *usecase.ChannelUsecase) *ChannelController {
-	return &ChannelController{response: reponse, channel: *channel}
+func NewChannelController(channel *usecase.ChannelUsecase, resp iresponse.IResponse) *ChannelController {
+	return &ChannelController{channel: *channel, resp: resp}
 }
 
-func (cc *ChannelController) CreateChannel(c *gin.Context) {
-	var request validator.ChannelCreateRequest
-	if err := c.ShouldBindJSON(&request); err != nil {
-		cc.response.ValidatorFail(c, validatorFail)
-	}
-
-	channelName, err := cc.channel.CreateChannel(request.Name)
+func (cc *ChannelController) GetAllChannels(c *gin.Context) {
+	channels, err := cc.channel.GetAllChannels(c)
 	if err != nil {
-		cc.response.FailWithError(c, createFail, err)
+		cc.resp.FailWithError(c, common.INTERNAL_SERVICE_ERROR, err)
 		return
 	}
-	cc.response.SuccessWithData(c, createSuccess, channelName)
+	cc.resp.SuccessWithData(c, common.QUERY_SUCCESS, map[string]interface{}{
+		"channels": channels,
+	})
 }
 
-func (cc *ChannelController) QueryUsers(c *gin.Context) {
-	var request validator.ChannelQueryUserRequest
-	if err := c.ShouldBindJSON(&request); err != nil {
-		cc.response.ValidatorFail(c, validatorFail)
+func (cc *ChannelController) Create(c *gin.Context) {
+	var req validator.CreateChannelRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		cc.resp.FailWithError(c, common.PARAM_ERROR, err)
 		return
 	}
 
-	users, err := cc.channel.QueryUsers(request.Name)
+	channel := domain.Channel{
+		ChannelName: req.ChannelName,
+		ChannelType: req.ChannelType,
+	}
+
+	created, err := cc.channel.CreateChannel(c, channel)
 	if err != nil {
-		cc.response.FailWithError(c, queryFail, err)
+		cc.resp.FailWithError(c, common.INTERNAL_SERVICE_ERROR, err)
 		return
 	}
-	cc.response.SuccessWithData(c, querySuccess, users)
+
+	cc.resp.SuccessWithData(c, common.CREATE_SUCCESS, map[string]interface{}{
+		"channel": created,
+	})
+}
+func (cc *ChannelController) Update(c *gin.Context) {
+	var req validator.UpdateChannelRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		cc.resp.FailWithError(c, common.PARAM_ERROR, err)
+		return
+	}
+
+	channel := domain.Channel{
+		ID:          req.ID,
+		ChannelName: req.ChannelName,
+		ChannelType: req.ChannelType,
+	}
+
+	updated, err := cc.channel.UpdateChannel(c, channel)
+	if err != nil {
+		cc.resp.FailWithError(c, common.INTERNAL_SERVICE_ERROR, err)
+		return
+	}
+
+	cc.resp.SuccessWithData(c, common.UPDATE_SUCCESS, map[string]interface{}{
+		"channel": updated,
+	})
 }
 
-func (cc *ChannelController) QueryChannel(c *gin.Context) {
-	channels, err := cc.channel.QueryChannels()
-	if err != nil {
-		cc.response.FailWithError(c, queryFail, err)
+func (cc *ChannelController) Delete(c *gin.Context) {
+	var req validator.DeleteChannelRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		cc.resp.FailWithError(c, common.PARAM_ERROR, err)
 		return
 	}
-	cc.response.SuccessWithData(c, querySuccess, channels)
+
+	if err := cc.channel.DeleteChannel(c, req.ChannelID); err != nil {
+		cc.resp.FailWithError(c, common.INTERNAL_SERVICE_ERROR, err)
+		return
+	}
+	cc.resp.Success(c, common.DELETE_SUCCESS)
 }

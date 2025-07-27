@@ -1,45 +1,41 @@
 package usecase
 
-import gorminterface "github.com/wang900115/LCA/internal/domain/interface/gorm"
+import (
+	"context"
+
+	"github.com/wang900115/LCA/pkg/domain"
+	"github.com/wang900115/LCA/pkg/implement"
+)
 
 type ChannelUsecase struct {
-	channelRepo gorminterface.ChannelImplement
+	reader implement.ChannelQueryService
+	writer implement.ChannelCommandService
 }
 
-func NewChannelUsecase(channelRepo gorminterface.ChannelImplement) *ChannelUsecase {
-	return &ChannelUsecase{
-		channelRepo: channelRepo,
-	}
+func NewChannelUsecase(reader *implement.ChannelQueryService, writer *implement.ChannelCommandService) *ChannelUsecase {
+	return &ChannelUsecase{reader: *reader, writer: *writer}
 }
 
-func (c *ChannelUsecase) CreateChannel(name string) (string, error) {
-	channel, err := c.channelRepo.CreateChannel(name)
-	if err != nil {
-		return "", err
-	}
-	return channel.Name, nil
+func (cu *ChannelUsecase) GetAllChannels(c context.Context) ([]domain.Channel, error) {
+	return cu.reader.QueryChannel(c)
 }
 
-func (c *ChannelUsecase) QueryChannels() ([]string, error) {
-	channels, err := c.channelRepo.QueryChannels()
-	if err != nil {
-		return nil, err
-	}
-	var names []string
-	for _, channel := range channels {
-		names = append(names, channel.Name)
-	}
-	return names, nil
+func (cu *ChannelUsecase) GetUserChannels(c context.Context, userID uint) ([]domain.Channel, error) {
+	return cu.reader.QueryCertainChannel(c, userID)
 }
 
-func (c *ChannelUsecase) QueryUsers(channelName string) ([]string, error) {
-	users, err := c.channelRepo.QueryUsers(channelName)
-	if err != nil {
-		return nil, err
-	}
-	var usernames []string
-	for _, user := range users {
-		usernames = append(usernames, user.Username)
-	}
-	return usernames, nil
+func (cu *ChannelUsecase) GetChannelUsers(c context.Context, channelID uint) ([]domain.User, error) {
+	return cu.reader.QueryUser(c, channelID)
+}
+
+func (cu *ChannelUsecase) CreateChannel(c context.Context, toCreate domain.Channel) (domain.Channel, error) {
+	return cu.writer.CreateChannel(c, toCreate)
+}
+
+func (cu *ChannelUsecase) DeleteChannel(c context.Context, channelID uint) error {
+	return cu.writer.DeleteChannel(c, channelID)
+}
+
+func (cu *ChannelUsecase) UpdateChannel(c context.Context, toUpdate domain.Channel) (domain.Channel, error) {
+	return cu.writer.UpdateChannel(c, toUpdate)
 }

@@ -1,53 +1,138 @@
 package controller
 
 import (
-	iresponse "github.com/wang900115/LCA/internal/adapter/controller/response"
+	"github.com/gin-gonic/gin"
 	"github.com/wang900115/LCA/internal/adapter/validator"
 	"github.com/wang900115/LCA/internal/application/usecase"
-
-	"github.com/gin-gonic/gin"
+	"github.com/wang900115/LCA/pkg/common"
+	iresponse "github.com/wang900115/LCA/pkg/common/response"
+	"github.com/wang900115/LCA/pkg/domain"
 )
 
 type UserController struct {
-	response iresponse.IResponse
-	token    usecase.TokenUsecase
-	user     usecase.UserUsecase
+	user usecase.UserUsecase
+	resp iresponse.IResponse
 }
 
-func NewUserController(response iresponse.IResponse, token *usecase.TokenUsecase, user *usecase.UserUsecase) *UserController {
-	return &UserController{response: response, token: *token, user: *user}
+func NewUserController(user *usecase.UserUsecase, resp iresponse.IResponse) *UserController {
+	return &UserController{user: *user, resp: resp}
 }
 
-func (uc *UserController) CreateUser(c *gin.Context) {
-	var request validator.UserCreateRequest
-	if err := c.ShouldBindJSON(&request); err != nil {
-		uc.response.ValidatorFail(c, validatorFail)
-		return
-	}
-	userName, err := uc.user.CreateUser(request.ChannelName, request.Username)
-	if err != nil {
-		uc.response.FailWithError(c, createFail, err)
+func (u *UserController) Login(c *gin.Context) {
+	var req validator.LoginAuthRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		u.resp.FailWithError(c, common.PARAM_ERROR, err)
 		return
 	}
 
-	token, err := uc.token.CreateToken(userName, request.ChannelName)
+	accessToken, refreshToken, user, err := u.user.Login(c, req.Username, req.Password)
 	if err != nil {
-		uc.response.FailWithError(c, createFail, err)
+		u.resp.FailWithError(c, common.INTERNAL_SERVICE_ERROR, err)
 		return
 	}
-	uc.response.SuccessWithData(c, createSuccess, token)
+	u.resp.SuccessWithData(c, common.LOGIN_SUCESS, map[string]interface{}{
+		"aaccessToken": accessToken,
+		"refreshToken": refreshToken,
+		"user":         user})
 }
 
-func (uc *UserController) DeleteUser(c *gin.Context) {
-	User := c.GetString("user")
-	Channel := c.GetString("channel")
+func (u *UserController) Logout(c *gin.Context) {
+	userID := c.GetUint("user_id")
+	if err := u.user.Logout(c, userID); err != nil {
+		u.resp.FailWithError(c, common.INTERNAL_SERVICE_ERROR, err)
+		return
+	}
+	u.resp.Success(c, common.LOGOUT_SUCCESS)
+}
 
-	userName, err := uc.user.DeleteUser(User)
-	if err != nil {
-		uc.response.FailWithError(c, deleteFail, err)
+func (u *UserController) Register(c *gin.Context) {
+	var req validator.RegisterUserRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		u.resp.FailWithError(c, common.PARAM_ERROR, err)
 		return
 	}
 
-	uc.token.DeleteToken(User, Channel)
-	uc.response.SuccessWithData(c, deleteSuccess, userName)
+	user := domain.User{
+		Username: req.Username,
+		Password: &req.Password,
+
+		FirstEmail:  req.FirstEmail,
+		SecondEmail: req.SecondEmail,
+		Phone:       req.Phone,
+		NickName:    req.NickName,
+		FirstName:   req.FirstName,
+		LastName:    req.LastName,
+		Birth:       req.Birth,
+		Country:     req.Country,
+		City:        req.City,
+	}
+	created, err := u.user.Register(c, user)
+	if err != nil {
+		u.resp.FailWithError(c, common.INTERNAL_SERVICE_ERROR, err)
+		return
+	}
+
+	u.resp.SuccessWithData(c, common.CREATE_SUCCESS, map[string]interface{}{
+		"user": created,
+	})
+}
+
+func (u *UserController) Query(c *gin.Context) {
+	users, err := u.user.QueryUser(c)
+	if err != nil {
+		u.resp.FailWithError(c, common.INTERNAL_SERVICE_ERROR, err)
+		return
+	}
+	u.resp.SuccessWithData(c, common.QUERY_SUCCESS, map[string]interface{}{
+		"users": users,
+	})
+}
+
+func (u *UserController) Update(c *gin.Context) {
+	var req validator.UpdateUserRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		u.resp.FailWithError(c, common.PARAM_ERROR, err)
+		return
+	}
+
+	userID := c.GetUint("user_id")
+	user := domain.User{
+		ID:       userID,
+		Username: req.Username,
+		Password: &req.Password,
+
+		FirstEmail:  req.FirstEmail,
+		SecondEmail: req.SecondEmail,
+		Phone:       req.Phone,
+		NickName:    req.NickName,
+		FirstName:   req.FirstName,
+		LastName:    req.LastName,
+		Birth:       req.Birth,
+		Country:     req.Country,
+		City:        req.City,
+	}
+
+	updated, err := u.user.UpdateUser(c, user)
+	if err != nil {
+		u.resp.FailWithError(c, common.INTERNAL_SERVICE_ERROR, err)
+		return
+	}
+
+	u.resp.SuccessWithData(c, common.UPDATE_SUCCESS, map[string]interface{}{
+		"user": updated,
+	})
+}
+
+func (u *UserController) Delete(c *gin.Context) {
+	var req validator.DeleteUserRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		u.resp.FailWithError(c, common.PARAM_ERROR, err)
+		return
+	}
+	userID := c.GetUint("user_id")
+	if err := u.user.DeleteUser(c, userID); err != nil {
+		u.resp.FailWithError(c, common.INTERNAL_SERVICE_ERROR, err)
+		return
+	}
+	u.resp.Success(c, common.DELETE_SUCCESS)
 }

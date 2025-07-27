@@ -3,3 +3,4 @@ test/
 
 *.exe
 *.log
+*.env

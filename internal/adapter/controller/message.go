@@ -1,58 +1,91 @@
 package controller
 
 import (
-	iresponse "github.com/wang900115/LCA/internal/adapter/controller/response"
+	"github.com/gin-gonic/gin"
 	"github.com/wang900115/LCA/internal/adapter/validator"
 	"github.com/wang900115/LCA/internal/application/usecase"
-
-	"github.com/gin-gonic/gin"
+	"github.com/wang900115/LCA/pkg/common"
+	iresponse "github.com/wang900115/LCA/pkg/common/response"
+	"github.com/wang900115/LCA/pkg/domain"
 )
 
 type MessageController struct {
-	response iresponse.IResponse
-	message  usecase.MessageUsecase
+	message usecase.MessageUsecase
+	resp    iresponse.IResponse
 }
 
-func NewMessageController(response iresponse.IResponse, message *usecase.MessageUsecase) *MessageController {
-	return &MessageController{response: response, message: *message}
+func NewMessageController(message *usecase.MessageUsecase, resp iresponse.IResponse) *MessageController {
+	return &MessageController{message: *message, resp: resp}
 }
 
-func (mc *MessageController) CreateMessage(c *gin.Context) {
-
-	ChannelUUID := c.GetString("channel_uuid")
-	UserUUID := c.GetString("user_uuid")
-	var request validator.MessageCreateRequest
-	if err := c.ShouldBindJSON(&request); err != nil {
-		mc.response.ValidatorFail(c, validatorFail)
+func (m *MessageController) Create(c *gin.Context) {
+	var req validator.CreateMessageRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		m.resp.FailWithError(c, common.PARAM_ERROR, err)
 		return
 	}
-	messageUUID, err := mc.message.CreateMessage(ChannelUUID, UserUUID, request.Content)
+	userID := c.GetUint("user_id")
+	message := domain.Message{
+		ChannelID: req.ChannelID,
+		UserID:    userID,
+		MsgType:   req.MsgType,
+		Status:    req.Status,
+		ReplyToID: req.ReplyToID,
+
+		Content:   req.Content,
+		AttachURL: req.AttachURL,
+	}
+	created, err := m.message.CreateMessage(c, message)
 	if err != nil {
-		mc.response.FailWithError(c, createFail, err)
+		m.resp.FailWithError(c, common.INTERNAL_SERVICE_ERROR, err)
 		return
 	}
-	mc.response.SuccessWithData(c, createSuccess, messageUUID)
+
+	m.resp.SuccessWithData(c, common.CREATE_SUCCESS, map[string]interface{}{
+		"message": created,
+	})
 }
 
-func (mc *MessageController) DeleteMessage(c *gin.Context) {
-	var request validator.MessageDeleteRequest
-	if err := c.ShouldBindJSON(&request); err != nil {
-		mc.response.ValidatorFail(c, validatorFail)
+func (m *MessageController) Update(c *gin.Context) {
+	var req validator.UpdateMessageRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		m.resp.FailWithError(c, common.PARAM_ERROR, err)
 		return
 	}
-	if err := mc.message.DeleteMessage(request.MessageUUID); err != nil {
-		mc.response.FailWithError(c, deleteFail, err)
-		return
-	}
-	mc.response.Success(c, deleteSuccess)
-}
+	userID := c.GetUint("user_id")
+	message := domain.Message{
+		ChannelID: req.ChannelID,
+		UserID:    userID,
+		MsgType:   req.MsgType,
+		Status:    req.Status,
+		ReplyToID: req.ReplyToID,
 
-func (mc *MessageController) QueryMessage(c *gin.Context) {
-	channelUUID := c.GetString("channel_uuid")
-	messages, err := mc.message.QueryMessages(channelUUID)
+		Content:   req.Content,
+		AttachURL: req.AttachURL,
+	}
+	updated, err := m.message.UpdateMessage(c, message)
 	if err != nil {
-		mc.response.FailWithError(c, queryFail, err)
+		m.resp.FailWithError(c, common.INTERNAL_SERVICE_ERROR, err)
 		return
 	}
-	mc.response.SuccessWithData(c, querySuccess, messages)
+
+	m.resp.SuccessWithData(c, common.UPDATE_SUCCESS, map[string]interface{}{
+		"message": updated,
+	})
+}
+
+func (m *MessageController) Delete(c *gin.Context) {
+	var req validator.DeleteMessageRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		m.resp.FailWithError(c, common.PARAM_ERROR, err)
+		return
+	}
+
+	err := m.message.DeleteMessage(c, req.MeesageID)
+	if err != nil {
+		m.resp.FailWithError(c, common.INTERNAL_SERVICE_ERROR, err)
+		return
+	}
+
+	m.resp.Success(c, common.DELETE_SUCCESS)
 }

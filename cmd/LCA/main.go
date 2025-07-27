@@ -1,73 +1,99 @@
 package main
 
 import (
-	"github.com/wang900115/LCA/internal/adapter/controller"
-	response "github.com/wang900115/LCA/internal/adapter/controller/response/json"
-	"github.com/wang900115/LCA/internal/adapter/middleware"
-	corsMid "github.com/wang900115/LCA/internal/adapter/middleware/cors"
-	jwtMid "github.com/wang900115/LCA/internal/adapter/middleware/jwt"
-	"github.com/wang900115/LCA/internal/bootstrap"
-	gormimplement "github.com/wang900115/LCA/internal/implement/gorm"
-	redisimplement "github.com/wang900115/LCA/internal/implement/redis"
+	"log"
+	"os"
 
-	// redisrate "LCA/internal/adapter/gin/middleware/redis_rate"
-	secureheader "github.com/wang900115/LCA/internal/adapter/middleware/secure_header"
-	"github.com/wang900115/LCA/internal/adapter/router"
-	"github.com/wang900115/LCA/internal/adapter/websocket/connection"
+	"github.com/joho/godotenv"
+	"github.com/wang900115/LCA/internal/adapter/controller"
+	"github.com/wang900115/LCA/internal/adapter/route"
 	"github.com/wang900115/LCA/internal/application/usecase"
+	"github.com/wang900115/LCA/pkg/bootstrap"
+	"github.com/wang900115/LCA/pkg/common/middleware"
+	middlewareCORS "github.com/wang900115/LCA/pkg/common/middleware/cors"
+	middlewareJWT "github.com/wang900115/LCA/pkg/common/middleware/jwt"
+	middlewareLOGGER "github.com/wang900115/LCA/pkg/common/middleware/logger"
+	middlewarePermission "github.com/wang900115/LCA/pkg/common/middleware/role"
+	middlewareSecure "github.com/wang900115/LCA/pkg/common/middleware/secure_header"
+	"github.com/wang900115/LCA/pkg/common/router"
+
+	response "github.com/wang900115/LCA/pkg/common/response/json"
+	"github.com/wang900115/LCA/pkg/implement"
 )
 
 func main() {
 	conf := bootstrap.NewConfig()
 
-	redispool := bootstrap.NewRedisPool(bootstrap.NewRedisOption(conf))
-	zaplogger := bootstrap.NewLogger(bootstrap.NewLoggerOption(conf))
-	postgresql := bootstrap.NewPostgresql(bootstrap.NewPostgresqlOption(conf))
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
 
-	// gorm.RunMigrations(postgresql)
+	secretKey := os.Getenv("SECRET_KEY")
 
-	userRepo := gormimplement.NewUserRepository(postgresql)
-	messageRepo := gormimplement.NewMessageRepository(postgresql)
-	channelRepo := gormimplement.NewChannelRepository(postgresql)
-	tokenRepo := redisimplement.NewTokenRepository(redispool, conf.GetDuration("jwt.expiration"))
+	dbGroup := bootstrap.NewDBGroup(conf)
+	redisGroup := bootstrap.NewRedisGroup(conf)
 
-	userUsecase := usecase.NewUserUsecase(userRepo)
-	messageUsecase := usecase.NewMessageUsecase(messageRepo)
-	channelUsecase := usecase.NewChannelUsecase(channelRepo)
-	tokenUsecase := usecase.NewTokenUsecase(tokenRepo)
+	syslogger := bootstrap.NewLogger(bootstrap.NewLoggerOption(conf))
 
-	response := response.NewJSONResponse(zaplogger)
+	cr := implement.NewChannelReadRepository(dbGroup.PickLeastConnRead(), redisGroup.PickLeastConnRead(), redisGroup.Write, syslogger)
+	cw := implement.NewChannelWriteRepository(dbGroup.Write, redisGroup.Write, syslogger)
 
-	hub := connection.NewHub()
-	go hub.Run()
+	mr := implement.NewMessageReadRepository(dbGroup.PickLeastConnRead(), redisGroup.PickLeastConnRead(), redisGroup.Write, syslogger)
+	mw := implement.NewMessageWriteRepository(dbGroup.Write, redisGroup.Write, syslogger)
 
-	userController := controller.NewUserController(response, tokenUsecase, userUsecase)
-	messageController := controller.NewMessageController(response, messageUsecase)
-	channelController := controller.NewChannelController(response, channelUsecase)
-	websocketController := controller.NewWebSocketController(response, hub, tokenUsecase, messageUsecase)
+	ur := implement.NewUserReadRepository(dbGroup.PickLeastConnRead(), redisGroup.PickLeastConnRead(), redisGroup.Write, syslogger)
+	uw := implement.NewUserWriteRepository(dbGroup.Write, redisGroup.Write, syslogger)
 
-	jwtMiddle := jwtMid.NewJWT(response, tokenUsecase)
-	corsMiddle := corsMid.NewCORS(corsMid.NewOption((conf)))
-	secureHeaderMiddle := secureheader.NewSecureHeader()
-	// redisRateMiddle := redisrate.NewRateLimiter(redispool, zaplogger, redisrate.NewOption(conf))
+	// !todo 要分成 CQRS
+	tu := implement.NewTokenAuthRepository(redisGroup.Write, syslogger)
 
-	userRouter := router.NewUserRouter(userController, jwtMiddle)
-	messageRouter := router.NewMessageRouter(messageController, jwtMiddle)
-	channelRouter := router.NewChannelRouter(channelController)
-	websocketRouter := router.NewWebSocketRouter(websocketController)
+	channel := usecase.NewChannelUsecase(&cr, &cw)
+	message := usecase.NewMessageUsecase(&mr, &mw)
+	user := usecase.NewUserUsecase(&ur, &uw, &tu, secretKey)
+
+	resp := response.NewJSONResponse(syslogger)
+
+	channelCon := controller.NewChannelController(channel, resp)
+	channelMessageCon := controller.NewChannelMessageController(message, resp)
+	channelUserCon := controller.NewChannelUserController(channel, resp)
+	messageCon := controller.NewMessageController(message, resp)
+	userCon := controller.NewUserController(user, resp)
+	userChannelCon := controller.NewUserChannelController(channel, resp)
+	userChannelMessageCon := controller.NewUserChannelMessageController(message, resp)
+
+	midCORS := middlewareCORS.NewCORS(middlewareCORS.NewOption(conf))
+	midJWT := middlewareJWT.NewJWT(resp, &tu, secretKey)
+	midRole := middlewarePermission.NewPermission(resp, &tu, secretKey)
+	midLog := middlewareLOGGER.NewLogger(syslogger)
+	// midRate := middlewareRate.NewRateLimiter(middlewareRate.NewOption(conf))
+	midSecure := middlewareSecure.NewSecureHeader()
+
+	userRoute := route.NewUserRouter(userCon, midJWT)
+	userChannelRoute := route.NewUserChannelRouter(userChannelCon, midJWT)
+	userChannelMessageRoute := route.NewUserChannelMessageRouter(userChannelMessageCon, midJWT)
+	channelRoute := route.NewChannelRouter(channelCon)
+	channelUserRoute := route.NewChannelUserRouter(channelUserCon, midJWT, midRole)
+	channelMessageRoute := route.NewChannelMessageRouter(channelMessageCon)
+	messageRoute := route.NewMessageRouter(messageCon, midJWT)
 
 	server := bootstrap.NewServer(
 		[]router.IRoute{
-			userRouter,
-			messageRouter,
-			channelRouter,
-			websocketRouter,
+			userRoute,
+			userChannelRoute,
+			userChannelMessageRoute,
+			channelRoute,
+			channelUserRoute,
+			channelMessageRoute,
+			messageRoute,
 		},
 		[]middleware.IMiddleware{
-			corsMiddle,
-			secureHeaderMiddle,
+			midCORS,
+			midSecure,
+			midLog,
 		},
 	)
 
 	bootstrap.Run(server, bootstrap.NewServerOption(conf))
+
 }

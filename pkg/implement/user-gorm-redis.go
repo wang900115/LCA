@@ -136,7 +136,7 @@ func (ur *UserReadRepository) QueryUser(c context.Context) ([]domain.User, error
 			default:
 				model := redismodel.User{}.FromDomain(user)
 				tableKey := rediskey.REDIS_TABLE_CHANNEL + strconv.Itoa(int(user.ID))
-				if err := ur.redis.Write.HSet(ctx, tableKey, model.ToHash()).Err(); err != nil {
+				if err := ur.redis.Write.Redis.HSet(ctx, tableKey, model.ToHash()).Err(); err != nil {
 					ur.logger.Error("Redis Write User Table Err ", zap.Error(err))
 				}
 			}
@@ -155,7 +155,7 @@ func (uw *UserWriteRepository) CreateUser(c context.Context, toCreate domain.Use
 	}
 
 	createdModel.Password = hashedPassword
-	if err := uw.gorm.Write.WithContext(c).Create(&createdModel).Error; err != nil {
+	if err := uw.gorm.Write.DB.WithContext(c).Create(&createdModel).Error; err != nil {
 		return domain.User{}, nil
 	}
 
@@ -169,7 +169,7 @@ func (uw *UserWriteRepository) CreateUser(c context.Context, toCreate domain.Use
 		default:
 			model := redismodel.User{}.FromDomain(user)
 			tableKey := rediskey.REDIS_TABLE_USER + strconv.Itoa(int(user.ID))
-			if err := uw.redis.Write.HSet(ctx, tableKey, model.ToHash()).Err(); err != nil {
+			if err := uw.redis.Write.Redis.HSet(ctx, tableKey, model.ToHash()).Err(); err != nil {
 				uw.logger.Error("Redis Write Creat User Table Err: ", zap.Error(err))
 			}
 		}
@@ -180,7 +180,7 @@ func (uw *UserWriteRepository) CreateUser(c context.Context, toCreate domain.Use
 
 func (uw *UserWriteRepository) DeleteUser(c context.Context, user_id uint) error {
 	// 先在 database 刪除
-	if err := uw.gorm.Write.WithContext(c).Delete(&gormmodel.User{}, user_id).Error; err != nil {
+	if err := uw.gorm.Write.DB.WithContext(c).Delete(&gormmodel.User{}, user_id).Error; err != nil {
 		return err
 	}
 
@@ -193,7 +193,7 @@ func (uw *UserWriteRepository) DeleteUser(c context.Context, user_id uint) error
 			return
 		default:
 			tableKey := rediskey.REDIS_TABLE_USER + strconv.Itoa(int(user_id))
-			if err := uw.redis.Write.Del(ctx, tableKey).Err(); err != nil {
+			if err := uw.redis.Write.Redis.Del(ctx, tableKey).Err(); err != nil {
 				uw.logger.Error("Redis Write Delete User Table Err ", zap.Error(err))
 			}
 		}
@@ -205,7 +205,7 @@ func (uw *UserWriteRepository) DeleteUser(c context.Context, user_id uint) error
 func (uw *UserWriteRepository) UpdateUser(c context.Context, toUpdate domain.User) (domain.User, error) {
 	// 先在 database 更新
 	updatedModel := gormmodel.User{}.FromDomain(toUpdate)
-	if err := uw.gorm.Write.WithContext(c).Updates(updatedModel).Error; err != nil {
+	if err := uw.gorm.Write.DB.WithContext(c).Updates(updatedModel).Error; err != nil {
 		return domain.User{}, err
 	}
 
@@ -219,7 +219,7 @@ func (uw *UserWriteRepository) UpdateUser(c context.Context, toUpdate domain.Use
 		default:
 			model := redismodel.User{}.FromDomain(user)
 			tableKey := rediskey.REDIS_TABLE_USER + strconv.Itoa(int(user.ID))
-			if err := uw.redis.Write.HSet(ctx, tableKey, model.ToHash()).Err(); err != nil {
+			if err := uw.redis.Write.Redis.HSet(ctx, tableKey, model.ToHash()).Err(); err != nil {
 				uw.logger.Error("Redis Write Update User Table Err ", zap.Error(err))
 			}
 		}
@@ -230,7 +230,7 @@ func (uw *UserWriteRepository) UpdateUser(c context.Context, toUpdate domain.Use
 
 func (uw *UserWriteRepository) UpdateRole(c context.Context, user_id uint, toUpdate string) (string, error) {
 	// 先在 database 更新
-	if err := uw.gorm.Write.WithContext(c).Model(&gormmodel.User{}).Where("id = ?", user_id).Update("role", toUpdate).Error; err != nil {
+	if err := uw.gorm.Write.DB.WithContext(c).Model(&gormmodel.User{}).Where("id = ?", user_id).Update("role", toUpdate).Error; err != nil {
 		return "", err
 	}
 
@@ -245,7 +245,7 @@ func (uw *UserWriteRepository) UpdateRole(c context.Context, user_id uint, toUpd
 			tableKey := rediskey.REDIS_TABLE_USER + strconv.Itoa(int(user_id))
 			fieldKey := rediskey.REDIS_FIELD_USER_ROLE
 			// !todo 用 redis-writer's logger
-			if err := uw.redis.Write.HSet(ctx, tableKey, fieldKey, toUpdate).Err(); err != nil {
+			if err := uw.redis.Write.Redis.HSet(ctx, tableKey, fieldKey, toUpdate).Err(); err != nil {
 				uw.logger.Error("Redis Write Update User Role Field Err ", zap.Error(err))
 			}
 		}

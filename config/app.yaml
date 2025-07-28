@@ -38,7 +38,9 @@ postgresql:
       user: ""
       password: ""
       dbname: ""
+
 redis:
+  master_name:
   write:
     addr:
     password:
@@ -51,7 +53,16 @@ redis:
     - addr:
       password:
       db:
-
+  sentinel:
+    - addr:
+      password:
+      db:
+    - addr:
+      password:
+      db:
+    - addr:
+      password:
+      db:
 log:
   log_path: "./log/app.log"
   application_name: "LCA"

@@ -35,8 +35,10 @@ func main() {
 	redisGroup := bootstrap.NewRedisGroup(conf)
 
 	syslogger := bootstrap.NewLogger(bootstrap.NewLoggerOption(conf))
+	applogger := bootstrap.NewLogger(bootstrap.NewLoggerOption(conf))
 
-	// !todo 新增一個 check ticker (corn) 來準時 健康檢查 如果有發生問題 -> failover
+	// !todo 新增一個 check ticker (corn) 來準時 健康檢查
+
 	cr := implement.NewChannelReadRepository(dbGroup, redisGroup, syslogger)
 	cw := implement.NewChannelWriteRepository(dbGroup, redisGroup, syslogger)
 
@@ -46,8 +48,7 @@ func main() {
 	ur := implement.NewUserReadRepository(dbGroup, redisGroup, syslogger)
 	uw := implement.NewUserWriteRepository(dbGroup, redisGroup, syslogger)
 
-	// !todo 要分成 CQRS
-	tu := implement.NewTokenAuthRepository(redisGroup.Write, syslogger)
+	tu := implement.NewTokenAuthRepository(redisGroup, syslogger)
 
 	channel := usecase.NewChannelUsecase(&cr, &cw)
 	message := usecase.NewMessageUsecase(&mr, &mw)
@@ -66,7 +67,7 @@ func main() {
 	midCORS := middlewareCORS.NewCORS(middlewareCORS.NewOption(conf))
 	midJWT := middlewareJWT.NewJWT(resp, &tu, secretKey)
 	midRole := middlewarePermission.NewPermission(resp, &tu, secretKey)
-	midLog := middlewareLOGGER.NewLogger(syslogger)
+	midLog := middlewareLOGGER.NewLogger(applogger)
 	// midRate := middlewareRate.NewRateLimiter(middlewareRate.NewOption(conf))
 	midSecure := middlewareSecure.NewSecureHeader()
 

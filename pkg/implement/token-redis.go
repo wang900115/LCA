@@ -10,7 +10,7 @@ import (
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
-	"github.com/redis/go-redis/v9"
+	"github.com/wang900115/LCA/pkg/bootstrap"
 	"github.com/wang900115/LCA/pkg/common"
 	"github.com/wang900115/LCA/pkg/domain"
 	rediskey "github.com/wang900115/LCA/pkg/redis/key"
@@ -36,11 +36,11 @@ type TokenAuthService interface {
 }
 
 type TokenAuthRepository struct {
-	redis  *redis.Client
+	redis  *bootstrap.RedisGroup
 	logger *zap.Logger
 }
 
-func NewTokenAuthRepository(redis *redis.Client, logger *zap.Logger) TokenAuthService {
+func NewTokenAuthRepository(redis *bootstrap.RedisGroup, logger *zap.Logger) TokenAuthService {
 	return &TokenAuthRepository{redis: redis, logger: logger}
 }
 
@@ -74,12 +74,12 @@ func (t *TokenAuthRepository) Generate(c context.Context, userID string, role st
 		},
 	}
 
-	if err := t.redis.Set(c, rediskey.REDIS_STRING_ACCESS_TOKEN+accessClaims.UserID+accessClaims.ID, salt, 24*time.Hour).Err(); err != nil {
+	if err := t.redis.Write.Redis.Set(c, rediskey.REDIS_STRING_ACCESS_TOKEN+accessClaims.UserID+accessClaims.ID, salt, 24*time.Hour).Err(); err != nil {
 		t.logger.Error("Redis Write Access Token String Err", zap.Error(err))
 		return "", "", err
 	}
 
-	if err := t.redis.Set(c, rediskey.REDIS_STRING_REFRESH_TOKEN+refreshClaims.UserID+refreshClaims.ID, salt, 7*24*time.Hour).Err(); err != nil {
+	if err := t.redis.Write.Redis.Set(c, rediskey.REDIS_STRING_REFRESH_TOKEN+refreshClaims.UserID+refreshClaims.ID, salt, 7*24*time.Hour).Err(); err != nil {
 		t.logger.Error("Redis Write Refresh Token String Err", zap.Error(err))
 		return "", "", err
 	}
@@ -107,7 +107,8 @@ func (t *TokenAuthRepository) ValidateAccess(c context.Context, tokenString stri
 	if err != nil {
 		return domain.TokenClaims{}, err
 	}
-	salt, err := t.redis.Get(c, rediskey.REDIS_STRING_ACCESS_TOKEN+claims.UserID+claims.ID).Result()
+	redisReader := t.redis.PickRedisLeastConnRead()
+	salt, err := redisReader.Get(c, rediskey.REDIS_STRING_ACCESS_TOKEN+claims.UserID+claims.ID).Result()
 	if err != nil {
 		return domain.TokenClaims{}, err
 	}
@@ -137,7 +138,8 @@ func (t *TokenAuthRepository) ValidateRefresh(c context.Context, tokenString str
 	if err != nil {
 		return domain.TokenClaims{}, err
 	}
-	salt, err := t.redis.Get(c, rediskey.REDIS_STRING_ACCESS_TOKEN+claims.UserID+claims.ID).Result()
+	redisReader := t.redis.PickRedisLeastConnRead()
+	salt, err := redisReader.Get(c, rediskey.REDIS_STRING_ACCESS_TOKEN+claims.UserID+claims.ID).Result()
 	if err != nil {
 		return domain.TokenClaims{}, err
 	}
@@ -178,7 +180,7 @@ func (t *TokenAuthRepository) Refresh(c context.Context, userID string, secretKe
 		},
 	}
 
-	if err := t.redis.Set(c, rediskey.REDIS_STRING_ACCESS_TOKEN+accessClaims.UserID+accessClaims.ID, salt, 24*time.Hour).Err(); err != nil {
+	if err := t.redis.Write.Redis.Set(c, rediskey.REDIS_STRING_ACCESS_TOKEN+accessClaims.UserID+accessClaims.ID, salt, 24*time.Hour).Err(); err != nil {
 		t.logger.Error("Redis Write Refresh Access Token String Err", zap.Error(err))
 		return "", err
 	}
@@ -195,11 +197,11 @@ func (t *TokenAuthRepository) Refresh(c context.Context, userID string, secretKe
 func (t *TokenAuthRepository) Delete(c context.Context, userID string) error {
 	accessPattern := rediskey.REDIS_STRING_ACCESS_TOKEN + userID + "*"
 	refreshPattern := rediskey.REDIS_STRING_REFRESH_TOKEN + userID + "*"
-
-	iterAccess := t.redis.Scan(c, 0, accessPattern, 0).Iterator()
+	redisReader := t.redis.PickRedisLeastConnRead()
+	iterAccess := redisReader.Scan(c, 0, accessPattern, 0).Iterator()
 	for iterAccess.Next(c) {
 		key := iterAccess.Val()
-		if err := t.redis.Del(c, key).Err(); err != nil {
+		if err := t.redis.Write.Redis.Del(c, key).Err(); err != nil {
 			t.logger.Error("failed to delete access token key from redis", zap.String("key", key), zap.Error(err))
 			return err
 		}
@@ -210,10 +212,10 @@ func (t *TokenAuthRepository) Delete(c context.Context, userID string) error {
 		return err
 	}
 
-	iterRefresh := t.redis.Scan(c, 0, refreshPattern, 0).Iterator()
+	iterRefresh := redisReader.Scan(c, 0, refreshPattern, 0).Iterator()
 	for iterRefresh.Next(c) {
 		key := iterAccess.Val()
-		if err := t.redis.Del(c, key).Err(); err != nil {
+		if err := t.redis.Write.Redis.Del(c, key).Err(); err != nil {
 			t.logger.Error("failed to delete refresh token key from redis", zap.String("key", key), zap.Error(err))
 			return err
 		}

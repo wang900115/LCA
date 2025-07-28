@@ -123,7 +123,7 @@ func (cr *ChannelReadRepository) QueryChannel(c context.Context) ([]domain.Chann
 			default:
 				model := redismodel.Channel{}.FromDomain(channel)
 				tableKey := rediskey.REDIS_TABLE_CHANNEL + strconv.Itoa(int(channel.ID))
-				if err := cr.redis.Write.HSet(ctx, tableKey, model.ToHash()).Err(); err != nil {
+				if err := cr.redis.Write.Redis.HSet(ctx, tableKey, model.ToHash()).Err(); err != nil {
 					cr.logger.Error("Redis Write Channel Table Err", zap.Error(err))
 				}
 			}
@@ -180,11 +180,11 @@ func (cr *ChannelReadRepository) QueryCertainChannel(c context.Context, user_id 
 			case <-ctx.Done():
 				return
 			default:
-				if err := cr.redis.Write.SAdd(ctx, setKey, domain.ID).Err(); err != nil {
+				if err := cr.redis.Write.Redis.SAdd(ctx, setKey, domain.ID).Err(); err != nil {
 					cr.logger.Error("Redis Write User-Channels Set Err ", zap.Error(err))
 				}
 				tableKey := rediskey.REDIS_TABLE_CHANNEL + strconv.Itoa(int(domain.ID))
-				if err := cr.redis.Write.HSet(ctx, tableKey, redismodel.Channel{}.FromDomain(domain).ToHash()).Err(); err != nil {
+				if err := cr.redis.Write.Redis.HSet(ctx, tableKey, redismodel.Channel{}.FromDomain(domain).ToHash()).Err(); err != nil {
 					cr.logger.Error("Redis Write Channel Table Err ", zap.Error(err))
 				}
 			}
@@ -240,11 +240,11 @@ func (cr *ChannelReadRepository) QueryUser(c context.Context, channel_id uint) (
 			case <-ctx.Done():
 				return
 			default:
-				if err := cr.redis.Write.SAdd(ctx, setKey, domain.ID).Err(); err != nil {
+				if err := cr.redis.Write.Redis.SAdd(ctx, setKey, domain.ID).Err(); err != nil {
 					cr.logger.Error("Redis Write Channel-Users Set Err ", zap.Error(err))
 				}
 				tableKey := rediskey.REDIS_TABLE_USER + strconv.Itoa(int(domain.ID))
-				if err := cr.redis.Write.HSet(ctx, tableKey, redismodel.User{}.FromDomain(domain).ToHash()).Err(); err != nil {
+				if err := cr.redis.Write.Redis.HSet(ctx, tableKey, redismodel.User{}.FromDomain(domain).ToHash()).Err(); err != nil {
 					cr.logger.Error("Redis Write User Table Err ", zap.Error(err))
 				}
 			}
@@ -257,7 +257,7 @@ func (cr *ChannelReadRepository) QueryUser(c context.Context, channel_id uint) (
 func (cw *ChannelWriteRepository) CreateChannel(c context.Context, toCreate domain.Channel) (domain.Channel, error) {
 	// 先在 database 創建
 	createdModel := gormmodel.Channel{}.FromDomain(toCreate)
-	if err := cw.gorm.Write.WithContext(c).Create(&createdModel).Error; err != nil {
+	if err := cw.gorm.Write.DB.WithContext(c).Create(&createdModel).Error; err != nil {
 		return domain.Channel{}, nil
 	}
 
@@ -271,7 +271,7 @@ func (cw *ChannelWriteRepository) CreateChannel(c context.Context, toCreate doma
 		default:
 			model := redismodel.Channel{}.FromDomain(channel)
 			tableKey := rediskey.REDIS_TABLE_CHANNEL + strconv.Itoa(int(channel.ID))
-			if err := cw.redis.Write.HSet(ctx, tableKey, model.ToHash()).Err(); err != nil {
+			if err := cw.redis.Write.Redis.HSet(ctx, tableKey, model.ToHash()).Err(); err != nil {
 				cw.logger.Error("Redis Write Creat Channel Table Err ", zap.Error(err))
 			}
 		}
@@ -282,7 +282,7 @@ func (cw *ChannelWriteRepository) CreateChannel(c context.Context, toCreate doma
 
 func (cw *ChannelWriteRepository) DeleteChannel(c context.Context, channel_id uint) error {
 	// 先在 database 刪除
-	if err := cw.gorm.Write.WithContext(c).Delete(&gormmodel.Channel{}, channel_id).Error; err != nil {
+	if err := cw.gorm.Write.DB.WithContext(c).Delete(&gormmodel.Channel{}, channel_id).Error; err != nil {
 		return err
 	}
 
@@ -295,7 +295,7 @@ func (cw *ChannelWriteRepository) DeleteChannel(c context.Context, channel_id ui
 			return
 		default:
 			tableKey := rediskey.REDIS_TABLE_CHANNEL + strconv.Itoa(int(channel_id))
-			if err := cw.redis.Write.Del(ctx, tableKey).Err(); err != nil {
+			if err := cw.redis.Write.Redis.Del(ctx, tableKey).Err(); err != nil {
 				cw.logger.Error("Redis Write Delete Channel Table Err ", zap.Error(err))
 			}
 		}
@@ -307,7 +307,7 @@ func (cw *ChannelWriteRepository) DeleteChannel(c context.Context, channel_id ui
 func (cw *ChannelWriteRepository) UpdateChannel(c context.Context, toUpdate domain.Channel) (domain.Channel, error) {
 	// 先在 database 更新
 	updatedModel := gormmodel.Channel{}.FromDomain(toUpdate)
-	if err := cw.gorm.Write.WithContext(c).Updates(updatedModel).Error; err != nil {
+	if err := cw.gorm.Write.DB.WithContext(c).Updates(updatedModel).Error; err != nil {
 		return domain.Channel{}, err
 	}
 
@@ -321,7 +321,7 @@ func (cw *ChannelWriteRepository) UpdateChannel(c context.Context, toUpdate doma
 		default:
 			model := redismodel.Channel{}.FromDomain(channel)
 			tableKey := rediskey.REDIS_TABLE_CHANNEL + strconv.Itoa(int(channel.ID))
-			if err := cw.redis.Write.HSet(ctx, tableKey, model.ToHash()).Err(); err != nil {
+			if err := cw.redis.Write.Redis.HSet(ctx, tableKey, model.ToHash()).Err(); err != nil {
 				cw.logger.Error("Redis Write Update Channel Table Err ", zap.Error(err))
 			}
 		}

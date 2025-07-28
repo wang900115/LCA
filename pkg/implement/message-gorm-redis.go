@@ -103,11 +103,11 @@ func (mr *MessageReadRepository) QueryMessage(c context.Context, channel_id uint
 			case <-ctx.Done():
 				return
 			default:
-				if err := mr.redis.Write.SAdd(ctx, setKey, domain.ID).Err(); err != nil {
+				if err := mr.redis.Write.Redis.SAdd(ctx, setKey, domain.ID).Err(); err != nil {
 					mr.logger.Error("Redis Write Channel-Messages Set Err ", zap.Error(err))
 				}
 				tableKey := rediskey.REDIS_TABLE_MESSAGE + strconv.Itoa(int(domain.ID))
-				if err := mr.redis.Write.HSet(ctx, tableKey, redismodel.Message{}.FromDomain(domain).ToHash()).Err(); err != nil {
+				if err := mr.redis.Write.Redis.HSet(ctx, tableKey, redismodel.Message{}.FromDomain(domain).ToHash()).Err(); err != nil {
 					mr.logger.Error("Redis Write Message Table Err ", zap.Error(err))
 				}
 			}
@@ -166,11 +166,11 @@ func (mr *MessageReadRepository) QueryCertainMessage(c context.Context, channel_
 			case <-ctx.Done():
 				return
 			default:
-				if err := mr.redis.Write.RPush(ctx, listKey, message.ID).Err(); err != nil {
+				if err := mr.redis.Write.Redis.RPush(ctx, listKey, message.ID).Err(); err != nil {
 					mr.logger.Error("Redis Push Channel-User-Messages List Err ", zap.Error(err))
 				}
 				tableKey := rediskey.REDIS_TABLE_CHANNEL + strconv.Itoa(int(message.ID))
-				if err := mr.redis.Write.HSet(ctx, tableKey, redismodel.Message{}.FromDomain(message).ToHash()).Err(); err != nil {
+				if err := mr.redis.Write.Redis.HSet(ctx, tableKey, redismodel.Message{}.FromDomain(message).ToHash()).Err(); err != nil {
 					mr.logger.Error("Redis Write Message Table Err ", zap.Error(err))
 				}
 			}
@@ -183,7 +183,7 @@ func (mr *MessageReadRepository) QueryCertainMessage(c context.Context, channel_
 func (mw *MessageWriteRepository) CreateMessage(c context.Context, toCreate domain.Message) (domain.Message, error) {
 	// 先在 database 創建
 	createdModel := gormmodel.Message{}.FromDomain(toCreate)
-	if err := mw.gorm.Write.WithContext(c).Create(&createdModel).Error; err != nil {
+	if err := mw.gorm.Write.DB.WithContext(c).Create(&createdModel).Error; err != nil {
 		return domain.Message{}, nil
 	}
 
@@ -197,7 +197,7 @@ func (mw *MessageWriteRepository) CreateMessage(c context.Context, toCreate doma
 		default:
 			model := redismodel.Message{}.FromDomain(message)
 			tableKey := rediskey.REDIS_TABLE_MESSAGE + strconv.Itoa(int(message.ID))
-			if err := mw.redis.Write.HSet(ctx, tableKey, model.ToHash()).Err(); err != nil {
+			if err := mw.redis.Write.Redis.HSet(ctx, tableKey, model.ToHash()).Err(); err != nil {
 				mw.logger.Error("Redis Write Creat Message Table Err ", zap.Error(err))
 			}
 		}
@@ -208,7 +208,7 @@ func (mw *MessageWriteRepository) CreateMessage(c context.Context, toCreate doma
 
 func (mw *MessageWriteRepository) DeleteMessage(c context.Context, message_id uint) error {
 	// 先在 database 刪除
-	if err := mw.gorm.Write.WithContext(c).Delete(&gormmodel.Message{}, message_id).Error; err != nil {
+	if err := mw.gorm.Write.DB.WithContext(c).Delete(&gormmodel.Message{}, message_id).Error; err != nil {
 		return err
 	}
 
@@ -221,7 +221,7 @@ func (mw *MessageWriteRepository) DeleteMessage(c context.Context, message_id ui
 			return
 		default:
 			tableKey := rediskey.REDIS_TABLE_CHANNEL + strconv.Itoa(int(message_id))
-			if err := mw.redis.Write.Del(ctx, tableKey).Err(); err != nil {
+			if err := mw.redis.Write.Redis.Del(ctx, tableKey).Err(); err != nil {
 				mw.logger.Error("Redis Write Delete Message Table Err ", zap.Error(err))
 			}
 		}
@@ -233,7 +233,7 @@ func (mw *MessageWriteRepository) DeleteMessage(c context.Context, message_id ui
 func (mw *MessageWriteRepository) UpdateMessage(c context.Context, toUpdate domain.Message) (domain.Message, error) {
 	// 先在 database 更新
 	updatedModel := gormmodel.Message{}.FromDomain(toUpdate)
-	if err := mw.gorm.Write.WithContext(c).Updates(updatedModel).Error; err != nil {
+	if err := mw.gorm.Write.DB.WithContext(c).Updates(updatedModel).Error; err != nil {
 		return domain.Message{}, err
 	}
 
@@ -247,7 +247,7 @@ func (mw *MessageWriteRepository) UpdateMessage(c context.Context, toUpdate doma
 		default:
 			model := redismodel.Message{}.FromDomain(message)
 			tableKey := rediskey.REDIS_TABLE_MESSAGE + strconv.Itoa(int(message.ID))
-			if err := mw.redis.Write.HSet(ctx, tableKey, model.ToHash()).Err(); err != nil {
+			if err := mw.redis.Write.Redis.HSet(ctx, tableKey, model.ToHash()).Err(); err != nil {
 				mw.logger.Error("Redis Write Update Message Table Err ", zap.Error(err))
 			}
 		}

@@ -70,10 +70,10 @@ func NewDBGroup(v *viper.Viper) *DBGroup {
 	return &DBGroup{Write: write, Reads: reads}
 }
 
-func (db *DBGroup) PickLeastConnRead() *gorm.DB {
+func (d *DBGroup) PickDBLeastConnRead() *gorm.DB {
 	var selected *gorm.DB
 	minConn := int(^uint(0) >> 1)
-	for _, read := range db.Reads {
+	for _, read := range d.Reads {
 		sqlDB, err := read.DB.DB()
 		if err != nil {
 			continue

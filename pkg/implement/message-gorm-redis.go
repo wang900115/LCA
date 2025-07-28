@@ -5,13 +5,12 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/redis/go-redis/v9"
+	"github.com/wang900115/LCA/pkg/bootstrap"
 	"github.com/wang900115/LCA/pkg/domain"
 	gormmodel "github.com/wang900115/LCA/pkg/gorm/model"
 	rediskey "github.com/wang900115/LCA/pkg/redis/key"
 	redismodel "github.com/wang900115/LCA/pkg/redis/model"
 	"go.uber.org/zap"
-	"gorm.io/gorm"
 )
 
 type MessageQueryService interface {
@@ -31,44 +30,43 @@ type MessageCommandService interface {
 }
 
 type MessageReadRepository struct {
-	gormReader  *gorm.DB
-	redisReader *redis.Client
-	redisWriter *redis.Client
-	logger      *zap.Logger
+	gorm   *bootstrap.DBGroup
+	redis  *bootstrap.RedisGroup
+	logger *zap.Logger
 }
 
 type MessageWriteRepository struct {
-	gormWriter  *gorm.DB
-	redisWriter *redis.Client
-	logger      *zap.Logger
+	gorm   *bootstrap.DBGroup
+	redis  *bootstrap.RedisGroup
+	logger *zap.Logger
 }
 
-func NewMessageReadRepository(gormReader *gorm.DB, redisReader *redis.Client, redisWriter *redis.Client, logger *zap.Logger) MessageQueryService {
+func NewMessageReadRepository(gorm *bootstrap.DBGroup, redis *bootstrap.RedisGroup, logger *zap.Logger) MessageQueryService {
 	return &MessageReadRepository{
-		gormReader:  gormReader,
-		redisReader: redisReader,
-		redisWriter: redisWriter,
-		logger:      logger,
+		gorm:   gorm,
+		redis:  redis,
+		logger: logger,
 	}
 }
 
-func NewMessageWriteRepository(gormWriter *gorm.DB, redisWriter *redis.Client, logger *zap.Logger) MessageCommandService {
+func NewMessageWriteRepository(gorm *bootstrap.DBGroup, redis *bootstrap.RedisGroup, logger *zap.Logger) MessageCommandService {
 	return &MessageWriteRepository{
-		gormWriter:  gormWriter,
-		redisWriter: redisWriter,
-		logger:      logger,
+		gorm:   gorm,
+		redis:  redis,
+		logger: logger,
 	}
 }
 
 func (mr *MessageReadRepository) QueryMessage(c context.Context, channel_id uint) ([]domain.Message, error) {
 	// 先從 redis 查找
 	setKey := rediskey.REDIS_SET_CHANNEL_MESSAGE + strconv.FormatUint(uint64(channel_id), 10)
-	messageIDs, err := mr.redisReader.SMembers(c, setKey).Result()
+	redisReader := mr.redis.PickRedisLeastConnRead()
+	messageIDs, err := redisReader.SMembers(c, setKey).Result()
 	if err == nil && len(messageIDs) > 0 {
 		var messages []domain.Message
 		for _, messageID := range messageIDs {
 			tableKey := rediskey.REDIS_TABLE_MESSAGE + messageID
-			data, err := mr.redisReader.HGetAll(c, tableKey).Result()
+			data, err := redisReader.HGetAll(c, tableKey).Result()
 			if err != nil || len(data) == 0 {
 				return nil, err
 			}
@@ -87,7 +85,8 @@ func (mr *MessageReadRepository) QueryMessage(c context.Context, channel_id uint
 	// 從 database
 	var messageModels []gormmodel.Message
 	var messages []domain.Message
-	err = mr.gormReader.WithContext(c).Joins("JOIN channnel_messages ON channel_messages.message_id = messages.id").Where("channel_messages.channel_id = ?", channel_id).Find(&messageModels).Error
+	gormReader := mr.gorm.PickDBLeastConnRead()
+	err = gormReader.WithContext(c).Joins("JOIN channnel_messages ON channel_messages.message_id = messages.id").Where("channel_messages.channel_id = ?", channel_id).Find(&messageModels).Error
 	if err != nil {
 		return nil, err
 	}
@@ -104,11 +103,11 @@ func (mr *MessageReadRepository) QueryMessage(c context.Context, channel_id uint
 			case <-ctx.Done():
 				return
 			default:
-				if err := mr.redisWriter.SAdd(ctx, setKey, domain.ID).Err(); err != nil {
+				if err := mr.redis.Write.SAdd(ctx, setKey, domain.ID).Err(); err != nil {
 					mr.logger.Error("Redis Write Channel-Messages Set Err ", zap.Error(err))
 				}
 				tableKey := rediskey.REDIS_TABLE_MESSAGE + strconv.Itoa(int(domain.ID))
-				if err := mr.redisWriter.HSet(ctx, tableKey, redismodel.Message{}.FromDomain(domain).ToHash()).Err(); err != nil {
+				if err := mr.redis.Write.HSet(ctx, tableKey, redismodel.Message{}.FromDomain(domain).ToHash()).Err(); err != nil {
 					mr.logger.Error("Redis Write Message Table Err ", zap.Error(err))
 				}
 			}
@@ -122,12 +121,13 @@ func (mr *MessageReadRepository) QueryMessage(c context.Context, channel_id uint
 func (mr *MessageReadRepository) QueryCertainMessage(c context.Context, channel_id uint, user_id uint) ([]domain.Message, error) {
 	// 從 redis 取得該 頻道特定用戶的 message_id
 	listKey := rediskey.REDIS_LIST_CHANNEL_USER_MESSAGE + strconv.FormatUint(uint64(channel_id), 10) + strconv.FormatUint(uint64(user_id), 10)
-	msgIDs, err := mr.redisReader.LRange(c, listKey, 0, -1).Result()
+	redisReader := mr.redis.PickRedisLeastConnRead()
+	msgIDs, err := redisReader.LRange(c, listKey, 0, -1).Result()
 	if err == nil && len(msgIDs) > 0 {
 		var result []domain.Message
 		for _, msgID := range msgIDs {
 			messageKey := rediskey.REDIS_TABLE_MESSAGE + msgID
-			data, err := mr.redisReader.HGetAll(c, messageKey).Result()
+			data, err := redisReader.HGetAll(c, messageKey).Result()
 			if err != nil {
 				return nil, err
 			}
@@ -147,7 +147,8 @@ func (mr *MessageReadRepository) QueryCertainMessage(c context.Context, channel_
 	// 從 database 取得
 	var messageModels []gormmodel.Message
 	var messages []domain.Message
-	err = mr.gormReader.WithContext(c).Where("channel_id = ? AND user_id = ?", channel_id, user_id).Find(&messageModels).Error
+	gormReader := mr.gorm.PickDBLeastConnRead()
+	err = gormReader.WithContext(c).Where("channel_id = ? AND user_id = ?", channel_id, user_id).Find(&messageModels).Error
 	if err != nil {
 		return nil, err
 	}
@@ -165,11 +166,11 @@ func (mr *MessageReadRepository) QueryCertainMessage(c context.Context, channel_
 			case <-ctx.Done():
 				return
 			default:
-				if err := mr.redisWriter.RPush(ctx, listKey, message.ID).Err(); err != nil {
+				if err := mr.redis.Write.RPush(ctx, listKey, message.ID).Err(); err != nil {
 					mr.logger.Error("Redis Push Channel-User-Messages List Err ", zap.Error(err))
 				}
 				tableKey := rediskey.REDIS_TABLE_CHANNEL + strconv.Itoa(int(message.ID))
-				if err := mr.redisWriter.HSet(ctx, tableKey, redismodel.Message{}.FromDomain(message).ToHash()).Err(); err != nil {
+				if err := mr.redis.Write.HSet(ctx, tableKey, redismodel.Message{}.FromDomain(message).ToHash()).Err(); err != nil {
 					mr.logger.Error("Redis Write Message Table Err ", zap.Error(err))
 				}
 			}
@@ -182,7 +183,7 @@ func (mr *MessageReadRepository) QueryCertainMessage(c context.Context, channel_
 func (mw *MessageWriteRepository) CreateMessage(c context.Context, toCreate domain.Message) (domain.Message, error) {
 	// 先在 database 創建
 	createdModel := gormmodel.Message{}.FromDomain(toCreate)
-	if err := mw.gormWriter.WithContext(c).Create(&createdModel).Error; err != nil {
+	if err := mw.gorm.Write.WithContext(c).Create(&createdModel).Error; err != nil {
 		return domain.Message{}, nil
 	}
 
@@ -196,7 +197,7 @@ func (mw *MessageWriteRepository) CreateMessage(c context.Context, toCreate doma
 		default:
 			model := redismodel.Message{}.FromDomain(message)
 			tableKey := rediskey.REDIS_TABLE_MESSAGE + strconv.Itoa(int(message.ID))
-			if err := mw.redisWriter.HSet(ctx, tableKey, model.ToHash()).Err(); err != nil {
+			if err := mw.redis.Write.HSet(ctx, tableKey, model.ToHash()).Err(); err != nil {
 				mw.logger.Error("Redis Write Creat Message Table Err ", zap.Error(err))
 			}
 		}
@@ -207,7 +208,7 @@ func (mw *MessageWriteRepository) CreateMessage(c context.Context, toCreate doma
 
 func (mw *MessageWriteRepository) DeleteMessage(c context.Context, message_id uint) error {
 	// 先在 database 刪除
-	if err := mw.gormWriter.WithContext(c).Delete(&gormmodel.Message{}, message_id).Error; err != nil {
+	if err := mw.gorm.Write.WithContext(c).Delete(&gormmodel.Message{}, message_id).Error; err != nil {
 		return err
 	}
 
@@ -220,7 +221,7 @@ func (mw *MessageWriteRepository) DeleteMessage(c context.Context, message_id ui
 			return
 		default:
 			tableKey := rediskey.REDIS_TABLE_CHANNEL + strconv.Itoa(int(message_id))
-			if err := mw.redisWriter.Del(ctx, tableKey).Err(); err != nil {
+			if err := mw.redis.Write.Del(ctx, tableKey).Err(); err != nil {
 				mw.logger.Error("Redis Write Delete Message Table Err ", zap.Error(err))
 			}
 		}
@@ -232,7 +233,7 @@ func (mw *MessageWriteRepository) DeleteMessage(c context.Context, message_id ui
 func (mw *MessageWriteRepository) UpdateMessage(c context.Context, toUpdate domain.Message) (domain.Message, error) {
 	// 先在 database 更新
 	updatedModel := gormmodel.Message{}.FromDomain(toUpdate)
-	if err := mw.gormWriter.WithContext(c).Updates(updatedModel).Error; err != nil {
+	if err := mw.gorm.Write.WithContext(c).Updates(updatedModel).Error; err != nil {
 		return domain.Message{}, err
 	}
 
@@ -246,7 +247,7 @@ func (mw *MessageWriteRepository) UpdateMessage(c context.Context, toUpdate doma
 		default:
 			model := redismodel.Message{}.FromDomain(message)
 			tableKey := rediskey.REDIS_TABLE_MESSAGE + strconv.Itoa(int(message.ID))
-			if err := mw.redisWriter.HSet(ctx, tableKey, model.ToHash()).Err(); err != nil {
+			if err := mw.redis.Write.HSet(ctx, tableKey, model.ToHash()).Err(); err != nil {
 				mw.logger.Error("Redis Write Update Message Table Err ", zap.Error(err))
 			}
 		}

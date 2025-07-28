@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/redis/go-redis/v9"
+	"github.com/wang900115/LCA/pkg/bootstrap"
 	"github.com/wang900115/LCA/pkg/common"
 	"github.com/wang900115/LCA/pkg/constant"
 	"github.com/wang900115/LCA/pkg/domain"
@@ -19,7 +19,6 @@ import (
 	redismodel "github.com/wang900115/LCA/pkg/redis/model"
 	"go.uber.org/zap"
 	"golang.org/x/crypto/argon2"
-	"gorm.io/gorm"
 )
 
 type UserQueryService interface {
@@ -45,32 +44,30 @@ type UserCommandService interface {
 }
 
 type UserReadRepository struct {
-	gormReader  *gorm.DB
-	redisReader *redis.Client
-	redisWriter *redis.Client
-	logger      *zap.Logger
+	gorm   *bootstrap.DBGroup
+	redis  *bootstrap.RedisGroup
+	logger *zap.Logger
 }
 
 type UserWriteRepository struct {
-	gormWriter  *gorm.DB
-	redisWriter *redis.Client
-	logger      *zap.Logger
+	gorm   *bootstrap.DBGroup
+	redis  *bootstrap.RedisGroup
+	logger *zap.Logger
 }
 
-func NewUserReadRepository(gormReader *gorm.DB, redisReader *redis.Client, redisWriter *redis.Client, logger *zap.Logger) UserQueryService {
+func NewUserReadRepository(gorm *bootstrap.DBGroup, redis *bootstrap.RedisGroup, logger *zap.Logger) UserQueryService {
 	return &UserReadRepository{
-		gormReader:  gormReader,
-		redisReader: redisReader,
-		redisWriter: redisWriter,
-		logger:      logger,
+		gorm:   gorm,
+		redis:  redis,
+		logger: logger,
 	}
 }
 
-func NewUserWriteRepository(gormWriter *gorm.DB, redisWriter *redis.Client, logger *zap.Logger) UserCommandService {
+func NewUserWriteRepository(gorm *bootstrap.DBGroup, redis *bootstrap.RedisGroup, logger *zap.Logger) UserCommandService {
 	return &UserWriteRepository{
-		gormWriter:  gormWriter,
-		redisWriter: redisWriter,
-		logger:      logger,
+		gorm:   gorm,
+		redis:  redis,
+		logger: logger,
 	}
 }
 
@@ -79,10 +76,12 @@ func (ur *UserReadRepository) QueryUser(c context.Context) ([]domain.User, error
 	var cursor uint64
 	var keys []string
 	pattern := rediskey.REDIS_TABLE_USER
+	redisReader := ur.redis.PickRedisLeastConnRead()
 	for {
 		var err error
 		var scannedKeys []string
-		scannedKeys, cursor, err = ur.redisReader.Scan(c, cursor, pattern+"*", 100).Result()
+
+		scannedKeys, cursor, err = redisReader.Scan(c, cursor, pattern+"*", 100).Result()
 		if err != nil {
 			return nil, err
 		}
@@ -97,7 +96,7 @@ func (ur *UserReadRepository) QueryUser(c context.Context) ([]domain.User, error
 		var users []domain.User
 		for _, key := range keys {
 			tableKey := pattern + key
-			data, err := ur.redisReader.HGetAll(c, tableKey).Result()
+			data, err := redisReader.HGetAll(c, tableKey).Result()
 			if err != nil {
 				return nil, err
 			}
@@ -117,7 +116,8 @@ func (ur *UserReadRepository) QueryUser(c context.Context) ([]domain.User, error
 	// 從資料庫查找
 	var usersModel []gormmodel.User
 	var users []domain.User
-	if err := ur.gormReader.WithContext(c).Find(&usersModel).Error; err != nil {
+	gormReader := ur.gorm.PickDBLeastConnRead()
+	if err := gormReader.WithContext(c).Find(&usersModel).Error; err != nil {
 		return nil, err
 	}
 
@@ -136,7 +136,7 @@ func (ur *UserReadRepository) QueryUser(c context.Context) ([]domain.User, error
 			default:
 				model := redismodel.User{}.FromDomain(user)
 				tableKey := rediskey.REDIS_TABLE_CHANNEL + strconv.Itoa(int(user.ID))
-				if err := ur.redisWriter.HSet(ctx, tableKey, model.ToHash()).Err(); err != nil {
+				if err := ur.redis.Write.HSet(ctx, tableKey, model.ToHash()).Err(); err != nil {
 					ur.logger.Error("Redis Write User Table Err ", zap.Error(err))
 				}
 			}
@@ -155,7 +155,7 @@ func (uw *UserWriteRepository) CreateUser(c context.Context, toCreate domain.Use
 	}
 
 	createdModel.Password = hashedPassword
-	if err := uw.gormWriter.WithContext(c).Create(&createdModel).Error; err != nil {
+	if err := uw.gorm.Write.WithContext(c).Create(&createdModel).Error; err != nil {
 		return domain.User{}, nil
 	}
 
@@ -169,7 +169,7 @@ func (uw *UserWriteRepository) CreateUser(c context.Context, toCreate domain.Use
 		default:
 			model := redismodel.User{}.FromDomain(user)
 			tableKey := rediskey.REDIS_TABLE_USER + strconv.Itoa(int(user.ID))
-			if err := uw.redisWriter.HSet(ctx, tableKey, model.ToHash()).Err(); err != nil {
+			if err := uw.redis.Write.HSet(ctx, tableKey, model.ToHash()).Err(); err != nil {
 				uw.logger.Error("Redis Write Creat User Table Err: ", zap.Error(err))
 			}
 		}
@@ -180,7 +180,7 @@ func (uw *UserWriteRepository) CreateUser(c context.Context, toCreate domain.Use
 
 func (uw *UserWriteRepository) DeleteUser(c context.Context, user_id uint) error {
 	// 先在 database 刪除
-	if err := uw.gormWriter.WithContext(c).Delete(&gormmodel.User{}, user_id).Error; err != nil {
+	if err := uw.gorm.Write.WithContext(c).Delete(&gormmodel.User{}, user_id).Error; err != nil {
 		return err
 	}
 
@@ -193,7 +193,7 @@ func (uw *UserWriteRepository) DeleteUser(c context.Context, user_id uint) error
 			return
 		default:
 			tableKey := rediskey.REDIS_TABLE_USER + strconv.Itoa(int(user_id))
-			if err := uw.redisWriter.Del(ctx, tableKey).Err(); err != nil {
+			if err := uw.redis.Write.Del(ctx, tableKey).Err(); err != nil {
 				uw.logger.Error("Redis Write Delete User Table Err ", zap.Error(err))
 			}
 		}
@@ -205,7 +205,7 @@ func (uw *UserWriteRepository) DeleteUser(c context.Context, user_id uint) error
 func (uw *UserWriteRepository) UpdateUser(c context.Context, toUpdate domain.User) (domain.User, error) {
 	// 先在 database 更新
 	updatedModel := gormmodel.User{}.FromDomain(toUpdate)
-	if err := uw.gormWriter.WithContext(c).Updates(updatedModel).Error; err != nil {
+	if err := uw.gorm.Write.WithContext(c).Updates(updatedModel).Error; err != nil {
 		return domain.User{}, err
 	}
 
@@ -219,7 +219,7 @@ func (uw *UserWriteRepository) UpdateUser(c context.Context, toUpdate domain.Use
 		default:
 			model := redismodel.User{}.FromDomain(user)
 			tableKey := rediskey.REDIS_TABLE_USER + strconv.Itoa(int(user.ID))
-			if err := uw.redisWriter.HSet(ctx, tableKey, model.ToHash()).Err(); err != nil {
+			if err := uw.redis.Write.HSet(ctx, tableKey, model.ToHash()).Err(); err != nil {
 				uw.logger.Error("Redis Write Update User Table Err ", zap.Error(err))
 			}
 		}
@@ -230,7 +230,7 @@ func (uw *UserWriteRepository) UpdateUser(c context.Context, toUpdate domain.Use
 
 func (uw *UserWriteRepository) UpdateRole(c context.Context, user_id uint, toUpdate string) (string, error) {
 	// 先在 database 更新
-	if err := uw.gormWriter.WithContext(c).Model(&gormmodel.User{}).Where("id = ?", user_id).Update("role", toUpdate).Error; err != nil {
+	if err := uw.gorm.Write.WithContext(c).Model(&gormmodel.User{}).Where("id = ?", user_id).Update("role", toUpdate).Error; err != nil {
 		return "", err
 	}
 
@@ -245,7 +245,7 @@ func (uw *UserWriteRepository) UpdateRole(c context.Context, user_id uint, toUpd
 			tableKey := rediskey.REDIS_TABLE_USER + strconv.Itoa(int(user_id))
 			fieldKey := rediskey.REDIS_FIELD_USER_ROLE
 			// !todo 用 redis-writer's logger
-			if err := uw.redisWriter.HSet(ctx, tableKey, fieldKey, toUpdate).Err(); err != nil {
+			if err := uw.redis.Write.HSet(ctx, tableKey, fieldKey, toUpdate).Err(); err != nil {
 				uw.logger.Error("Redis Write Update User Role Field Err ", zap.Error(err))
 			}
 		}
@@ -256,7 +256,8 @@ func (uw *UserWriteRepository) UpdateRole(c context.Context, user_id uint, toUpd
 
 func (ur *UserReadRepository) CheckPassword(c context.Context, username string, password string) (domain.User, error) {
 	var user gormmodel.User
-	if err := ur.gormReader.Table("user").Where("username = ?", username).First(&user).Error; err != nil {
+	gormReader := ur.gorm.PickDBLeastConnRead()
+	if err := gormReader.Table("user").Where("username = ?", username).First(&user).Error; err != nil {
 		return domain.User{}, err
 	}
 	pass, err := verifyPasswordArgon2id(user.Password, password)

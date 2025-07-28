@@ -36,14 +36,15 @@ func main() {
 
 	syslogger := bootstrap.NewLogger(bootstrap.NewLoggerOption(conf))
 
-	cr := implement.NewChannelReadRepository(dbGroup.PickLeastConnRead(), redisGroup.PickLeastConnRead(), redisGroup.Write, syslogger)
-	cw := implement.NewChannelWriteRepository(dbGroup.Write, redisGroup.Write, syslogger)
+	// !todo 新增一個 check ticker (corn) 來準時 健康檢查 如果有發生問題 -> failover
+	cr := implement.NewChannelReadRepository(dbGroup, redisGroup, syslogger)
+	cw := implement.NewChannelWriteRepository(dbGroup, redisGroup, syslogger)
 
-	mr := implement.NewMessageReadRepository(dbGroup.PickLeastConnRead(), redisGroup.PickLeastConnRead(), redisGroup.Write, syslogger)
-	mw := implement.NewMessageWriteRepository(dbGroup.Write, redisGroup.Write, syslogger)
+	mr := implement.NewMessageReadRepository(dbGroup, redisGroup, syslogger)
+	mw := implement.NewMessageWriteRepository(dbGroup, redisGroup, syslogger)
 
-	ur := implement.NewUserReadRepository(dbGroup.PickLeastConnRead(), redisGroup.PickLeastConnRead(), redisGroup.Write, syslogger)
-	uw := implement.NewUserWriteRepository(dbGroup.Write, redisGroup.Write, syslogger)
+	ur := implement.NewUserReadRepository(dbGroup, redisGroup, syslogger)
+	uw := implement.NewUserWriteRepository(dbGroup, redisGroup, syslogger)
 
 	// !todo 要分成 CQRS
 	tu := implement.NewTokenAuthRepository(redisGroup.Write, syslogger)

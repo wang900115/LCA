@@ -57,11 +57,11 @@ func NewRedisGroup(v *viper.Viper) *RedisGroup {
 	return &RedisGroup{Write: write, Reads: reads}
 }
 
-func (rg *RedisGroup) PickLeastConnRead() *redis.Client {
+func (re *RedisGroup) PickRedisLeastConnRead() *redis.Client {
 	var min *redis.Client
 	var minConns int
 
-	for _, r := range rg.Reads {
+	for _, r := range re.Reads {
 		stats := r.Redis.PoolStats()
 		if min == nil || stats.TotalConns < uint32(minConns) {
 			min = r.Redis

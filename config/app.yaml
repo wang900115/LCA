@@ -8,61 +8,62 @@ server:
 
 postgresql:
   write:
-    host: "127.0.0.1"
+    host: "postgres_write"
     port: "5432"
-    user: ""
-    password: ""
-    dbname: ""
+    user: "user"
+    password: "password"
+    dbname: "main"
 
   reads:
-    - host: "127.0.0.2"
-      port: ""
-      user: ""
-      password: ""
-      dbname: ""
-
-    - host: "127.0.0.3"
+    - host: "postgres_read_1"
       port: "5432"
-      user: ""
-      password: ""
-      dbname: ""
+      user: "user"
+      password: "password"
+      dbname: "main"
 
-    - host: "127.0.0.4"
+    - host: "postgres_read_2"
       port: "5432"
-      user: ""
-      password: ""
-      dbname: ""
+      user: "user"
+      password: "password"
+      dbname: "main"
 
-    - host: "127.0.0.5"
-      port: "5432"
-      user: ""
-      password: ""
-      dbname: ""
+    # - host: "127.0.0.4"
+    #   port: "5432"
+    #   user: ""
+    #   password: ""
+    #   dbname: ""
+
+    # - host: "127.0.0.5"
+    #   port: "5432"
+    #   user: ""
+    #   password: ""
+    #   dbname: ""
 
 redis:
-  master_name:
+  master_name: "mymaster"
   write:
-    addr:
-    password:
-    db:
+    addr: "redis_write:6379"
+    password: ""
+    db: 0
   reads:
-    - addr:
-      password:
-      db:
+    - addr: "redis_read_1:6379"
+      password: ""
+      db: 0
 
-    - addr:
-      password:
-      db:
+    - addr: "redis_read__2:6379"
+      password: ""
+      db: 0
   sentinel:
-    - addr:
-      password:
-      db:
-    - addr:
-      password:
-      db:
-    - addr:
-      password:
-      db:
+    - addr: "redis_sentinel_1:26379"
+      password: ""
+      db: 0
+    - addr: "redis_sentinel_2:26379"
+      password: ""
+      db: 0
+    - addr: "redis_sentinel_3:26379"
+      password: ""
+      db: 0
+
 log:
   log_path: "./log/app.log"
   application_name: "LCA"

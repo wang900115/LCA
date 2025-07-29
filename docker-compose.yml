@@ -1,29 +1,88 @@
 version: "3.9"
 services:
-  lca:
-    build:
-      context: .
-    depends_on:
-      - postgres
-      - redis
-    environment:
-      - CONFIG_PATH=/config/app.yaml
-    volumes:
-      - ./config:/config
+  app:
+    build: .
+    container_name: lca_app
     ports:
       - "8080:8080"
-
-  postgres:
-    image: postgres:15
-    restart: always
+    volumes:
+      - ./:/app
+      - ./log:/app/log
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: example
-      POSTGRES_DB: LCA
+      - CONFIG_PATH=/app/config.yaml
+    depends_on:
+      - postgres_write
+      - redis_write
+
+  postgres_write:
+    image: postgres:15
+    container_name: postgres_write
+    environment:
+      POSTGRES_DB: main
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
     ports:
       - "5432:5432"
 
-  redis:
+  postgres_read_1:
+    image: postgres:15
+    container_name: postgres_read_1
+    environment:
+      POSTGRES_DB: main
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5433:5432"
+
+  postgres_read_2:
+    image: postgres:15
+    container_name: postgres_read_2
+    environment:
+      POSTGRES_DB: main
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5434:5432"
+
+  redis_write:
     image: redis:7
+    container_name: redis_write
     ports:
       - "6379:6379"
+
+  redis_read_1:
+    image: redis:7
+    container_name: redis_read_1
+    ports:
+      - "6380:6379"
+
+  redis_read_2:
+    image: redis:7
+    container_name: redis_read_2
+    ports:
+      - "6381:6379"
+
+  redis_sentinel_1:
+    image: bitnami/redis-sentinel:7
+    container_name: redis_sentinel_1
+    environment:
+      - REDIS_MASTER_HOST=redis_write
+    ports:
+      - "26379:26379"
+
+  redis_sentinel_2:
+    image: bitnami/redis-sentinel:7
+    container_name: redis_sentinel_2
+    environment:
+      - REDIS_MASTER_HOST=redis_write
+    ports:
+      - "26380:26379"
+
+  redis_sentinel_3:
+    image: bitnami/redis-sentinel:7
+    container_name: redis_sentinel_3
+    environment:
+      - REDIS_MASTER_HOST=redis_write
+    ports:
+      - "26381:26379"
+      

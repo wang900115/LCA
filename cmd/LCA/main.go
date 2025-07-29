@@ -1,10 +1,12 @@
 package main
 
 import (
+	"context"
 	"log"
 	"os"
 
 	"github.com/joho/godotenv"
+	"github.com/robfig/cron"
 	"github.com/wang900115/LCA/internal/adapter/controller"
 	"github.com/wang900115/LCA/internal/adapter/route"
 	"github.com/wang900115/LCA/internal/application/usecase"
@@ -15,9 +17,8 @@ import (
 	middlewareLOGGER "github.com/wang900115/LCA/pkg/common/middleware/logger"
 	middlewarePermission "github.com/wang900115/LCA/pkg/common/middleware/role"
 	middlewareSecure "github.com/wang900115/LCA/pkg/common/middleware/secure_header"
-	"github.com/wang900115/LCA/pkg/common/router"
-
 	response "github.com/wang900115/LCA/pkg/common/response/json"
+	"github.com/wang900115/LCA/pkg/common/router"
 	"github.com/wang900115/LCA/pkg/implement"
 )
 
@@ -37,7 +38,23 @@ func main() {
 	syslogger := bootstrap.NewLogger(bootstrap.NewLoggerOption(conf))
 	applogger := bootstrap.NewLogger(bootstrap.NewLoggerOption(conf))
 
-	// !todo 新增一個 check ticker (corn) 來準時 健康檢查
+	ctx := context.Background()
+
+	c := cron.New()
+
+	if err := c.AddFunc("/30 * * * * *", func() {
+		redisGroup.HeadlthCheck(ctx)
+	}); err != nil {
+		log.Fatalf("Failed to add cron redis-health-check func: %v", err)
+	}
+
+	if err := c.AddFunc("/60 * * * * *", func() {
+		dbGroup.HeadlthCheck(ctx)
+	}); err != nil {
+		log.Fatalf("Failed to add cron postgre-health-check func: %v", err)
+	}
+
+	c.Start()
 
 	cr := implement.NewChannelReadRepository(dbGroup, redisGroup, syslogger)
 	cw := implement.NewChannelWriteRepository(dbGroup, redisGroup, syslogger)
@@ -96,6 +113,6 @@ func main() {
 		},
 	)
 
-	bootstrap.Run(server, bootstrap.NewServerOption(conf))
+	bootstrap.Run(server, bootstrap.NewServerOption(conf), c)
 
 }

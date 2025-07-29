@@ -16,12 +16,7 @@ type RedisConfig struct {
 	DB       int
 }
 
-type WriteRedis struct {
-	Redis *redis.Client
-	Label string
-}
-
-type ReadRedis struct {
+type GenernalRedis struct {
 	Redis *redis.Client
 	Label string
 }
@@ -32,8 +27,8 @@ type SentinelRedis struct {
 }
 
 type RedisGroup struct {
-	Write      *WriteRedis
-	Reads      []*ReadRedis
+	Write      *GenernalRedis
+	Reads      []*GenernalRedis
 	Sentinels  []*SentinelRedis
 	MasterName string
 }
@@ -109,7 +104,7 @@ func NewRedisGroup(v *viper.Viper) *RedisGroup {
 		writeLabel = opt.Addr
 	}
 
-	var reads []*ReadRedis
+	var reads []*GenernalRedis
 	readConfigs := v.Get("redis.reads").([]interface{})
 	for _, cfg := range readConfigs {
 		rc := cfg.(map[string]interface{})
@@ -119,11 +114,11 @@ func NewRedisGroup(v *viper.Viper) *RedisGroup {
 			DB:       rc["db"].(int),
 		}
 		client := redis.NewClient(conf.DSN())
-		reads = append(reads, &ReadRedis{Redis: client, Label: conf.Addr})
+		reads = append(reads, &GenernalRedis{Redis: client, Label: conf.Addr})
 	}
 
 	return &RedisGroup{
-		Write:      &WriteRedis{Redis: writeClient, Label: writeLabel},
+		Write:      &GenernalRedis{Redis: writeClient, Label: writeLabel},
 		Reads:      reads,
 		Sentinels:  sentinels,
 		MasterName: masterName,
@@ -143,4 +138,35 @@ func (re *RedisGroup) PickRedisLeastConnRead() *redis.Client {
 	}
 
 	return min
+}
+
+func (re *RedisGroup) HeadlthCheck(ctx context.Context) {
+	if err := pingRedisNode(ctx, re.Write.Redis); err != nil {
+		log.Printf("[Failover-Redis-Warning] write redis failed: %v", err)
+
+		addr, err := getMasterAddrFromSentinel(ctx, re.Sentinels, re.MasterName)
+		if err != nil {
+			log.Printf("[Failover-Redis-Error] sentinel lookup failed: %v", err)
+			return
+		}
+		newWrite := redis.NewClient(&redis.Options{
+			Addr:     addr,
+			Password: re.Write.Redis.Options().Password,
+			DB:       re.Write.Redis.Options().DB,
+		})
+
+		if pingRedisNode(ctx, newWrite) == nil {
+			log.Printf("[Failover-Redis-Info] switched to new master: %s", addr)
+			re.Write = &GenernalRedis{Redis: newWrite, Label: addr}
+		} else {
+			log.Printf("[Failover-Redis-Error] new master not healthy: %s", addr)
+		}
+	}
+}
+
+func pingRedisNode(ctx context.Context, redis *redis.Client) error {
+	if err := redis.Ping(ctx).Err(); err != nil {
+		return err
+	}
+	return nil
 }

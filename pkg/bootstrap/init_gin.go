@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/gin-contrib/pprof"
+	"github.com/robfig/cron"
 	"github.com/wang900115/LCA/pkg/common/middleware"
 	"github.com/wang900115/LCA/pkg/common/router"
 
@@ -64,7 +65,7 @@ func NewServer(routes []router.IRoute, middlewares []middleware.IMiddleware) *Ap
 	}
 }
 
-func Run(a *App, option serverOption) {
+func Run(a *App, option serverOption, c *cron.Cron) {
 	gin.SetMode(option.RunMode)
 
 	router := gin.Default()
@@ -94,7 +95,9 @@ func Run(a *App, option serverOption) {
 	}()
 
 	quit := make(chan os.Signal, 1)
+
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 	<-quit
+	c.Stop()
 	log.Println("Shutdown Server ...")
 }

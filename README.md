@@ -8,10 +8,13 @@
   **LCA** is a message chat hybrid system written in Go. It is designed for Decentralized encrypted communication. However, central management is still the priority for system security.
 
 ## Knowledge
-  - **Decentral Auth:** Decentral concept is this project main idea, like gossip protocal peer2peer , and it cause to be strong community. each node be not only either giver still recevier. Staggered interact between Opher-Chain(which maintence by your self) and Channel (which maintence by goverment).
-  - **Encryption:**  Using RSA Algorithm in sender side(Merkle Patricia Tree for node completely).
-  - **Distributed System:** Distributing theorm like CAP,(Consistence, Availability, Partition Tolerance) and BASE(Basically Available, Soft State, Eventual Consistency) with Quorum system design method for paxos, raft ... algorithms.
-  - **Security:** According PASETO and JWT tech to increase hack difficulty 
+  - **Decentral Architecture:** The core idea of this project is decentralization, inspired by peer-to-peer gossip protocols. This approach naturally leads to the formation of strong, resilient communities. Each node acts not only as a giver but also as a receiver, enabling a fully participatory network. The interaction is staggered between the Opher-Chain and external blockchain ecosystems (such as Ethereum and others). This design promotes interoperability while maintaining independence.
+  
+  - **Encryption:** Messages are encrypted on the sender side using the RSA algorithm. A Merkle Patricia Tree is employed to ensure complete integrity and verification of nodes within the network.
+  
+  - **Distributed System:** The system is designed following distributed system principles, including the CAP theorem (Consistency, Availability, Partition Tolerance) and BASE (Basically Available, Soft State, Eventual Consistency). Quorum-based system design is applied to implement consensus algorithms such as Paxos and Raft, ensuring reliability and consistency across nodes.
+  
+  - **Security:** The project uses PASETO and JWT technologies for authentication and session management, enhancing system security and making unauthorized access or hacking significantly more difficult. 
 
 ## Prerequisite 
   - Golang Version >= 1.25.0
@@ -44,4 +47,4 @@ You can download the lastest build here:
   - Main Dev: 
     - Name: Perry
 ## Licensing
-  This project, Decentraling Encrypt Chat Application (DECA), is released under an open-source license to encourage collaboration, transparency, and innovation in decentralized secure communication systems. We currently use the following license: MIT License You are free to: Use, Copy, Modify, Merge, Publish, and Distribute the software Use it for personal, educational, or commercial purposes Provided that: You include the original copyright and license You provide attribution to the original authors For the full license text, refer to the LICENSE file in the repository.
+  This project, LightWeight Chat Application (LCA), is released under an open-source license to encourage collaboration, transparency, and innovation in decentralized secure communication systems. We currently use the following license: MIT License You are free to: Use, Copy, Modify, Merge, Publish, and Distribute the software Use it for personal, educational, or commercial purposes Provided that: You include the original copyright and license You provide attribution to the original authors For the full license text, refer to the LICENSE file in the repository.

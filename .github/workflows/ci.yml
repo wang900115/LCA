@@ -9,38 +9,64 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: 檢出程式碼
+    - name: Checkout source code
       uses: actions/checkout@v4
 
-    - name: 設定 Go 環境
+    - name: Set up Go environment
       uses: actions/setup-go@v4
       with:
         go-version: '1.25.0'
 
-    - name: 安裝依賴套件
+    - name: Install dependencies
       run: go mod download
 
-    - name: 編譯
+    - name: Build project
       run: go build ./...
 
-    - name: 執行測試
+    - name: Run tests
       run: go test ./...
 
-    - name: 執行靜態分析
+    - name: Run static analysis
       run: go vet ./...
 
-    - name: DC提示 (成功)
+    - name: Discord notification (success)
       if: success()
       run: |
         curl -H "Content-Type: application/json" \
           -X POST \
-          -d "{\"content\": \"✅ CI Pipeline Passed\nRepo: $GITHUB_REPOSITORY\nCommit: $GITHUB_SHA\nAuthor: $GITHUB_ACTOR\"}" \
+          -d '{
+            "content": "✅ CI Pipeline Passed",
+            "embeds":[{
+              "title":"Build Information",
+              "color":3066993,
+              "fields": [
+                {"name":"Repository","value":"'"$GITHUB_REPOSITORY"'","inline":true},
+                {"name":"Commit","value":"'"$GITHUB_SHA"'","inline":true}
+                {"name":"Author","value":"'"$GITHUB_ACTOR"'","inline":true}
+                {"name":"Link","value":"'"$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"'"}
+              ],
+              "footer": {"text:"Github Actions CI"}
+              }]
+            }'\
           ${{ secrets.DISCORD_WEBHOOK }}
 
-    - name: DC提示 (失敗)
+    - name: Discord notification (failure)
       if: failure()
       run: |
         curl -H "Content-Type: application/json" \
           -X POST \
-          -d "{\"content\": \"❌ CI Pipeline Failed\nRepo: $GITHUB_REPOSITORY\nCommit: $GITHUB_SHA\nAuthor: $GITHUB_ACTOR\"}" \
+          -d '{
+            "content": "❌ CI Pipeline Failed",
+            "embeds":[{
+              "title":"Build Information",
+              "color": 15158332,
+              "fields": [
+                {"name":"Repository","value":"'"$GITHUB_REPOSITORY"'","inline":true},
+                {"name":"Commit","value":"'"$GITHUB_SHA"'","inline":true}
+                {"name":"Author","value":"'"$GITHUB_ACTOR"'","inline":true}
+                {"name":"Link","value":"'"$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"'"}
+              ],
+              "footer": {"text:"Github Actions CI"}
+              }]
+            }'\
           ${{ secrets.DISCORD_WEBHOOK }}

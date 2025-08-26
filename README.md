@@ -1,7 +1,7 @@
 
  <h1 align="center"><strong>Lightweight Chat Application</strong></h1> 
     <p align="center">
-      <img src="assets/banner.png" alt="LCA Banner" width="300"/>
+      <img src="assets/banner.png" alt="LCA Banner" height="225" width="230" />
     </p>
   
 ## Overview

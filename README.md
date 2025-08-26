@@ -5,7 +5,7 @@
     </p>
   
 ## Overview
-  **LCA** is a message chat hybrid system written in Go. It is designed for Decentralized encrypted communication. However, central management is still the priority for system security.
+  **LCA** is a message decentralized chat application. It is designed for Decentralized encrypted communication. However, central management is still the priority for system security.
 
 ## Knowledge
   - **Decentral Architecture:** The core idea of this project is decentralization, inspired by peer-to-peer gossip protocols. This approach naturally leads to the formation of strong, resilient communities. Each node acts not only as a giver but also as a receiver, enabling a fully participatory network. The interaction is staggered between the Opher-Chain and external blockchain ecosystems (such as Ethereum and others). This design promotes interoperability while maintaining independence.

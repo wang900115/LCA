@@ -3,7 +3,7 @@ package main
 import (
 	"log"
 
-	"github.com/wang900115/LCA/internal/adapter/gorm/model"
+	gormmodel "github.com/wang900115/LCA/internal/adapter/gorm/model"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -17,7 +17,7 @@ func main() {
 		log.Fatal("failed to connect database:", err)
 	}
 
-	err = db.AutoMigrate(&model.Channel{}, &model.User{}, &model.Message{})
+	err = db.AutoMigrate(&gormmodel.Channel{}, &gormmodel.User{}, &gormmodel.Message{})
 	if err != nil {
 		log.Fatal("failed to migrate database: ", err)
 	}

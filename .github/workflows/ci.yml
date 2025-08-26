@@ -15,7 +15,7 @@ jobs:
     - name: 設定 Go 環境
       uses: actions/setup-go@v4
       with:
-        go-version: '1.24.4'
+        go-version: '1.25.0'
 
     - name: 安裝依賴套件
       run: go mod download

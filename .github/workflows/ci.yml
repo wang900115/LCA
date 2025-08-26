@@ -41,11 +41,11 @@ jobs:
               "color":3066993,
               "fields": [
                 {"name":"Repository","value":"'"$GITHUB_REPOSITORY"'","inline":true},
-                {"name":"Commit","value":"'"$GITHUB_SHA"'","inline":true}
-                {"name":"Author","value":"'"$GITHUB_ACTOR"'","inline":true}
+                {"name":"Commit","value":"'"$GITHUB_SHA"'","inline":true},
+                {"name":"Author","value":"'"$GITHUB_ACTOR"'","inline":true},
                 {"name":"Link","value":"'"$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"'"}
               ],
-              "footer": {"text:"Github Actions CI"}
+              "footer": {"text":"Github Actions CI"}
               }]
             }'\
           ${{ secrets.DISCORD_WEBHOOK }}
@@ -62,11 +62,11 @@ jobs:
               "color": 15158332,
               "fields": [
                 {"name":"Repository","value":"'"$GITHUB_REPOSITORY"'","inline":true},
-                {"name":"Commit","value":"'"$GITHUB_SHA"'","inline":true}
-                {"name":"Author","value":"'"$GITHUB_ACTOR"'","inline":true}
+                {"name":"Commit","value":"'"$GITHUB_SHA"'","inline":true},
+                {"name":"Author","value":"'"$GITHUB_ACTOR"'","inline":true},
                 {"name":"Link","value":"'"$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"'"}
               ],
-              "footer": {"text:"Github Actions CI"}
+              "footer": {"text":"Github Actions CI"}
               }]
             }'\
           ${{ secrets.DISCORD_WEBHOOK }}

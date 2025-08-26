@@ -48,6 +48,8 @@ func (uc *UserController) DeleteUser(c *gin.Context) {
 		return
 	}
 
-	uc.token.DeleteToken(User, Channel)
+	if err := uc.token.DeleteToken(User, Channel); err != nil {
+		uc.response.FailWithError(c, accessDenied, err)
+	}
 	uc.response.SuccessWithData(c, deleteSuccess, userName)
 }

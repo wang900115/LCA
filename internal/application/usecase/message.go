@@ -1,50 +1,39 @@
 package usecase
 
 import (
+	"context"
+
+	"github.com/wang900115/LCA/internal/adapter/validator"
 	"github.com/wang900115/LCA/internal/domain/entities"
-	gorminterface "github.com/wang900115/LCA/internal/domain/interface/gorm"
+	"github.com/wang900115/LCA/internal/implement"
 )
 
 type MessageUsecase struct {
-	messageRepo gorminterface.MessageImplement
+	messageRepo implement.MessageImplement
 }
 
-func NewMessageUsecase(messageRepo gorminterface.MessageImplement) *MessageUsecase {
+func NewMessageUsecase(messageRepo implement.MessageImplement) *MessageUsecase {
 	return &MessageUsecase{
 		messageRepo: messageRepo,
 	}
 }
 
-func (m *MessageUsecase) CreateMessage(channel, user, content string) (string, error) {
+func (m *MessageUsecase) CreateMessage(ctx context.Context, sender uint, req validator.MessageCreateRequest) error {
 	messageDomain := entities.Message{
-		Channel: channel,
-		User:    user,
-		Content: content,
+		Sender:  sender,
+		Content: req.Content,
 	}
-
-	message, err := m.messageRepo.CreateMessage(messageDomain)
-	if err != nil {
-		return "", err
-	}
-	return message.User, nil
+	return m.messageRepo.Create(ctx, messageDomain)
 }
 
-func (m *MessageUsecase) DeleteMessage(messageUUID string) error {
-	err := m.messageRepo.DeleteMessage(messageUUID)
-	if err != nil {
-		return err
-	}
-	return nil
+func (m *MessageUsecase) ReadMessage(ctx context.Context, id uint) (*entities.Message, error) {
+	return m.messageRepo.Read(ctx, id)
 }
 
-func (m *MessageUsecase) QueryMessages(channel string) ([]string, error) {
-	messages, err := m.messageRepo.QueryMessages(channel)
-	if err != nil {
-		return nil, err
-	}
-	var Content []string
-	for _, message := range messages {
-		Content = append(Content, message.Content)
-	}
-	return Content, nil
+func (m *MessageUsecase) UpdateMessage(ctx context.Context, id uint, field string, value any) error {
+	return m.messageRepo.Update(ctx, id, field, value)
+}
+
+func (m *MessageUsecase) DeleteMessage(ctx context.Context, id uint) error {
+	return m.messageRepo.Delete(ctx, id)
 }

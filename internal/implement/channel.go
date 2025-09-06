@@ -17,8 +17,11 @@ type ChannelImplement interface {
 	Delete(context.Context, uint) error
 	ReadUsers(context.Context, uint) (*entities.ChannelUser, error)
 	ReadMessages(context.Context, uint) (*entities.ChannelMessage, error)
-	UpdateUsers(context.Context, uint, entities.User) error
-	UpdateMessages(context.Context, uint, entities.Message) error
+	AddUser(context.Context, uint, entities.User) error
+	RemoveUser(context.Context, uint, uint) error
+	AddMessage(context.Context, uint, entities.Message) error
+	UpdateMessage(context.Context, uint, uint, string) error
+	RemoveMessage(context.Context, uint, uint) error
 }
 
 type ChannelRepository struct {
@@ -82,11 +85,6 @@ func (r *ChannelRepository) ReadUsers(ctx context.Context, id uint) (*entities.C
 }
 
 // !todo(redis, db)
-func (r *ChannelRepository) UpdateUsers(ctx context.Context, id uint, user entities.User) error {
-	return nil
-}
-
-// !todo(redis, db)
 func (r *ChannelRepository) ReadMessages(ctx context.Context, id uint) (*entities.ChannelMessage, error) {
 	var channelMessage gormmodel.ChannelMessage
 	if err := r.gorm.WithContext(ctx).Where("channel_id = ?", id).First(&channelMessage).Error; err != nil {
@@ -96,6 +94,26 @@ func (r *ChannelRepository) ReadMessages(ctx context.Context, id uint) (*entitie
 }
 
 // !todo(redis, db)
-func (r *ChannelRepository) UpdateMessages(ctx context.Context, id uint, message entities.Message) error {
+func (r *ChannelRepository) AddUser(ctx context.Context, id uint, user entities.User) error {
+	return nil
+}
+
+// !todo(redis, db)
+func (r *ChannelRepository) RemoveUser(ctx context.Context, id uint, user_id uint) error {
+	return nil
+}
+
+// !todo(redis, db)
+func (r *ChannelRepository) AddMessage(ctx context.Context, id uint, message entities.Message) error {
+	return nil
+}
+
+// !todo(redis, db)
+func (r *ChannelRepository) UpdateMessage(ctx context.Context, id uint, message_id uint, new string) error {
+	return nil
+}
+
+// !todo(redis, db)
+func (r *ChannelRepository) RemoveMessage(ctx context.Context, id uint, message_id uint) error {
 	return nil
 }

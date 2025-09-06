@@ -1,6 +1,10 @@
 package usecase
 
 import (
+	"context"
+
+	"github.com/wang900115/LCA/internal/adapter/validator"
+	"github.com/wang900115/LCA/internal/domain/entities"
 	"github.com/wang900115/LCA/internal/implement"
 )
 
@@ -14,34 +18,59 @@ func NewChannelUsecase(channelRepo implement.ChannelImplement) *ChannelUsecase {
 	}
 }
 
-func (c *ChannelUsecase) CreateChannel(name string) (string, error) {
-	channel, err := c.channelRepo.CreateChannel(name)
-	if err != nil {
-		return "", err
+func (c *ChannelUsecase) CreateChannel(ctx context.Context, req validator.ChannelCreateRequest) error {
+	channel := entities.Channel{
+		Name:        req.Name,
+		Founder:     req.Founder,
+		ChannelType: req.ChannelType,
 	}
-	return channel.Name, nil
+	return c.channelRepo.Create(ctx, channel)
 }
 
-func (c *ChannelUsecase) QueryChannels() ([]string, error) {
-	channels, err := c.channelRepo.QueryChannels()
+func (c *ChannelUsecase) ReadChannel(ctx context.Context, id uint) (*entities.Channel, error) {
+	return c.channelRepo.Read(ctx, id)
+}
+
+func (c *ChannelUsecase) UpdateChannel(ctx context.Context, id uint, field string, value any) error {
+	return c.channelRepo.Update(ctx, id, field, value)
+}
+
+func (c *ChannelUsecase) DeleteChannel(ctx context.Context, id uint) error {
+	return c.channelRepo.Delete(ctx, id)
+}
+
+func (c *ChannelUsecase) QueryChannelUsers(ctx context.Context, id uint) ([]*entities.User, error) {
+	channelUsers, err := c.channelRepo.ReadUsers(ctx, id)
 	if err != nil {
 		return nil, err
 	}
-	var names []string
-	for _, channel := range channels {
-		names = append(names, channel.Name)
-	}
-	return names, nil
+	return channelUsers.Users, nil
 }
 
-func (c *ChannelUsecase) QueryUsers(channelName string) ([]string, error) {
-	users, err := c.channelRepo.QueryUsers(channelName)
+func (c *ChannelUsecase) QueryChannelMessages(ctx context.Context, id uint) ([]*entities.Message, error) {
+	channelMessages, err := c.channelRepo.ReadMessages(ctx, id)
 	if err != nil {
 		return nil, err
 	}
-	var usernames []string
-	for _, user := range users {
-		usernames = append(usernames, user.Username)
-	}
-	return usernames, nil
+	return channelMessages.Message, nil
+}
+
+func (c *ChannelUsecase) UserJoin(ctx context.Context, id uint, user entities.User) error {
+	return c.channelRepo.AddUser(ctx, id, user)
+}
+
+func (c *ChannelUsecase) UserLeave(ctx context.Context, id uint, user_id uint) error {
+	return c.channelRepo.RemoveUser(ctx, id, user_id)
+}
+
+func (c *ChannelUsecase) CommentMessage(ctx context.Context, id uint, message entities.Message) error {
+	return c.channelRepo.AddMessage(ctx, id, message)
+}
+
+func (c *ChannelUsecase) EditeMessage(ctx context.Context, id uint, message_id uint, new string) error {
+	return c.channelRepo.UpdateMessage(ctx, id, message_id, new)
+}
+
+func (c *ChannelUsecase) RegainMessage(ctx context.Context, id uint, message_id uint) error {
+	return c.channelRepo.RemoveMessage(ctx, id, message_id)
 }

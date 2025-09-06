@@ -1,8 +1,13 @@
 package entities
 
-type TokenClaims struct {
-	User    string `json:"user"`
-	Channel string `json:"channel"`
+type UserTokenClaims struct {
+	UserID      uint      `json:"user"`
+	LoginStatus UserLogin `json:"login"`
+	ExpiredAt   int64     `json:"expired_at"`
+}
 
-	ExpiredAt int64 `json:"expired_at"`
+type ChannelTokenClaims struct {
+	ChannelID  uint        `json:"channel"`
+	JoinStatus UserChannel `json:"join"`
+	ExpiredAt  int64       `json:"expired_at"`
 }

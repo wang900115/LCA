@@ -6,17 +6,40 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-type TokenClaims struct {
-	User    string `json:"user"`
-	Channel string `json:"channel"`
-
+type UserTokenClaims struct {
+	UserID     uint
+	LastLogin  int64
+	IPAddress  string
+	DeviceInfo string
 	jwt.RegisteredClaims
 }
 
-func (t TokenClaims) ToDomain() entities.TokenClaims {
-	return entities.TokenClaims{
-		User:      t.User,
-		Channel:   t.Channel,
-		ExpiredAt: t.ExpiresAt.Unix(),
+type ChannelTokenClaims struct {
+	ChannelID uint
+	Role      string
+	LastJoin  int64
+	jwt.RegisteredClaims
+}
+
+func (ut UserTokenClaims) ToDomain() entities.UserTokenClaims {
+	return entities.UserTokenClaims{
+		UserID: ut.UserID,
+		LoginStatus: entities.UserLogin{
+			LastLogin:  ut.LastLogin,
+			IPAddress:  &ut.IPAddress,
+			DeviceInfo: &ut.DeviceInfo,
+		},
+		ExpiredAt: ut.ExpiresAt.Unix(),
+	}
+}
+
+func (ct ChannelTokenClaims) ToDomain() entities.ChannelTokenClaims {
+	return entities.ChannelTokenClaims{
+		ChannelID: ct.ChannelID,
+		JoinStatus: entities.UserChannel{
+			Role:     ct.Role,
+			LastJoin: ct.LastJoin,
+		},
+		ExpiredAt: ct.ExpiresAt.Unix(),
 	}
 }

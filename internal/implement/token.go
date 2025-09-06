@@ -25,9 +25,13 @@ var (
 
 type TokenImplement interface {
 	GenerateSalt(int) []byte
-	CreateToken(entities.TokenClaims) (string, error)
-	ValidateToken(string) (entities.TokenClaims, error)
-	DeleteToken(string, string) error
+	CreateUserToken(entities.UserTokenClaims) (string, error)
+	CreateChannelToken(entities.ChannelTokenClaims) (string, error)
+	ValidateUserToken(string) (entities.UserTokenClaims, error)
+	ValidateChannelToken(string) (entities.ChannelTokenClaims, error)
+
+	DeleteUserToken(uint) error
+	DeleteChannelToken(uint, uint) error
 }
 type TokenRepository struct {
 	redis      *redis.Client
@@ -109,7 +113,6 @@ func (r *TokenRepository) ValidateToken(token string) (entities.TokenClaims, err
 	return tokenClaimsModel.ToDomain(), nil
 }
 
-func (r *TokenRepository) DeleteToken(user, channel string) error {
-	return r.redis.Del(context.Background(), jwtsaltPrefix+user+channel).Err()
-
+func (r *TokenRepository) DeleteUserToken(user string) error {
+	return r.redis.Del(context.Background(), jwtsaltPrefix+user).Err()
 }

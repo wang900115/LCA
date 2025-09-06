@@ -1,4 +1,4 @@
-package redismodel
+package rediskey
 
 const (
 	REDIS_USER_CHANNEL_TABLE = "user-channel:"

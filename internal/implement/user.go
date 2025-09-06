@@ -15,6 +15,8 @@ type UserImplement interface {
 	Read(context.Context, uint) (*entities.User, error)
 	Update(context.Context, uint, string, any) error
 	Delete(context.Context, uint) error
+	VerifyLogin(context.Context, string, string) (*uint, error)
+	VerifyLogout(context.Context, string) (*uint, error)
 	CreateLogin(context.Context, entities.UserLogin) error
 	UpdateLogin(context.Context, uint, int64) (*entities.UserLogin, error)
 	UpdateChannel(context.Context, uint, uint, int64) (*entities.UserChannel, error)
@@ -74,6 +76,16 @@ func (r *UserRepository) Delete(ctx context.Context, id uint) error {
 		return err
 	}
 	return nil
+}
+
+// !todo(db)
+func (r *UserRepository) VerifyLogin(ctx context.Context, username string, password string) (*uint, error) {
+	return nil, nil
+}
+
+// !todo(db)
+func (r *UserRepository) VerifyLogout(ctx context.Context, ipAddress string) (*uint, error) {
+	return nil, nil
 }
 
 // !todo(redis, db)

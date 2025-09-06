@@ -10,16 +10,16 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type JWT struct {
+type USERJWT struct {
 	response iresponse.IResponse
 	token    usecase.TokenUsecase
 }
 
-func NewJWT(response iresponse.IResponse, token *usecase.TokenUsecase) *JWT {
-	return &JWT{response: response, token: *token}
+func NewJWT(response iresponse.IResponse, token *usecase.TokenUsecase) *USERJWT {
+	return &USERJWT{response: response, token: *token}
 }
 
-func (j *JWT) Middleware(c *gin.Context) {
+func (j *USERJWT) Middleware(c *gin.Context) {
 	token, err := j.extract(c)
 	if err != nil {
 		j.response.AuthFail(c, err.Error())
@@ -27,22 +27,22 @@ func (j *JWT) Middleware(c *gin.Context) {
 		return
 	}
 
-	tokenClaims, err := j.token.ValidateToken(token)
+	tokenClaims, err := j.token.ValidateUserToken(token)
 	if err != nil {
 		j.response.AuthFail(c, err.Error())
 		c.Abort()
 		return
 	}
 
-	c.Set("channel", tokenClaims.Channel)
-	c.Set("user", tokenClaims.User)
+	c.Set("user_id", tokenClaims.UserID)
+	c.Set("ip_address", tokenClaims.LoginStatus.IPAddress)
 	c.Set("expired_at", tokenClaims.ExpiredAt)
 
 	c.Next()
 
 }
 
-func (JWT) extract(c *gin.Context) (string, error) {
+func (USERJWT) extract(c *gin.Context) (string, error) {
 	authorization := c.GetHeader("Authorization")
 	if authorization == "" {
 		return "", errors.New("no token")

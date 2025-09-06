@@ -1,7 +1,7 @@
 package entities
 
 type Message struct {
-	Channel string `json:"channel"`
-	User    string `json:"user"`
+	ID      uint   `json:"id"`
+	Sender  uint   `json:"sender"`
 	Content string `json:"content"`
 }

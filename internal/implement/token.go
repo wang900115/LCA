@@ -1,4 +1,4 @@
-package redisimplement
+package implement
 
 import (
 	"context"
@@ -8,7 +8,6 @@ import (
 
 	redismodel "github.com/wang900115/LCA/internal/adapter/redis/model"
 	"github.com/wang900115/LCA/internal/domain/entities"
-	redisinterface "github.com/wang900115/LCA/internal/domain/interface/redis"
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/redis/go-redis/v9"
@@ -24,12 +23,18 @@ var (
 	ErrTokenExpired = errors.New("token expired")
 )
 
+type TokenImplement interface {
+	GenerateSalt(int) []byte
+	CreateToken(entities.TokenClaims) (string, error)
+	ValidateToken(string) (entities.TokenClaims, error)
+	DeleteToken(string, string) error
+}
 type TokenRepository struct {
 	redis      *redis.Client
 	expiration time.Duration
 }
 
-func NewTokenRepository(redis *redis.Client, expiration time.Duration) redisinterface.TokenImplement {
+func NewTokenRepository(redis *redis.Client, expiration time.Duration) TokenImplement {
 	return &TokenRepository{
 		redis:      redis,
 		expiration: expiration,

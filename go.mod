@@ -1,6 +1,6 @@
 module github.com/wang900115/LCA
 
-go 1.25.0
+go 1.25.1
 
 require (
 	github.com/gin-contrib/pprof v1.5.3

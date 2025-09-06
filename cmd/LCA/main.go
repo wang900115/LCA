@@ -6,6 +6,7 @@ import (
 	"github.com/wang900115/LCA/internal/adapter/middleware"
 	corsMid "github.com/wang900115/LCA/internal/adapter/middleware/cors"
 	jwtMid "github.com/wang900115/LCA/internal/adapter/middleware/jwt"
+	redisrate "github.com/wang900115/LCA/internal/adapter/middleware/redis_rate"
 	"github.com/wang900115/LCA/internal/bootstrap"
 	gormimplement "github.com/wang900115/LCA/internal/implement/gorm"
 	redisimplement "github.com/wang900115/LCA/internal/implement/redis"
@@ -49,7 +50,7 @@ func main() {
 	jwtMiddle := jwtMid.NewJWT(response, tokenUsecase)
 	corsMiddle := corsMid.NewCORS(corsMid.NewOption((conf)))
 	secureHeaderMiddle := secureheader.NewSecureHeader()
-	// redisRateMiddle := redisrate.NewRateLimiter(redispool, zaplogger, redisrate.NewOption(conf))
+	redisRateMiddle := redisrate.NewRateLimiter(redispool, zaplogger, redisrate.NewOption(conf))
 
 	userRouter := router.NewUserRouter(userController, jwtMiddle)
 	messageRouter := router.NewMessageRouter(messageController, jwtMiddle)

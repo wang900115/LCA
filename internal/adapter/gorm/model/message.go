@@ -8,21 +8,17 @@ import (
 
 type Message struct {
 	gorm.Model
-
-	ChannelName string `json:"channel_name" gorm:"not null"`
-	Username    string `json:"user_name" gorm:"not null"`
-
-	Content string `json:"content" gorm:"not null"`
+	Sender  uint   `gorm:"column:sender;not null"`
+	Content string `gorm:"column:content;not null"`
 }
 
 func (m Message) TableName() string {
-	return "messages"
+	return "message"
 }
 
-func (m Message) ToDomain() entities.Message {
-	return entities.Message{
-		Channel: m.ChannelName,
-		User:    m.Username,
+func (m Message) ToDomain() *entities.Message {
+	return &entities.Message{
+		ID:      m.ID,
 		Content: m.Content,
 	}
 }

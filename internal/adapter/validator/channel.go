@@ -6,9 +6,10 @@ type ChannelCreateRequest struct {
 	ChannelType string `json:"type" binding:"required"`
 }
 
-type ChannelQueryRequest struct {
+type ChannelQueryUserRequest struct {
+	ChannelID uint `json:"channel" binding"required"`
 }
 
-type ChannelQueryUserRequest struct {
-	Name string `json:"channel_name" binding:"required"`
+type ChannelQueryMessageRequest struct {
+	ChannelID uint `json:"channel" binding"required"`
 }

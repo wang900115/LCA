@@ -17,42 +17,16 @@ func NewMessageController(response iresponse.IResponse, message *usecase.Message
 	return &MessageController{response: response, message: *message}
 }
 
-func (mc *MessageController) CreateMessage(c *gin.Context) {
-
-	ChannelUUID := c.GetString("channel_uuid")
-	UserUUID := c.GetString("user_uuid")
-	var request validator.MessageCreateRequest
+func (mc *MessageController) ReadMessage(c *gin.Context) {
+	var request validator.MessageReadRequest
 	if err := c.ShouldBindJSON(&request); err != nil {
 		mc.response.ValidatorFail(c, validatorFail)
 		return
 	}
-	messageUUID, err := mc.message.CreateMessage(ChannelUUID, UserUUID, request.Content)
+	message, err := mc.message.ReadMessage(c, request.MessageId)
 	if err != nil {
 		mc.response.FailWithError(c, createFail, err)
 		return
 	}
-	mc.response.SuccessWithData(c, createSuccess, messageUUID)
-}
-
-func (mc *MessageController) DeleteMessage(c *gin.Context) {
-	var request validator.MessageDeleteRequest
-	if err := c.ShouldBindJSON(&request); err != nil {
-		mc.response.ValidatorFail(c, validatorFail)
-		return
-	}
-	if err := mc.message.DeleteMessage(request.MessageUUID); err != nil {
-		mc.response.FailWithError(c, deleteFail, err)
-		return
-	}
-	mc.response.Success(c, deleteSuccess)
-}
-
-func (mc *MessageController) QueryMessage(c *gin.Context) {
-	channelUUID := c.GetString("channel_uuid")
-	messages, err := mc.message.QueryMessages(channelUUID)
-	if err != nil {
-		mc.response.FailWithError(c, queryFail, err)
-		return
-	}
-	mc.response.SuccessWithData(c, querySuccess, messages)
+	mc.response.SuccessWithData(c, createSuccess, message)
 }

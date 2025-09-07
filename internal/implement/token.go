@@ -5,6 +5,7 @@ import (
 	"context"
 	"crypto/rand"
 	"errors"
+	"strconv"
 	"time"
 
 	redismodel "github.com/wang900115/LCA/internal/adapter/redis/model"
@@ -70,12 +71,12 @@ func (r *TokenRepository) CreateUserToken(ctx context.Context, tokenClaims entit
 		DeviceInfo: *tokenClaims.LoginStatus.DeviceInfo,
 	}
 	tokenClaimsModel.ExpiresAt = jwt.NewNumericDate(time.Now().Add(r.loginExpiration))
-
-	_, err := r.redis.Set(ctx, jwtsaltPrefix+string(tokenClaims.UserID), string(salt), r.loginExpiration).Result()
+	id := strconv.FormatUint(uint64(tokenClaims.UserID), 10)
+	_, err := r.redis.Set(ctx, jwtsaltPrefix+id, string(salt), r.loginExpiration).Result()
 	if err != nil {
 		return "", err
 	}
-	return jwt.NewWithClaims(jwt.SigningMethodHS256, tokenClaimsModel).SignedString(append([]byte(string(tokenClaimsModel.UserID)), salt...))
+	return jwt.NewWithClaims(jwt.SigningMethodHS256, tokenClaimsModel).SignedString(append(r.loginSecret, salt...))
 }
 
 func (r *TokenRepository) CreateChannelToken(ctx context.Context, channelClaims entities.ChannelTokenClaims) (string, error) {
@@ -87,8 +88,9 @@ func (r *TokenRepository) CreateChannelToken(ctx context.Context, channelClaims 
 		LastJoin:  channelClaims.JoinStatus.LastJoin,
 	}
 	channelClaimsModel.ExpiresAt = jwt.NewNumericDate(time.Now().Add(r.joinExpiration))
-
-	_, err := r.redis.Set(ctx, jwtsaltPrefix+string(channelClaims.UserID)+string(channelClaims.ChannelID), string(salt), r.joinExpiration).Result()
+	id := strconv.FormatUint(uint64(channelClaims.UserID), 10)
+	channelId := strconv.FormatUint(uint64(channelClaims.ChannelID), 10)
+	_, err := r.redis.Set(ctx, jwtsaltPrefix+id+channelId, string(salt), r.joinExpiration).Result()
 	if err != nil {
 		return "", err
 	}
@@ -169,9 +171,12 @@ func (r *TokenRepository) ValidateChannelToken(token string) (*entities.ChannelT
 }
 
 func (r *TokenRepository) DeleteUserToken(ctx context.Context, userId uint) error {
-	return r.redis.Del(context.Background(), jwtsaltPrefix+string(userId)).Err()
+	id := strconv.FormatUint(uint64(userId), 10)
+	return r.redis.Del(context.Background(), jwtsaltPrefix+id).Err()
 }
 
 func (r *TokenRepository) DeleteChannelToken(ctx context.Context, userId uint, channelId uint) error {
-	return r.redis.Del(context.Background(), jwtsaltPrefix+string(userId)+string(channelId)).Err()
+	id := strconv.FormatUint(uint64(userId), 10)
+	channel_id := strconv.FormatUint(uint64(channelId), 10)
+	return r.redis.Del(context.Background(), jwtsaltPrefix+id+channel_id).Err()
 }

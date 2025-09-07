@@ -7,9 +7,9 @@ type ChannelCreateRequest struct {
 }
 
 type ChannelQueryUserRequest struct {
-	ChannelID uint `json:"channel" binding"required"`
+	ChannelID uint `json:"channel" binding:"required"`
 }
 
 type ChannelQueryMessageRequest struct {
-	ChannelID uint `json:"channel" binding"required"`
+	ChannelID uint `json:"channel" binding:"required"`
 }

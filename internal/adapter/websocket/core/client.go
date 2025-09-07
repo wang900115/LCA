@@ -2,18 +2,21 @@ package websocketcore
 
 import (
 	"github.com/gorilla/websocket"
+	"github.com/wang900115/LCA/internal/domain/entities"
 )
 
 type Client struct {
 	Conn      *websocket.Conn
 	ChannelID uint
+	User      entities.User
 	Send      chan []byte
 }
 
-func NewClient(conn *websocket.Conn, channelId uint) *Client {
+func NewClient(conn *websocket.Conn, channelId uint, user entities.User) *Client {
 	return &Client{
 		Conn:      conn,
 		ChannelID: channelId,
+		User:      user,
 		Send:      make(chan []byte, 256),
 	}
 }
@@ -26,14 +29,15 @@ func (c *Client) ReadPump(hub *Hub) {
 	}()
 
 	for {
-		_, _, err := c.Conn.ReadMessage()
+		_, message, err := c.Conn.ReadMessage()
 		if err != nil {
 			break
 		}
 
-		// hub.Broadcast <- BroadcastMessage{
-		// 	hub.Clients
-		// }
+		hub.Broadcast <- BroadcastMessage{
+			ChannelID: c.ChannelID,
+			Message:   message,
+		}
 	}
 }
 

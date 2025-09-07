@@ -42,7 +42,7 @@ func main() {
 
 	userController := controller.NewUserController(response, userUsecase, channelUsecase, messageUsecase)
 	channelController := controller.NewChannelController(response, channelUsecase)
-	websocketController := controller.NewWebSocketController(response, hub)
+	websocketController := controller.NewWebSocketController(response, userUsecase, hub)
 
 	authjwtMiddle := jwtMid.NewUSERJWT(response, tokenRepo)
 	joinjwtMiddle := jwtMid.NewCHANNELJWT(response, tokenRepo)

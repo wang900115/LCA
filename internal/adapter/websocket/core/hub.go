@@ -1,5 +1,13 @@
 package websocketcore
 
+import (
+	"encoding/json"
+	"time"
+
+	websocketevent "github.com/wang900115/LCA/internal/adapter/websocket/event"
+	websocketmodel "github.com/wang900115/LCA/internal/adapter/websocket/model"
+)
+
 type BroadcastMessage struct {
 	ChannelID uint
 	Message   []byte
@@ -32,28 +40,35 @@ func (h *Hub) Run() {
 			}
 			h.Clients[client.ChannelID][client] = true
 
-			// msg, _ := json.Marshal(payload)
+			payload := websocketmodel.ChannelPayload{
+				Type:      websocketevent.EVENT_USER_JOIN,
+				Sender:    client.User.Username,
+				Content:   "join the channel",
+				Timestamp: time.Now().UTC().Unix(),
+			}
 
-			// for c := range h.Clients[client.ChannelID] {
-			// 	c.Send <- msg
-			// }
+			msg, _ := json.Marshal(payload)
+
+			for c := range h.Clients[client.ChannelID] {
+				c.Send <- msg
+			}
 
 		// Unregister a client
 		case client := <-h.Unregister:
 			if clients, ok := h.Clients[client.ChannelID]; ok {
 				if _, ok := clients[client]; ok {
 
-					// payload := event.MessagePayload{
-					// 	Type:      event.EventLeave,
-					// 	Sender:    client.User,
-					// 	Content:   "leave the channel",
-					// 	Timestamp: time.Now().Format(time.RFC3339),
-					// }
+					payload := websocketmodel.ChannelPayload{
+						Type:      websocketevent.EVENT_USER_LEAVE,
+						Sender:    client.User.Username,
+						Content:   "leave the channel",
+						Timestamp: time.Now().UTC().Unix(),
+					}
 
-					// msg, _ := json.Marshal(payload)
-					// for c := range h.Clients[client.ChannelID] {
-					// 	c.Send <- msg
-					// }
+					msg, _ := json.Marshal(payload)
+					for c := range h.Clients[client.ChannelID] {
+						c.Send <- msg
+					}
 
 					delete(clients, client)
 					close(client.Send)
@@ -63,6 +78,7 @@ func (h *Hub) Run() {
 					}
 				}
 			}
+
 		// Broadcast a message to all clients in the channel
 		case message := <-h.Broadcast:
 			if clients, ok := h.Clients[message.ChannelID]; ok {

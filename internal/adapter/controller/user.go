@@ -41,7 +41,6 @@ func (uc *UserController) Delete(c *gin.Context) {
 		return
 	}
 	uc.response.Success(c, DELETED_SUCCESS)
-	return
 }
 
 func (uc *UserController) Login(c *gin.Context) {

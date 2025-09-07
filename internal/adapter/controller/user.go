@@ -10,14 +10,16 @@ import (
 
 type UserController struct {
 	response iresponse.IResponse
-	token    usecase.TokenUsecase
 	user     usecase.UserUsecase
+	channel  usecase.ChannelUsecase
+	message  usecase.MessageUsecase
 }
 
-func NewUserController(response iresponse.IResponse, token *usecase.TokenUsecase, user *usecase.UserUsecase) *UserController {
-	return &UserController{response: response, token: *token, user: *user}
+func NewUserController(response iresponse.IResponse, user *usecase.UserUsecase, channel *usecase.ChannelUsecase, message *usecase.MessageUsecase) *UserController {
+	return &UserController{response: response, user: *user, channel: *channel}
 }
 
+// todo email and otp
 func (uc *UserController) Register(c *gin.Context) {
 	var request validator.UserCreateRequest
 	if err := c.ShouldBindJSON(&request); err != nil {
@@ -48,17 +50,15 @@ func (uc *UserController) Login(c *gin.Context) {
 		uc.response.ValidatorFail(c, validatorFail)
 		return
 	}
-	id, userLogin, err := uc.user.Login(c, request)
-	if id == nil || userLogin == nil || err != nil {
+	token, userLogin, err := uc.user.Login(c, request)
+	if token == "" || userLogin == nil || err != nil {
 		uc.response.FailWithError(c, accessDenied, err)
 		return
 	}
-	token, err := uc.token.UserLoginGenerateToken(*id, *userLogin)
-	if err != nil {
-		uc.response.FailWithError(c, accessDenied, err)
-		return
-	}
-	uc.response.SuccessWithData(c, querySuccess, token)
+	uc.response.SuccessWithData(c, querySuccess, map[string]interface{}{
+		"token": token,
+		"info":  userLogin,
+	})
 }
 
 func (uc *UserController) Logout(c *gin.Context) {
@@ -67,12 +67,106 @@ func (uc *UserController) Logout(c *gin.Context) {
 		uc.response.Fail(c, accessDenied)
 		return
 	}
-	id, err := uc.user.Logout(c, c.ClientIP())
-	if id == nil || err != nil {
+	err := uc.user.Logout(c, c.ClientIP())
+	if err != nil {
 		uc.response.FailWithError(c, accessDenied, err)
 		return
 	}
-	if err := uc.token.DeleteUserToken(*id); err != nil {
+	uc.response.Success(c, querySuccess)
+}
+
+func (uc *UserController) Join(c *gin.Context) {
+	id := c.GetUint("user")
+	var request validator.UserJoinRequest
+	if err := c.ShouldBindJSON(&request); err != nil {
+		uc.response.ValidatorFail(c, validatorFail)
+		return
+	}
+	token, userJoin, err := uc.user.JoinChannel(c, id, request)
+	if token == "" || userJoin == nil || err != nil {
+		uc.response.FailWithError(c, accessDenied, err)
+		return
+	}
+	user, err := uc.user.ReadUser(c, id)
+	if err != nil {
+		uc.response.FailWithError(c, accessDenied, err)
+		return
+	}
+	err = uc.channel.UserJoin(c, request.ChannelID, *user)
+	if err != nil {
+		uc.response.FailWithError(c, accessDenied, err)
+		return
+	}
+	uc.response.SuccessWithData(c, querySuccess, map[string]interface{}{
+		"token": token,
+		"info":  userJoin,
+	})
+}
+
+func (uc *UserController) Leave(c *gin.Context) {
+	id := c.GetUint("user")
+	channelId := c.GetUint("channel")
+	if err := uc.user.LeaveChannel(c, id, channelId); err != nil {
+		uc.response.FailWithError(c, accessDenied, err)
+		return
+	}
+	if err := uc.channel.UserLeave(c, channelId, id); err != nil {
+		uc.response.FailWithError(c, accessDenied, err)
+		return
+	}
+	uc.response.Success(c, querySuccess)
+}
+
+func (uc *UserController) Comment(c *gin.Context) {
+	var request validator.UserCommentRequest
+	if err := c.ShouldBindJSON(&request); err != nil {
+		uc.response.ValidatorFail(c, validatorFail)
+		return
+	}
+	id := c.GetUint("user_id")
+	channelId := c.GetUint("channel_id")
+	if err := uc.channel.CommentMessage(c, id, channelId, request); err != nil {
+		uc.response.FailWithError(c, accessDenied, err)
+		return
+	}
+	if err := uc.message.CreateMessage(c, id, request.Content); err != nil {
+		uc.response.FailWithError(c, accessDenied, err)
+		return
+	}
+	uc.response.Success(c, querySuccess)
+}
+
+func (uc *UserController) Edite(c *gin.Context) {
+	var request validator.UserEditeRequest
+	if err := c.ShouldBindJSON(&request); err != nil {
+		uc.response.ValidatorFail(c, validatorFail)
+		return
+	}
+	id := c.GetUint("user_id")
+	channelId := c.GetUint("channel_id")
+	if err := uc.channel.EditeMessage(c, id, channelId, request.NewContent); err != nil {
+		uc.response.FailWithError(c, accessDenied, err)
+		return
+	}
+	if err := uc.message.UpdateMessage(c, id, "content", request.NewContent); err != nil {
+		uc.response.FailWithError(c, accessDenied, err)
+		return
+	}
+	uc.response.Success(c, querySuccess)
+}
+
+func (uc *UserController) Regain(c *gin.Context) {
+	var request validator.UserRegainRequest
+	if err := c.ShouldBindJSON(&request); err != nil {
+		uc.response.ValidatorFail(c, validatorFail)
+		return
+	}
+	id := c.GetUint("channel_id")
+	if err := uc.channel.RegainMessage(c, id, request.MessageID); err != nil {
+		uc.response.FailWithError(c, accessDenied, err)
+		return
+	}
+	if err := uc.message.DeleteMessage(c, request.MessageID); err != nil {
 		uc.response.FailWithError(c, accessDenied, err)
 		return
 	}

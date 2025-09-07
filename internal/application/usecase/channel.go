@@ -63,7 +63,11 @@ func (c *ChannelUsecase) UserLeave(ctx context.Context, id uint, user_id uint) e
 	return c.channelRepo.RemoveUser(ctx, id, user_id)
 }
 
-func (c *ChannelUsecase) CommentMessage(ctx context.Context, id uint, message entities.Message) error {
+func (c *ChannelUsecase) CommentMessage(ctx context.Context, id uint, channel_id uint, req validator.UserCommentRequest) error {
+	message := entities.Message{
+		Sender:  id,
+		Content: req.Content,
+	}
 	return c.channelRepo.AddMessage(ctx, id, message)
 }
 

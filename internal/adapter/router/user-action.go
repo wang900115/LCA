@@ -1,0 +1,42 @@
+package router
+
+import (
+	"github.com/wang900115/LCA/internal/adapter/controller"
+	"github.com/wang900115/LCA/internal/adapter/middleware/jwt"
+
+	"github.com/gin-gonic/gin"
+)
+
+type UserRouter struct {
+	userController controller.UserController
+	userJWT        jwt.USERJWT
+	channelJWT     jwt.CHANNELJWT
+}
+
+func NewUserRouter(userController *controller.UserController, userJWT *jwt.USERJWT, CHANNELJWT *jwt.CHANNELJWT) IRoute {
+	return &UserRouter{userController: *userController, userJWT: *userJWT, channelJWT: *CHANNELJWT}
+}
+
+func (ur *UserRouter) Setup(router *gin.RouterGroup) {
+	userGroup := router.Group("v1/user/")
+	{
+		userGroup.POST("register", ur.userController.Register)
+		userGroup.POST("delete", ur.userJWT.Middleware, ur.userController.Delete)
+	}
+	userAuthGroup := router.Group("v1/user/auth")
+	{
+		userAuthGroup.POST("login", ur.userController.Login)
+		userAuthGroup.POST("logout", ur.userJWT.Middleware, ur.userController.Logout)
+	}
+	userJoinGroup := router.Group("v1/user/channel", ur.userJWT.Middleware)
+	{
+		userJoinGroup.POST("join", ur.userController.Join)
+		userJoinGroup.POST("leave", ur.userController.Leave)
+	}
+	userSpeakGroup := router.Group("v1/user/channel/message", ur.userJWT.Middleware, ur.channelJWT.Middleware)
+	{
+		userSpeakGroup.POST("comment", ur.userController.Comment)
+		userSpeakGroup.POST("edited", ur.userController.Edite)
+		userSpeakGroup.POST("delete", ur.userController.Regain)
+	}
+}

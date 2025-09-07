@@ -3,7 +3,6 @@ package usecase
 import (
 	"context"
 
-	"github.com/wang900115/LCA/internal/adapter/validator"
 	"github.com/wang900115/LCA/internal/domain/entities"
 	"github.com/wang900115/LCA/internal/implement"
 )
@@ -18,10 +17,10 @@ func NewMessageUsecase(messageRepo implement.MessageImplement) *MessageUsecase {
 	}
 }
 
-func (m *MessageUsecase) CreateMessage(ctx context.Context, sender uint, req validator.MessageCreateRequest) error {
+func (m *MessageUsecase) CreateMessage(ctx context.Context, sender uint, content string) error {
 	messageDomain := entities.Message{
 		Sender:  sender,
-		Content: req.Content,
+		Content: content,
 	}
 	return m.messageRepo.Create(ctx, messageDomain)
 }

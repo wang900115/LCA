@@ -21,3 +21,21 @@ type UserLoginRequest struct {
 type UserDeleteRequest struct {
 	Password string `json:"password" binding:"required"`
 }
+
+type UserJoinRequest struct {
+	ChannelID uint  `json:"channel" binding:"required"`
+	JoinTime  int64 `json:"joinTime" binding:"required"`
+}
+
+type UserCommentRequest struct {
+	Content string `json:"content" binding:"required"`
+	// CommentTime int64  `json:"commentTime" binding:"required"`
+}
+
+type UserEditeRequest struct {
+	NewContent string `json:"content" binding:"required"`
+}
+
+type UserRegainRequest struct {
+	MessageID uint `json:"message" binding:"required"`
+}

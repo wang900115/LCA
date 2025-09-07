@@ -15,14 +15,15 @@ type UserTokenClaims struct {
 }
 
 type ChannelTokenClaims struct {
+	UserID    uint
 	ChannelID uint
 	Role      string
 	LastJoin  int64
 	jwt.RegisteredClaims
 }
 
-func (ut UserTokenClaims) ToDomain() entities.UserTokenClaims {
-	return entities.UserTokenClaims{
+func (ut UserTokenClaims) ToDomain() *entities.UserTokenClaims {
+	return &entities.UserTokenClaims{
 		UserID: ut.UserID,
 		LoginStatus: entities.UserLogin{
 			LastLogin:  ut.LastLogin,
@@ -33,8 +34,9 @@ func (ut UserTokenClaims) ToDomain() entities.UserTokenClaims {
 	}
 }
 
-func (ct ChannelTokenClaims) ToDomain() entities.ChannelTokenClaims {
-	return entities.ChannelTokenClaims{
+func (ct ChannelTokenClaims) ToDomain() *entities.ChannelTokenClaims {
+	return &entities.ChannelTokenClaims{
+		UserID:    ct.UserID,
 		ChannelID: ct.ChannelID,
 		JoinStatus: entities.UserChannel{
 			Role:     ct.Role,

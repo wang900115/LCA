@@ -23,7 +23,7 @@ func (cc *ChannelController) CreateChannel(c *gin.Context) {
 		cc.response.ValidatorFail(c, validatorFail)
 	}
 
-	channelName, err := cc.channel.CreateChannel(request.Name)
+	channelName, err := cc.channel.Create(request.Name)
 	if err != nil {
 		cc.response.FailWithError(c, createFail, err)
 		return

@@ -9,12 +9,14 @@ import (
 )
 
 type UserUsecase struct {
-	userRepo implement.UserImplement
+	userRepo  implement.UserImplement
+	tokenRepo implement.TokenImplement
 }
 
-func NewUserUsecase(userRepo implement.UserImplement) *UserUsecase {
+func NewUserUsecase(userRepo implement.UserImplement, tokenRepo implement.TokenImplement) *UserUsecase {
 	return &UserUsecase{
-		userRepo: userRepo,
+		userRepo:  userRepo,
+		tokenRepo: tokenRepo,
 	}
 }
 
@@ -44,26 +46,54 @@ func (u *UserUsecase) DeleteUser(ctx context.Context, id uint) error {
 	return u.userRepo.Delete(ctx, id)
 }
 
-func (u *UserUsecase) JoinChannel(ctx context.Context, id uint, channel_id uint, joinTime int64) (*entities.UserChannel, error) {
-	return u.userRepo.UpdateChannel(ctx, id, channel_id, joinTime)
+func (u *UserUsecase) JoinChannel(ctx context.Context, id uint, req validator.UserJoinRequest) (string, *entities.UserChannel, error) {
+	channel, err := u.userRepo.UpdateChannel(ctx, id, req.ChannelID, req.JoinTime)
+	if err != nil {
+		return "", nil, err
+	}
+	tokenClaims := entities.ChannelTokenClaims{
+		UserID:     id,
+		ChannelID:  req.ChannelID,
+		JoinStatus: *channel,
+	}
+	token, err := u.tokenRepo.CreateChannelToken(ctx, tokenClaims)
+	if err != nil {
+		return "", nil, err
+	}
+	return token, channel, nil
 }
 
-func (u *UserUsecase) Login(ctx context.Context, req validator.UserLoginRequest) (*uint, *entities.UserLogin, error) {
+func (u *UserUsecase) LeaveChannel(ctx context.Context, id uint, channel_id uint) error {
+	return u.tokenRepo.DeleteChannelToken(ctx, id, channel_id)
+}
+
+func (u *UserUsecase) Login(ctx context.Context, req validator.UserLoginRequest) (string, *entities.UserLogin, error) {
 	id, err := u.userRepo.VerifyLogin(ctx, req.Username, req.Password)
 	if err != nil {
-		return nil, nil, err
+		return "", nil, err
 	}
 	status, err := u.userRepo.UpdateLogin(ctx, *id, req.Login)
 	if err != nil {
-		return nil, nil, err
+		return "", nil, err
 	}
-	return id, status, nil
+	tokenClaims := entities.UserTokenClaims{
+		UserID:      *id,
+		LoginStatus: *status,
+	}
+	token, err := u.tokenRepo.CreateUserToken(ctx, tokenClaims)
+	if err != nil {
+		return "", nil, err
+	}
+	return token, status, nil
 }
 
-func (u *UserUsecase) Logout(ctx context.Context, ipAddress string) (*uint, error) {
+func (u *UserUsecase) Logout(ctx context.Context, ipAddress string) error {
 	id, err := u.userRepo.VerifyLogout(ctx, ipAddress)
 	if err != nil {
-		return nil, err
+		return err
 	}
-	return id, nil
+	if err := u.tokenRepo.DeleteUserToken(ctx, *id); err != nil {
+		return err
+	}
+	return nil
 }

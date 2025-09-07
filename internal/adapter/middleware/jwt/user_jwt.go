@@ -5,18 +5,18 @@ import (
 	"strings"
 
 	iresponse "github.com/wang900115/LCA/internal/adapter/controller/response"
-	"github.com/wang900115/LCA/internal/application/usecase"
+	"github.com/wang900115/LCA/internal/implement"
 
 	"github.com/gin-gonic/gin"
 )
 
 type USERJWT struct {
 	response iresponse.IResponse
-	token    usecase.TokenUsecase
+	token    implement.TokenImplement
 }
 
-func NewJWT(response iresponse.IResponse, token *usecase.TokenUsecase) *USERJWT {
-	return &USERJWT{response: response, token: *token}
+func NewUSERJWT(response iresponse.IResponse, token implement.TokenImplement) *USERJWT {
+	return &USERJWT{response: response, token: token}
 }
 
 func (j *USERJWT) Middleware(c *gin.Context) {
@@ -36,7 +36,7 @@ func (j *USERJWT) Middleware(c *gin.Context) {
 
 	c.Set("user_id", tokenClaims.UserID)
 	c.Set("ip_address", tokenClaims.LoginStatus.IPAddress)
-	c.Set("expired_at", tokenClaims.ExpiredAt)
+	c.Set("last_login", tokenClaims.LoginStatus.LastLogin)
 
 	c.Next()
 

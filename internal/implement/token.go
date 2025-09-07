@@ -1,6 +1,7 @@
 package implement
 
 import (
+	"bytes"
 	"context"
 	"crypto/rand"
 	"errors"
@@ -25,23 +26,29 @@ var (
 
 type TokenImplement interface {
 	GenerateSalt(int) []byte
-	CreateUserToken(entities.UserTokenClaims) (string, error)
-	CreateChannelToken(entities.ChannelTokenClaims) (string, error)
-	ValidateUserToken(string) (entities.UserTokenClaims, error)
-	ValidateChannelToken(string) (entities.ChannelTokenClaims, error)
-
-	DeleteUserToken(uint) error
-	DeleteChannelToken(uint, uint) error
+	CreateUserToken(context.Context, entities.UserTokenClaims) (string, error)
+	CreateChannelToken(context.Context, entities.ChannelTokenClaims) (string, error)
+	ValidateUserToken(string) (*entities.UserTokenClaims, error)
+	ValidateChannelToken(string) (*entities.ChannelTokenClaims, error)
+	DeleteUserToken(context.Context, uint) error
+	DeleteChannelToken(context.Context, uint, uint) error
 }
+
 type TokenRepository struct {
-	redis      *redis.Client
-	expiration time.Duration
+	redis           *redis.Client
+	loginExpiration time.Duration
+	joinExpiration  time.Duration
+	loginSecret     []byte
+	joinSecret      []byte
 }
 
-func NewTokenRepository(redis *redis.Client, expiration time.Duration) TokenImplement {
+func NewTokenRepository(redis *redis.Client, loginExpiration time.Duration, joinExpiration time.Duration, loginSecret []byte, joinSecret []byte) TokenImplement {
 	return &TokenRepository{
-		redis:      redis,
-		expiration: expiration,
+		redis:           redis,
+		loginExpiration: loginExpiration,
+		joinExpiration:  joinExpiration,
+		loginSecret:     loginSecret,
+		joinSecret:      joinSecret,
 	}
 }
 
@@ -54,65 +61,117 @@ func (TokenRepository) GenerateSalt(saltSize int) []byte {
 	return salt
 }
 
-func (r *TokenRepository) CreateToken(tokenClaims entities.TokenClaims) (string, error) {
+func (r *TokenRepository) CreateUserToken(ctx context.Context, tokenClaims entities.UserTokenClaims) (string, error) {
 	salt := r.GenerateSalt(saltSize)
-	tokenClaimsModel := redismodel.TokenClaims{
-		User:    tokenClaims.User,
-		Channel: tokenClaims.Channel,
+	tokenClaimsModel := redismodel.UserTokenClaims{
+		UserID:     tokenClaims.UserID,
+		LastLogin:  tokenClaims.LoginStatus.LastLogin,
+		IPAddress:  *tokenClaims.LoginStatus.IPAddress,
+		DeviceInfo: *tokenClaims.LoginStatus.DeviceInfo,
 	}
-	tokenClaimsModel.ExpiresAt = jwt.NewNumericDate(time.Now().Add(r.expiration))
+	tokenClaimsModel.ExpiresAt = jwt.NewNumericDate(time.Now().Add(r.loginExpiration))
 
-	_, err := r.redis.Set(context.Background(), jwtsaltPrefix+tokenClaims.User+tokenClaims.Channel, string(salt), r.expiration).Result()
+	_, err := r.redis.Set(ctx, jwtsaltPrefix+string(tokenClaims.UserID), string(salt), r.loginExpiration).Result()
 	if err != nil {
 		return "", err
 	}
-	return jwt.NewWithClaims(jwt.SigningMethodHS256, tokenClaimsModel).SignedString(append([]byte(tokenClaimsModel.User+tokenClaims.Channel), salt...))
+	return jwt.NewWithClaims(jwt.SigningMethodHS256, tokenClaimsModel).SignedString(append([]byte(string(tokenClaimsModel.UserID)), salt...))
 }
 
-func (r *TokenRepository) ValidateToken(token string) (entities.TokenClaims, error) {
+func (r *TokenRepository) CreateChannelToken(ctx context.Context, channelClaims entities.ChannelTokenClaims) (string, error) {
+	salt := r.GenerateSalt(saltSize)
+	channelClaimsModel := redismodel.ChannelTokenClaims{
+		UserID:    channelClaims.UserID,
+		ChannelID: channelClaims.ChannelID,
+		Role:      channelClaims.JoinStatus.Role,
+		LastJoin:  channelClaims.JoinStatus.LastJoin,
+	}
+	channelClaimsModel.ExpiresAt = jwt.NewNumericDate(time.Now().Add(r.joinExpiration))
+
+	_, err := r.redis.Set(ctx, jwtsaltPrefix+string(channelClaims.UserID)+string(channelClaims.ChannelID), string(salt), r.joinExpiration).Result()
+	if err != nil {
+		return "", err
+	}
+	return jwt.NewWithClaims(jwt.SigningMethodHS256, channelClaimsModel).SignedString(append(r.joinSecret, salt...))
+}
+
+func (r *TokenRepository) ValidateUserToken(token string) (*entities.UserTokenClaims, error) {
 	unvertifiedToken, _, err := new(jwt.Parser).ParseUnverified(token, jwt.MapClaims{})
 	if err != nil {
-		return entities.TokenClaims{}, err
+		return nil, err
 	}
 	mapClaims, ok := unvertifiedToken.Claims.(jwt.MapClaims)
 	if !ok {
-		return entities.TokenClaims{}, errors.New("token map failed")
+		return nil, errors.New("token map failed")
 	}
-
 	user, ok := mapClaims["user"].(string)
 	if !ok {
-		return entities.TokenClaims{}, errors.New("token map userUUID failed")
+		return nil, errors.New("token map user failed")
 	}
-
-	channel, ok := mapClaims["channel"].(string)
-	if !ok {
-		return entities.TokenClaims{}, errors.New("token map channelUUID failed")
-	}
-
-	salt, err := r.redis.Get(context.Background(), jwtsaltPrefix+user+channel).Result()
+	salt, err := r.redis.Get(context.Background(), jwtsaltPrefix+user).Result()
 	if err != nil {
-		return entities.TokenClaims{}, err
+		return nil, err
 	}
-
-	key := []byte(user + channel + salt)
-	tokenClaims, parseErr := jwt.ParseWithClaims(token, &redismodel.TokenClaims{}, func(token *jwt.Token) (interface{}, error) {
+	key := bytes.Join([][]byte{r.loginSecret, []byte(salt)}, []byte{})
+	tokenClaims, parseErr := jwt.ParseWithClaims(token, &redismodel.UserTokenClaims{}, func(token *jwt.Token) (interface{}, error) {
 		return key, nil
 	})
 	if parseErr != nil {
-		return entities.TokenClaims{}, parseErr
+		return nil, parseErr
 	}
-
 	if !tokenClaims.Valid {
-		return entities.TokenClaims{}, ErrTokenExpired
+		return nil, ErrTokenExpired
 	}
-
-	tokenClaimsModel, ok := tokenClaims.Claims.(*redismodel.TokenClaims)
+	tokenClaimsModel, ok := tokenClaims.Claims.(*redismodel.UserTokenClaims)
 	if !ok {
-		return entities.TokenClaims{}, ErrInvalidToken
+		return nil, ErrInvalidToken
 	}
 	return tokenClaimsModel.ToDomain(), nil
 }
 
-func (r *TokenRepository) DeleteUserToken(user string) error {
-	return r.redis.Del(context.Background(), jwtsaltPrefix+user).Err()
+func (r *TokenRepository) ValidateChannelToken(token string) (*entities.ChannelTokenClaims, error) {
+	unvertifiedToken, _, err := new(jwt.Parser).ParseUnverified(token, jwt.MapClaims{})
+	if err != nil {
+		return nil, err
+	}
+	mapClaims, ok := unvertifiedToken.Claims.(jwt.MapClaims)
+	if !ok {
+		return nil, errors.New("token map failed")
+	}
+	user, ok := mapClaims["user"].(string)
+	if !ok {
+		return nil, errors.New("token map user failed")
+	}
+	channel, ok := mapClaims["channel"].(string)
+	if !ok {
+		return nil, errors.New("token map channel failed")
+	}
+
+	salt, err := r.redis.Get(context.Background(), jwtsaltPrefix+user+channel).Result()
+	if err != nil {
+		return nil, err
+	}
+	key := bytes.Join([][]byte{r.joinSecret, []byte(salt)}, []byte{})
+	tokenClaims, parseErr := jwt.ParseWithClaims(token, &redismodel.ChannelTokenClaims{}, func(token *jwt.Token) (interface{}, error) {
+		return key, nil
+	})
+	if parseErr != nil {
+		return nil, parseErr
+	}
+	if !tokenClaims.Valid {
+		return nil, ErrTokenExpired
+	}
+	tokenClaimsModel, ok := tokenClaims.Claims.(*redismodel.ChannelTokenClaims)
+	if !ok {
+		return nil, ErrInvalidToken
+	}
+	return tokenClaimsModel.ToDomain(), nil
+}
+
+func (r *TokenRepository) DeleteUserToken(ctx context.Context, userId uint) error {
+	return r.redis.Del(context.Background(), jwtsaltPrefix+string(userId)).Err()
+}
+
+func (r *TokenRepository) DeleteChannelToken(ctx context.Context, userId uint, channelId uint) error {
+	return r.redis.Del(context.Background(), jwtsaltPrefix+string(userId)+string(channelId)).Err()
 }

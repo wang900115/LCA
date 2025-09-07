@@ -7,6 +7,7 @@ type UserTokenClaims struct {
 }
 
 type ChannelTokenClaims struct {
+	UserID     uint        `json:"user"`
 	ChannelID  uint        `json:"channel"`
 	JoinStatus UserChannel `json:"join"`
 	ExpiredAt  int64       `json:"expired_at"`

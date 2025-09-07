@@ -29,7 +29,6 @@ type UserJoinRequest struct {
 
 type UserCommentRequest struct {
 	Content string `json:"content" binding:"required"`
-	// CommentTime int64  `json:"commentTime" binding:"required"`
 }
 
 type UserEditeRequest struct {

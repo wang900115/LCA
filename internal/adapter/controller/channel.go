@@ -23,22 +23,20 @@ func (cc *ChannelController) CreateChannel(c *gin.Context) {
 		cc.response.ValidatorFail(c, validatorFail)
 	}
 
-	channelName, err := cc.channel.Create(request.Name)
+	err := cc.channel.CreateChannel(c, request)
 	if err != nil {
 		cc.response.FailWithError(c, createFail, err)
 		return
 	}
-	cc.response.SuccessWithData(c, createSuccess, channelName)
+	cc.response.Success(c, createSuccess)
 }
 
 func (cc *ChannelController) QueryUsers(c *gin.Context) {
 	var request validator.ChannelQueryUserRequest
 	if err := c.ShouldBindJSON(&request); err != nil {
 		cc.response.ValidatorFail(c, validatorFail)
-		return
 	}
-
-	users, err := cc.channel.QueryUsers(request.Name)
+	users, err := cc.channel.QueryChannelUsers(c, request.ChannelID)
 	if err != nil {
 		cc.response.FailWithError(c, queryFail, err)
 		return
@@ -46,8 +44,12 @@ func (cc *ChannelController) QueryUsers(c *gin.Context) {
 	cc.response.SuccessWithData(c, querySuccess, users)
 }
 
-func (cc *ChannelController) QueryChannel(c *gin.Context) {
-	channels, err := cc.channel.QueryChannels()
+func (cc *ChannelController) QueryMessage(c *gin.Context) {
+	var request validator.ChannelQueryUserRequest
+	if err := c.ShouldBindJSON(&request); err != nil {
+		cc.response.ValidatorFail(c, validatorFail)
+	}
+	channels, err := cc.channel.QueryChannelMessages(c, request.ChannelID)
 	if err != nil {
 		cc.response.FailWithError(c, queryFail, err)
 		return

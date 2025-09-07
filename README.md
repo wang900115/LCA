@@ -32,13 +32,13 @@ You can download the lastest build here:
   - *Docker*
     -  Run:  `docker-compose up --build`
     -  ShutDowan:  `docker-compose down`
-  -  *Local* 
+  - *Local* 
     - Window: 
       -  Build: `go build -o build ./cmd/LCA/main.go`
       -  Run: `./build/main.exe`
     - Linux:
-      - Build: `make build`
-      - Run: `make run`
+      -  Build: `make build`
+      -  Run: `make run`
 
 ## Question
   If you have any questions, please send me the ISSUE. I will personally understand and check if there are any omissions. Keep doing the best.

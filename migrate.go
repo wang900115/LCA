@@ -17,7 +17,8 @@ func main() {
 		log.Fatal("failed to connect database:", err)
 	}
 
-	err = db.AutoMigrate(&gormmodel.Channel{}, &gormmodel.User{}, &gormmodel.Message{})
+	err = db.AutoMigrate(&gormmodel.Channel{}, &gormmodel.User{}, &gormmodel.Message{},
+		&gormmodel.ChannelMessage{}, &gormmodel.ChannelUser{}, &gormmodel.UserLogin{}, &gormmodel.UserChannel{})
 	if err != nil {
 		log.Fatal("failed to migrate database: ", err)
 	}

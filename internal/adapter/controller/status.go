@@ -1,27 +1,26 @@
 package controller
 
-var (
-	paramError = "param error"
+const (
+	// Request Errors
+	INVALID_PARAM_ERROR = "INVALID_PARAM_ERROR"
+	MISSING_PARAM_ERROR = "MISSING_PARAM_ERROR"
+	VALIDATION_ERROR    = "VALIDATION_ERROR"
 
-	catchSuccess = "catch success"
-	catchFail    = "catch fail"
+	// Auth Errors
+	UNAUTHORIZED_ERROR = "UNAUTHORIZED_ERROR"
+	FORBIDDEN_ERROR    = "FORBIDDEN_ERROR"
+	EXPIRATION_ERROR   = "EXPIRATION_ERROR"
 
-	testSuccess = "test success"
-	testFail    = "test fail"
+	// Common Errors
+	COMMON_INTERNAL_ERROR = "COMMON_INTERNAL_ERROR"
+	COMMON_EXTERNAL_ERROR = "COMMON_EXTERNAL_ERROR"
+)
 
-	querySuccess = "query success"
-	queryFail    = "query fail"
-
-	createSuccess = "create success"
-	createFail    = "create fail"
-
-	updateSuccess = "update success"
-	updateFail    = "update fail"
-
-	deleteSuccess = "delete success"
-	deleteFail    = "delete fail"
-
-	validatorFail = "validator fail"
-
-	accessDenied = "access denied"
+const (
+	// Success
+	SUCCESS          = "SUCCESS"
+	CREATED_SUCCESS  = "CREATED_SUCCESS"
+	UPDATED_SUCCESS  = "UPDATED_SUCCESS"
+	DELETED_SUCCESS  = "DELETED_SUCCESS"
+	ACCEPTED_SUCCESS = "ACCEPTED_SUCCESS"
 )

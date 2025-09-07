@@ -6,15 +6,13 @@ import (
 	"github.com/wang900115/LCA/internal/adapter/middleware"
 	corsMid "github.com/wang900115/LCA/internal/adapter/middleware/cors"
 	jwtMid "github.com/wang900115/LCA/internal/adapter/middleware/jwt"
-	redisrate "github.com/wang900115/LCA/internal/adapter/middleware/redis_rate"
+	websocketcore "github.com/wang900115/LCA/internal/adapter/websocket/core"
 	"github.com/wang900115/LCA/internal/bootstrap"
-	gormimplement "github.com/wang900115/LCA/internal/implement/gorm"
-	redisimplement "github.com/wang900115/LCA/internal/implement/redis"
+	"github.com/wang900115/LCA/internal/implement"
 
 	// redisrate "LCA/internal/adapter/gin/middleware/redis_rate"
 	secureheader "github.com/wang900115/LCA/internal/adapter/middleware/secure_header"
 	"github.com/wang900115/LCA/internal/adapter/router"
-	"github.com/wang900115/LCA/internal/adapter/websocket/connection"
 	"github.com/wang900115/LCA/internal/application/usecase"
 )
 
@@ -27,40 +25,41 @@ func main() {
 
 	// gorm.RunMigrations(postgresql)
 
-	userRepo := gormimplement.NewUserRepository(postgresql)
-	messageRepo := gormimplement.NewMessageRepository(postgresql)
-	channelRepo := gormimplement.NewChannelRepository(postgresql)
-	tokenRepo := redisimplement.NewTokenRepository(redispool, conf.GetDuration("jwt.expiration"))
+	userRepo := implement.NewUserRepository(postgresql, redispool)
+	messageRepo := implement.NewMessageRepository(postgresql, redispool)
+	channelRepo := implement.NewChannelRepository(postgresql, redispool)
+	// !todo
+	tokenRepo := implement.NewTokenRepository(redispool, conf.GetDuration("jwt.login_expiration"), conf.GetDuration("jwt.join_expiration"), []byte("0"), []byte("0"))
 
-	userUsecase := usecase.NewUserUsecase(userRepo)
+	userUsecase := usecase.NewUserUsecase(userRepo, tokenRepo)
 	messageUsecase := usecase.NewMessageUsecase(messageRepo)
 	channelUsecase := usecase.NewChannelUsecase(channelRepo)
-	tokenUsecase := usecase.NewTokenUsecase(tokenRepo)
 
 	response := response.NewJSONResponse(zaplogger)
 
-	hub := connection.NewHub()
+	hub := websocketcore.NewHub()
 	go hub.Run()
 
-	userController := controller.NewUserController(response, tokenUsecase, userUsecase)
-	messageController := controller.NewMessageController(response, messageUsecase)
+	userController := controller.NewUserController(response, userUsecase, channelUsecase, messageUsecase)
 	channelController := controller.NewChannelController(response, channelUsecase)
-	websocketController := controller.NewWebSocketController(response, hub, tokenUsecase, messageUsecase)
+	websocketController := controller.NewWebSocketController(response, hub)
 
-	jwtMiddle := jwtMid.NewJWT(response, tokenUsecase)
+	authjwtMiddle := jwtMid.NewUSERJWT(response, tokenRepo)
+	joinjwtMiddle := jwtMid.NewCHANNELJWT(response, tokenRepo)
+
 	corsMiddle := corsMid.NewCORS(corsMid.NewOption((conf)))
 	secureHeaderMiddle := secureheader.NewSecureHeader()
-	redisRateMiddle := redisrate.NewRateLimiter(redispool, zaplogger, redisrate.NewOption(conf))
+	// redisRateMiddle := redisrate.NewRateLimiter(redispool, zaplogger, redisrate.NewOption(conf))
 
-	userRouter := router.NewUserRouter(userController, jwtMiddle)
-	messageRouter := router.NewMessageRouter(messageController, jwtMiddle)
-	channelRouter := router.NewChannelRouter(channelController)
+	userRouter := router.NewUserRouter(userController, authjwtMiddle, joinjwtMiddle)
+	channelRouter := router.NewChannelRouter(channelController, authjwtMiddle, joinjwtMiddle)
+	// messageRouter := router.NewMessageRouter(messageController)
 	websocketRouter := router.NewWebSocketRouter(websocketController)
 
 	server := bootstrap.NewServer(
 		[]router.IRoute{
 			userRouter,
-			messageRouter,
+			// messageRouter,
 			channelRouter,
 			websocketRouter,
 		},

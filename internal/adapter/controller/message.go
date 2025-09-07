@@ -20,13 +20,13 @@ func NewMessageController(response iresponse.IResponse, message *usecase.Message
 func (mc *MessageController) ReadMessage(c *gin.Context) {
 	var request validator.MessageReadRequest
 	if err := c.ShouldBindJSON(&request); err != nil {
-		mc.response.ValidatorFail(c, validatorFail)
+		mc.response.ValidatorFail(c, INVALID_PARAM_ERROR)
 		return
 	}
 	message, err := mc.message.ReadMessage(c, request.MessageId)
 	if err != nil {
-		mc.response.FailWithError(c, createFail, err)
+		mc.response.FailWithError(c, COMMON_INTERNAL_ERROR, err)
 		return
 	}
-	mc.response.SuccessWithData(c, createSuccess, message)
+	mc.response.SuccessWithData(c, ACCEPTED_SUCCESS, message)
 }

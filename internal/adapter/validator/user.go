@@ -22,6 +22,11 @@ type UserDeleteRequest struct {
 	Password string `json:"password" binding:"required"`
 }
 
+type UserParticateRequest struct {
+	ChannelID uint  `json:"channel" binding:"required"`
+	JoinTime  int64 `json:"joinTime" binding:"required"`
+}
+
 type UserJoinRequest struct {
 	ChannelID uint  `json:"channel" binding:"required"`
 	JoinTime  int64 `json:"joinTime" binding:"required"`

@@ -19,7 +19,7 @@ type UserLogin struct {
 	DeviceInfo *string `json:"deviceInfo"`
 }
 
-type UserChannel struct {
+type UserJoin struct {
 	Role     string `json:"role"`
 	LastJoin int64  `json:"lastJoin"`
 }

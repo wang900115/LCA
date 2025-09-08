@@ -46,7 +46,7 @@ func (u *UserUsecase) DeleteUser(ctx context.Context, id uint) error {
 	return u.userRepo.Delete(ctx, id)
 }
 
-func (u *UserUsecase) JoinChannel(ctx context.Context, id uint, req validator.UserJoinRequest) (string, *entities.UserChannel, error) {
+func (u *UserUsecase) JoinChannel(ctx context.Context, id uint, req validator.UserJoinRequest) (string, *entities.UserJoin, error) {
 	channel, err := u.userRepo.UpdateChannel(ctx, id, req.ChannelID, req.JoinTime)
 	if err != nil {
 		return "", nil, err

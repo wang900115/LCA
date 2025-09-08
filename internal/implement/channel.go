@@ -11,12 +11,12 @@ import (
 )
 
 type ChannelImplement interface {
-	Create(context.Context, entities.Channel) error
+	Create(context.Context, uint, entities.Channel) error
 	Read(context.Context, uint) (*entities.Channel, error)
 	Update(context.Context, uint, string, any) error
 	Delete(context.Context, uint) error
-	ReadUsers(context.Context, uint) (*entities.ChannelUser, error)
-	ReadMessages(context.Context, uint) (*entities.ChannelMessage, error)
+	ReadUsers(context.Context, uint) ([]*entities.User, error)
+	ReadMessages(context.Context, uint) ([]*entities.Message, error)
 	AddUser(context.Context, uint, entities.User) error
 	RemoveUser(context.Context, uint, uint) error
 	AddMessage(context.Context, uint, entities.Message) error
@@ -36,10 +36,15 @@ func NewChannelRepository(gorm *gorm.DB, redis *redis.Client) ChannelImplement {
 	}
 }
 
-func (r *ChannelRepository) Create(ctx context.Context, channel entities.Channel) error {
+func (r *ChannelRepository) Create(ctx context.Context, id uint, channel entities.Channel) error {
+	var user gormmodel.User
+	if err := r.gorm.WithContext(ctx).First(&user, id).Error; err != nil {
+		return err
+	}
 	channelModel := gormmodel.Channel{
 		Name:        channel.Name,
-		Founder:     channel.Founder,
+		FounderID:   channel.FounderID,
+		Founder:     user,
 		ChannelType: channel.ChannelType,
 	}
 	if err := r.gorm.WithContext(ctx).Create(&channelModel).Error; err != nil {
@@ -76,21 +81,13 @@ func (r *ChannelRepository) Delete(ctx context.Context, id uint) error {
 }
 
 // !todo(redis, db)
-func (r *ChannelRepository) ReadUsers(ctx context.Context, id uint) (*entities.ChannelUser, error) {
-	var channelUser gormmodel.ChannelUser
-	if err := r.gorm.WithContext(ctx).Where("channel_id = ?", id).First(&channelUser).Error; err != nil {
-		return nil, err
-	}
-	return channelUser.ToDomain(), nil
+func (r *ChannelRepository) ReadUsers(ctx context.Context, id uint) ([]*entities.User, error) {
+	return nil, nil
 }
 
 // !todo(redis, db)
-func (r *ChannelRepository) ReadMessages(ctx context.Context, id uint) (*entities.ChannelMessage, error) {
-	var channelMessage gormmodel.ChannelMessage
-	if err := r.gorm.WithContext(ctx).Where("channel_id = ?", id).First(&channelMessage).Error; err != nil {
-		return nil, err
-	}
-	return channelMessage.ToDomain(), nil
+func (r *ChannelRepository) ReadMessages(ctx context.Context, id uint) ([]*entities.Message, error) {
+	return nil, nil
 }
 
 // !todo(redis, db)

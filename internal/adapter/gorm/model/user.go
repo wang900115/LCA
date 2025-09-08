@@ -59,25 +59,3 @@ func (ul UserLogin) ToDomain() *entities.UserLogin {
 		DeviceInfo: nil,
 	}
 }
-
-type UserChannel struct {
-	gorm.Model
-	UserID    uint   `gorm:"column:user_id"`
-	ChannelID uint   `gorm:"column:channel_id"`
-	Role      string `gorm:"column:role"`
-	LastJoin  int64  `gorm:"column:last_join"`
-
-	Channel Channel `gorm:"foreignkey:ChannelID; references:ID"`
-	User    User    `gorm:"foreignKey:UserID;reference:ID"`
-}
-
-func (uc UserChannel) TableName() string {
-	return "user_channel"
-}
-
-func (uc UserChannel) ToDomain() *entities.UserChannel {
-	return &entities.UserChannel{
-		Role:     uc.Role,
-		LastJoin: uc.LastJoin,
-	}
-}

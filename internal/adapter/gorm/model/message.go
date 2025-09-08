@@ -8,8 +8,12 @@ import (
 
 type Message struct {
 	gorm.Model
-	Sender  uint   `gorm:"column:sender;not null"`
-	Content string `gorm:"column:content;not null"`
+	ChannelID uint   `gorm:"index; not null"`
+	Sender    uint   `gorm:"column:sender;not null"`
+	Content   string `gorm:"column:content;not null"`
+
+	Channel Channel `gorm:"foreignKey:ChannelID"`
+	User    User    `gorm:"foreignKey:Sender"`
 }
 
 func (m Message) TableName() string {

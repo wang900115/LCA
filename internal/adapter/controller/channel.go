@@ -18,12 +18,13 @@ func NewChannelController(reponse iresponse.IResponse, channel *usecase.ChannelU
 }
 
 func (cc *ChannelController) CreateChannel(c *gin.Context) {
+	id := c.GetUint("user_id")
 	var request validator.ChannelCreateRequest
 	if err := c.ShouldBindJSON(&request); err != nil {
 		cc.response.ValidatorFail(c, INVALID_PARAM_ERROR)
 	}
 
-	err := cc.channel.CreateChannel(c, request)
+	err := cc.channel.CreateChannel(c, id, request)
 	if err != nil {
 		cc.response.FailWithError(c, COMMON_INTERNAL_ERROR, err)
 		return
@@ -32,11 +33,8 @@ func (cc *ChannelController) CreateChannel(c *gin.Context) {
 }
 
 func (cc *ChannelController) QueryUsers(c *gin.Context) {
-	var request validator.ChannelQueryUserRequest
-	if err := c.ShouldBindJSON(&request); err != nil {
-		cc.response.ValidatorFail(c, INVALID_PARAM_ERROR)
-	}
-	users, err := cc.channel.QueryChannelUsers(c, request.ChannelID)
+	channelID := c.GetUint("channel_id")
+	users, err := cc.channel.QueryChannelUsers(c, channelID)
 	if err != nil {
 		cc.response.FailWithError(c, COMMON_INTERNAL_ERROR, err)
 		return
@@ -45,14 +43,11 @@ func (cc *ChannelController) QueryUsers(c *gin.Context) {
 }
 
 func (cc *ChannelController) QueryMessages(c *gin.Context) {
-	var request validator.ChannelQueryUserRequest
-	if err := c.ShouldBindJSON(&request); err != nil {
-		cc.response.ValidatorFail(c, INVALID_PARAM_ERROR)
-	}
-	channels, err := cc.channel.QueryChannelMessages(c, request.ChannelID)
+	channelID := c.GetUint("channel_id")
+	messages, err := cc.channel.QueryChannelMessages(c, channelID)
 	if err != nil {
 		cc.response.FailWithError(c, COMMON_INTERNAL_ERROR, err)
 		return
 	}
-	cc.response.SuccessWithData(c, ACCEPTED_SUCCESS, channels)
+	cc.response.SuccessWithData(c, ACCEPTED_SUCCESS, messages)
 }

@@ -74,6 +74,21 @@ func (uc *UserController) Logout(c *gin.Context) {
 	uc.response.Success(c, SUCCESS)
 }
 
+func (uc *UserController) Particate(c *gin.Context) {
+	id := c.GetUint("user")
+	var request validator.UserParticateRequest
+	if err := c.ShouldBindJSON(&request); err != nil {
+		uc.response.ValidatorFail(c, INVALID_PARAM_ERROR)
+		return
+	}
+	err := uc.user.ParticateChannel(c, id, request)
+	if err != nil {
+		uc.response.FailWithError(c, COMMON_INTERNAL_ERROR, err)
+		return
+	}
+	uc.response.Success(c, SUCCESS)
+}
+
 func (uc *UserController) Join(c *gin.Context) {
 	id := c.GetUint("user")
 	var request validator.UserJoinRequest
@@ -91,7 +106,7 @@ func (uc *UserController) Join(c *gin.Context) {
 		uc.response.FailWithError(c, COMMON_INTERNAL_ERROR, err)
 		return
 	}
-	err = uc.channel.UserJoin(c, request.ChannelID, *user)
+	err = uc.channel.UserJoin(c, request.ChannelID, user.ID)
 	if err != nil {
 		uc.response.FailWithError(c, COMMON_INTERNAL_ERROR, err)
 		return
@@ -123,15 +138,15 @@ func (uc *UserController) Comment(c *gin.Context) {
 		return
 	}
 	id := c.GetUint("user_id")
-	channelId := c.GetUint("channel_id")
-	if err := uc.channel.CommentMessage(c, id, channelId, request); err != nil {
-		uc.response.FailWithError(c, COMMON_INTERNAL_ERROR, err)
-		return
-	}
+	// channelId := c.GetUint("channel_id")
 	if err := uc.message.CreateMessage(c, id, request.Content); err != nil {
 		uc.response.FailWithError(c, COMMON_INTERNAL_ERROR, err)
 		return
 	}
+	// if err := uc.channel.CommentMessage(c, id, channelId, request); err != nil {
+	// 	uc.response.FailWithError(c, COMMON_INTERNAL_ERROR, err)
+	// 	return
+	// }
 	uc.response.Success(c, SUCCESS)
 }
 
@@ -142,11 +157,11 @@ func (uc *UserController) Edite(c *gin.Context) {
 		return
 	}
 	id := c.GetUint("user_id")
-	channelId := c.GetUint("channel_id")
-	if err := uc.channel.EditeMessage(c, id, channelId, request.NewContent); err != nil {
-		uc.response.FailWithError(c, COMMON_INTERNAL_ERROR, err)
-		return
-	}
+	// channelId := c.GetUint("channel_id")
+	// if err := uc.channel.EditeMessage(c, id, channelId, request.NewContent); err != nil {
+	// 	uc.response.FailWithError(c, COMMON_INTERNAL_ERROR, err)
+	// 	return
+	// }
 	if err := uc.message.UpdateMessage(c, id, "content", request.NewContent); err != nil {
 		uc.response.FailWithError(c, COMMON_INTERNAL_ERROR, err)
 		return
@@ -160,11 +175,11 @@ func (uc *UserController) Regain(c *gin.Context) {
 		uc.response.ValidatorFail(c, INVALID_PARAM_ERROR)
 		return
 	}
-	id := c.GetUint("channel_id")
-	if err := uc.channel.RegainMessage(c, id, request.MessageID); err != nil {
-		uc.response.FailWithError(c, COMMON_INTERNAL_ERROR, err)
-		return
-	}
+	// id := c.GetUint("channel_id")
+	// if err := uc.channel.RegainMessage(c, id, request.MessageID); err != nil {
+	// 	uc.response.FailWithError(c, COMMON_INTERNAL_ERROR, err)
+	// 	return
+	// }
 	if err := uc.message.DeleteMessage(c, request.MessageID); err != nil {
 		uc.response.FailWithError(c, COMMON_INTERNAL_ERROR, err)
 		return

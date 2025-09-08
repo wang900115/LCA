@@ -7,4 +7,5 @@ type Channel struct {
 	Founder     *User      `json:"founder"`
 	ChannelType string     `json:"type"`
 	Messages    []*Message `json:"messages"`
+	Users       []*User    `json:"users"`
 }

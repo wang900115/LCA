@@ -37,8 +37,9 @@ type UserImplement interface {
 	VerifyLogin(context.Context, string, string) (*uint, error)
 	VerifyLogout(context.Context, string) (*uint, error)
 	CreateLogin(context.Context, uint, entities.UserLogin) error
-	UpdateLogin(context.Context, uint, int64) (*entities.UserLogin, error)
-	UpdateChannel(context.Context, uint, uint, int64) (*entities.UserJoin, error)
+	UpdateLoginTime(context.Context, uint, int64) (*entities.UserLogin, error)
+	CreateJoin(context.Context, uint, uint, entities.UserJoin) error
+	UpdateJoinTime(context.Context, uint, uint, int64) (*entities.UserJoin, error)
 }
 
 type UserRepository struct {
@@ -159,7 +160,7 @@ func (r *UserRepository) CreateLogin(ctx context.Context, id uint, userLogin ent
 	return nil
 }
 
-func (r *UserRepository) UpdateLogin(ctx context.Context, login_id uint, loginTime int64) (*entities.UserLogin, error) {
+func (r *UserRepository) UpdateLoginTime(ctx context.Context, login_id uint, loginTime int64) (*entities.UserLogin, error) {
 	var userLogin gormmodel.UserLogin
 	if err := r.gorm.WithContext(ctx).Where("id = ?", login_id).First(&userLogin).Update("last_login", loginTime).Error; err != nil {
 		return nil, err
@@ -175,7 +176,7 @@ func (r *UserRepository) UpdateLogin(ctx context.Context, login_id uint, loginTi
 	return userLogin.ToDomain(), nil
 }
 
-func (r *UserRepository) CreateChannel(ctx context.Context, id uint, channel_id uint, userJoin entities.UserJoin) error {
+func (r *UserRepository) CreateJoin(ctx context.Context, id uint, channel_id uint, userJoin entities.UserJoin) error {
 	var user gormmodel.User
 	if err := r.gorm.WithContext(ctx).Where("id = ?", id).First(&user).Error; err != nil {
 		return err
@@ -187,7 +188,7 @@ func (r *UserRepository) CreateChannel(ctx context.Context, id uint, channel_id 
 
 	userJoinModel := gormmodel.MiddleChannelUser{
 		UserID:    id,
-		ChannelID: id,
+		ChannelID: channel_id,
 		Role:      userJoin.Role,
 		LastJoin:  userJoin.LastJoin,
 	}
@@ -195,7 +196,7 @@ func (r *UserRepository) CreateChannel(ctx context.Context, id uint, channel_id 
 	if err := r.gorm.WithContext(ctx).Create(&userJoinModel).Error; err != nil {
 		return err
 	}
-	key := rediskey.REDIS_USER_CHANNEL_TABLE + strconv.FormatUint(uint64(userJoinModel.ID), 10)
+	key := rediskey.REDIS_USER_CHANNEL_TABLE + fmt.Sprintf("%d:%d", id, channel_id)
 	fields := map[string]interface{}{
 		rediskey.REDIS_USER_CHANNEL_FIELD_USERID:    id,
 		rediskey.REDIS_USER_CHANNEL_FIELD_CHANNELID: channel_id,
@@ -212,13 +213,13 @@ func (r *UserRepository) CreateChannel(ctx context.Context, id uint, channel_id 
 	return nil
 }
 
-func (r *UserRepository) UpdateChannel(ctx context.Context, id uint, channel_id uint, joinTime int64) (*entities.UserJoin, error) {
+func (r *UserRepository) UpdateJoinTime(ctx context.Context, id uint, channel_id uint, joinTime int64) (*entities.UserJoin, error) {
 	var userChannel gormmodel.MiddleChannelUser
 	if err := r.gorm.WithContext(ctx).Where("user_id = ? && channel_id =?", id, channel_id).First(&userChannel).Update("last_join", joinTime).Error; err != nil {
 		return nil, err
 	}
 
-	key := rediskey.REDIS_USER_CHANNEL_TABLE + strconv.FormatUint(uint64(userChannel.ID), 10)
+	key := rediskey.REDIS_USER_CHANNEL_TABLE + fmt.Sprintf("%d:%d", id, channel_id)
 	go func(ctx context.Context, key string, lastLogin int64) {
 		if err := r.redis.HSet(ctx, key, rediskey.REDIS_USER_CHANNEL_FIELD_LASTJOIN, lastLogin).Err(); err != nil {
 			log.Printf("redis HSet error: %v", err)

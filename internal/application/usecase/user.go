@@ -46,8 +46,16 @@ func (u *UserUsecase) DeleteUser(ctx context.Context, id uint) error {
 	return u.userRepo.Delete(ctx, id)
 }
 
+func (u *UserUsecase) ParticateChannel(ctx context.Context, id uint, req validator.UserParticateRequest) error {
+	userJoin := entities.UserJoin{
+		Role:     "general",
+		LastJoin: req.JoinTime,
+	}
+	return u.userRepo.CreateJoin(ctx, id, req.ChannelID, userJoin)
+}
+
 func (u *UserUsecase) JoinChannel(ctx context.Context, id uint, req validator.UserJoinRequest) (string, *entities.UserJoin, error) {
-	channel, err := u.userRepo.UpdateChannel(ctx, id, req.ChannelID, req.JoinTime)
+	channel, err := u.userRepo.UpdateJoinTime(ctx, id, req.ChannelID, req.JoinTime)
 	if err != nil {
 		return "", nil, err
 	}
@@ -72,7 +80,7 @@ func (u *UserUsecase) Login(ctx context.Context, req validator.UserLoginRequest)
 	if err != nil {
 		return "", nil, err
 	}
-	status, err := u.userRepo.UpdateLogin(ctx, *id, req.Login)
+	status, err := u.userRepo.UpdateLoginTime(ctx, *id, req.Login)
 	if err != nil {
 		return "", nil, err
 	}

@@ -47,26 +47,26 @@ func (c *ChannelUsecase) QueryChannelMessages(ctx context.Context, id uint) ([]*
 	return c.channelRepo.ReadMessages(ctx, id)
 }
 
-func (c *ChannelUsecase) UserJoin(ctx context.Context, id uint, user entities.User) error {
-	return c.channelRepo.AddUser(ctx, id, user)
+func (c *ChannelUsecase) UserJoin(ctx context.Context, id uint, user_id uint) error {
+	return c.channelRepo.AddUser(ctx, id, user_id)
 }
 
 func (c *ChannelUsecase) UserLeave(ctx context.Context, id uint, user_id uint) error {
 	return c.channelRepo.RemoveUser(ctx, id, user_id)
 }
 
-func (c *ChannelUsecase) CommentMessage(ctx context.Context, id uint, channel_id uint, req validator.UserCommentRequest) error {
-	message := entities.Message{
-		Sender:  id,
-		Content: req.Content,
-	}
-	return c.channelRepo.AddMessage(ctx, id, message)
-}
+// func (c *ChannelUsecase) CommentMessage(ctx context.Context, id uint, channel_id uint, req validator.UserCommentRequest) error {
+// 	message := entities.Message{
+// 		Sender:  id,
+// 		Content: req.Content,
+// 	}
+// 	return c.channelRepo.AddMessage(ctx, id, message)
+// }
 
-func (c *ChannelUsecase) EditeMessage(ctx context.Context, id uint, message_id uint, new string) error {
-	return c.channelRepo.UpdateMessage(ctx, id, message_id, new)
-}
+// func (c *ChannelUsecase) EditeMessage(ctx context.Context, id uint, message_id uint, new string) error {
+// 	return c.channelRepo.UpdateMessage(ctx, id, message_id, new)
+// }
 
-func (c *ChannelUsecase) RegainMessage(ctx context.Context, id uint, message_id uint) error {
-	return c.channelRepo.RemoveMessage(ctx, id, message_id)
-}
+// func (c *ChannelUsecase) RegainMessage(ctx context.Context, id uint, message_id uint) error {
+// 	return c.channelRepo.RemoveMessage(ctx, id, message_id)
+// }

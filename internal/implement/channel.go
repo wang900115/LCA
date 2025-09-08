@@ -2,9 +2,11 @@ package implement
 
 import (
 	"context"
+	"strconv"
 
 	"github.com/redis/go-redis/v9"
 	gormmodel "github.com/wang900115/LCA/internal/adapter/gorm/model"
+	rediskey "github.com/wang900115/LCA/internal/adapter/redis/key"
 	"github.com/wang900115/LCA/internal/domain/entities"
 
 	"gorm.io/gorm"
@@ -17,11 +19,8 @@ type ChannelImplement interface {
 	Delete(context.Context, uint) error
 	ReadUsers(context.Context, uint) ([]*entities.User, error)
 	ReadMessages(context.Context, uint) ([]*entities.Message, error)
-	AddUser(context.Context, uint, entities.User) error
+	AddUser(context.Context, uint, uint) error
 	RemoveUser(context.Context, uint, uint) error
-	AddMessage(context.Context, uint, entities.Message) error
-	UpdateMessage(context.Context, uint, uint, string) error
-	RemoveMessage(context.Context, uint, uint) error
 }
 
 type ChannelRepository struct {
@@ -80,37 +79,34 @@ func (r *ChannelRepository) Delete(ctx context.Context, id uint) error {
 	return nil
 }
 
-// !todo(redis, db)
 func (r *ChannelRepository) ReadUsers(ctx context.Context, id uint) ([]*entities.User, error) {
-	return nil, nil
+	var channel gormmodel.Channel
+	if err := r.gorm.First(&channel, id).Error; err != nil {
+		return nil, err
+	}
+	return channel.ToDomain().Users, nil
 }
 
-// !todo(redis, db)
 func (r *ChannelRepository) ReadMessages(ctx context.Context, id uint) ([]*entities.Message, error) {
-	return nil, nil
+	var channel gormmodel.Channel
+	if err := r.gorm.First(&channel, id).Error; err != nil {
+		return nil, err
+	}
+	return channel.ToDomain().Messages, nil
 }
 
-// !todo(redis, db)
-func (r *ChannelRepository) AddUser(ctx context.Context, id uint, user entities.User) error {
+func (r *ChannelRepository) AddUser(ctx context.Context, id uint, user_id uint) error {
+	key := rediskey.REDIS_CHANNEL_USER_SET + strconv.FormatUint(uint64(id), 10)
+	if err := r.redis.SAdd(ctx, key, user_id).Err(); err != nil {
+		return nil
+	}
 	return nil
 }
 
-// !todo(redis, db)
 func (r *ChannelRepository) RemoveUser(ctx context.Context, id uint, user_id uint) error {
-	return nil
-}
-
-// !todo(redis, db)
-func (r *ChannelRepository) AddMessage(ctx context.Context, id uint, message entities.Message) error {
-	return nil
-}
-
-// !todo(redis, db)
-func (r *ChannelRepository) UpdateMessage(ctx context.Context, id uint, message_id uint, new string) error {
-	return nil
-}
-
-// !todo(redis, db)
-func (r *ChannelRepository) RemoveMessage(ctx context.Context, id uint, message_id uint) error {
+	key := rediskey.REDIS_CHANNEL_USER_SET + strconv.FormatUint(uint64(id), 10)
+	if err := r.redis.SRem(ctx, key, user_id).Err(); err != nil {
+		return nil
+	}
 	return nil
 }

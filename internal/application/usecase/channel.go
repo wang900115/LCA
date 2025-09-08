@@ -18,13 +18,13 @@ func NewChannelUsecase(channelRepo implement.ChannelImplement) *ChannelUsecase {
 	}
 }
 
-func (c *ChannelUsecase) CreateChannel(ctx context.Context, req validator.ChannelCreateRequest) error {
+func (c *ChannelUsecase) CreateChannel(ctx context.Context, id uint, req validator.ChannelCreateRequest) error {
 	channel := entities.Channel{
 		Name:        req.Name,
-		Founder:     req.Founder,
+		FounderID:   id,
 		ChannelType: req.ChannelType,
 	}
-	return c.channelRepo.Create(ctx, channel)
+	return c.channelRepo.Create(ctx, id, channel)
 }
 
 func (c *ChannelUsecase) ReadChannel(ctx context.Context, id uint) (*entities.Channel, error) {
@@ -40,19 +40,11 @@ func (c *ChannelUsecase) DeleteChannel(ctx context.Context, id uint) error {
 }
 
 func (c *ChannelUsecase) QueryChannelUsers(ctx context.Context, id uint) ([]*entities.User, error) {
-	channelUsers, err := c.channelRepo.ReadUsers(ctx, id)
-	if err != nil {
-		return nil, err
-	}
-	return channelUsers.Users, nil
+	return c.channelRepo.ReadUsers(ctx, id)
 }
 
 func (c *ChannelUsecase) QueryChannelMessages(ctx context.Context, id uint) ([]*entities.Message, error) {
-	channelMessages, err := c.channelRepo.ReadMessages(ctx, id)
-	if err != nil {
-		return nil, err
-	}
-	return channelMessages.Message, nil
+	return c.channelRepo.ReadMessages(ctx, id)
 }
 
 func (c *ChannelUsecase) UserJoin(ctx context.Context, id uint, user entities.User) error {

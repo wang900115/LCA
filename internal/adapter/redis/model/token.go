@@ -38,7 +38,7 @@ func (ct ChannelTokenClaims) ToDomain() *entities.ChannelTokenClaims {
 	return &entities.ChannelTokenClaims{
 		UserID:    ct.UserID,
 		ChannelID: ct.ChannelID,
-		JoinStatus: entities.UserChannel{
+		JoinStatus: entities.UserJoin{
 			Role:     ct.Role,
 			LastJoin: ct.LastJoin,
 		},

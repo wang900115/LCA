@@ -1,26 +1,39 @@
+<h1 align="center"><strong>Lightweight Chat Application (LCA)</strong></h1>
 
- <h1 align="center"><strong>Lightweight Chat Application</strong></h1> 
-    <p align="center">
-      <img src="assets/banner.png" alt="LCA Banner" height="225" width="230" />
-    </p>
-  
-## Overview
-  **LCA** is a message decentralized chat application. It is designed for Decentralized encrypted communication. However, central management is still the priority for system security.
+<p align="center">
+  <img src="assets/inside.png" alt="LCA Banner" height="225" width="370" />
+</p>
 
-## Knowledge
-  - **Decentral Architecture:** The core idea of this project is decentralization, inspired by peer-to-peer gossip protocols. This approach naturally leads to the formation of strong, resilient communities. Each node acts not only as a giver but also as a receiver, enabling a fully participatory network. The interaction is staggered between the Opher-Chain and external blockchain ecosystems (such as Ethereum and others). This design promotes interoperability while maintaining independence.
-  
-  - **Encryption:** Messages are encrypted on the sender side using the RSA algorithm. A Merkle Patricia Tree is employed to ensure complete integrity and verification of nodes within the network.
-  
-  - **Distributed System:** The system is designed following distributed system principles, including the CAP theorem (Consistency, Availability, Partition Tolerance) and BASE (Basically Available, Soft State, Eventual Consistency). Quorum-based system design is applied to implement consensus algorithms such as Paxos and Raft, ensuring reliability and consistency across nodes.
-  
-  - **Security:** The project uses PASETO and JWT technologies for authentication and session management, enhancing system security and making unauthorized access or hacking significantly more difficult. 
+---
 
-## Prerequisite 
-  - Golang Version >= 1.25.0
-  - Docker Installed (images come from pulling hub)
-  - If using Local (should have postgresql server and redis service)
+## 📌 Overview
+**LCA** (Lightweight Chat Application) is a secure and lightweight messaging platform.  
+It is designed to support both **RESTful APIs** and **WebSocket communication**, while maintaining **centralized management** for enhanced system security.
 
+---
+
+## 🧠 Knowledge & Core Features
+- **API Protocol**
+  - RESTful APIs for user and message management  
+  - WebSocket channels for real-time communication  
+  - Supports event-driven architecture for scalability  
+
+- **Security**
+  - **PASETO** and **JWT** for authentication and session management  
+  - Strong defense against unauthorized access or tampering  
+
+---
+
+## 🔧 Prerequisites
+Before you start, make sure you have:
+
+- **Golang** `>= 1.25.0`
+- **Docker** (images will be pulled automatically from Docker Hub)
+- **Local setup (optional)**  
+  - PostgreSQL server  
+  - Redis service  
+
+---
 ## Download Build 
 
 You can download the lastest build here:
@@ -28,7 +41,8 @@ You can download the lastest build here:
   - [Linux](https://github.com/wang900115/LCA/releases/latest/download/main)
 
 ## Get Started
-> [!WARNING] if Using local please check prerequsite 
+> [!WARNING]  
+> If running locally, please verify you meet the prerequisites above. 
   - *Docker*
     -  Run:  `docker-compose up --build`
     -  ShutDowan:  `docker-compose down`

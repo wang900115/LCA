@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/spf13/viper"
 	"github.com/wang900115/LCA/internal/adapter/controller"
 	response "github.com/wang900115/LCA/internal/adapter/controller/response/json"
 	"github.com/wang900115/LCA/internal/adapter/middleware"
@@ -17,11 +18,15 @@ import (
 )
 
 func main() {
-	conf := bootstrap.NewConfig()
-
-	redispool := bootstrap.NewRedisPool(bootstrap.NewRedisOption(conf))
-	zaplogger := bootstrap.NewLogger(bootstrap.NewLoggerOption(conf))
-	postgresql := bootstrap.NewPostgresql(bootstrap.NewPostgresqlOption(conf))
+	conf := viper.New()
+	appOptions, err := bootstrap.SetEnvironment(conf, "dev")
+	if err != nil {
+		panic(err)
+	}
+	redispool := bootstrap.NewRedisPool(appOptions.Redis)
+	zaplogger := bootstrap.NewLogger(appOptions.Logger)
+	postgresql := bootstrap.NewPostgresql(appOptions.Postgresql)
+	// promethus := bootstrap.NewPromethus(appOptions.Promethus)
 
 	// gorm.RunMigrations(postgresql)
 
@@ -69,5 +74,5 @@ func main() {
 		},
 	)
 
-	bootstrap.Run(server, bootstrap.NewServerOption(conf))
+	bootstrap.Run(server, appOptions.Server)
 }

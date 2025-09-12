@@ -1,6 +1,6 @@
 build/
 test/
-config/*.yaml
+config/
 
 *.exe
 *.log

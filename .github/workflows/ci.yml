@@ -16,15 +16,18 @@ jobs:
       uses: actions/setup-go@v4
       with:
         go-version: '1.25.1'
-    
+
+    - name: Install dependencies
+      run: |
+        go mod tidy
+        go mod download
+        
     - name: "Run golangci-lint"
       uses: golangci/golangci-lint-action@v6
       with:
         version:  v1.55.2
         args: --timeout=3m
 
-    - name: Install dependencies
-      run: go mod download
 
     - name: Build project
       run: go build ./...

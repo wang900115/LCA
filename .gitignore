@@ -1,5 +1,6 @@
 build/
 test/
+.golangci-lint.cache/
 
 *.dev.yaml
 *.test.yaml

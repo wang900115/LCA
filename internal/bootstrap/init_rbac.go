@@ -24,7 +24,7 @@ func NewCasbin(gorm *gorm.DB, option casbinOption) *casbin.SyncedEnforcer {
 		panic(err)
 	}
 
-	casbinModel, err := model.NewModelFromFile("internal/adapter/casbin/casbinText.go")
+	casbinModel, err := model.NewModelFromFile("config/auth_model.conf")
 	if err != nil {
 		panic(err)
 	}

@@ -11,6 +11,8 @@ import (
 	websocketcore "github.com/wang900115/LCA/internal/adapter/websocket/core"
 	"github.com/wang900115/LCA/internal/bootstrap"
 	"github.com/wang900115/LCA/internal/implement"
+	"github.com/wang900115/LCA/internal/task"
+	infrastructurejob "github.com/wang900115/LCA/internal/task/infrastructure-job"
 
 	// redisrate "LCA/internal/adapter/gin/middleware/redis_rate"
 	secureheader "github.com/wang900115/LCA/internal/adapter/middleware/secure_header"
@@ -28,6 +30,15 @@ func main() {
 	zaplogger := bootstrap.NewLogger(appOptions.Logger)
 	postgresql := bootstrap.NewPostgresql(appOptions.Postgresql)
 	casbin := bootstrap.NewCasbin(postgresql, appOptions.Casbin)
+
+	job1 := infrastructurejob.NewPostgresqlJob(zaplogger, postgresql)
+	job2 := infrastructurejob.NewRedisJob(zaplogger, redispool)
+
+	scheduler := bootstrap.NewScheduler(
+		[]task.IJob{
+			job1,
+			job2,
+		})
 	// promethus := bootstrap.NewPromethus(appOptions.Promethus)
 
 	// gorm.RunMigrations(postgresql)
@@ -77,5 +88,8 @@ func main() {
 		},
 	)
 
-	bootstrap.Run(server, appOptions.Server)
+	srv := server.Run(appOptions.Server)
+	sch := scheduler.Run(appOptions.Gocron)
+
+	bootstrap.Run(appOptions.Server.CancelTimeout, srv, *sch)
 }

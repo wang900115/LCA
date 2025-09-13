@@ -1,0 +1,37 @@
+# example config
+
+app:
+  run_mode: ""
+  cancel_timeout: "1s"
+
+server:
+  http_port: 0000
+  read_header_timeout: "1s"
+
+postgresql:
+  # "postgres"
+  host: "localhost"
+  port: 5432
+  user: "postgres"
+  password: "your_password"
+  dbname: "your_database_name"
+  sslmode: "disable"
+
+redis:
+  user: "your_user(default)"
+  password: "your_password"
+  # "redis"
+  host: "localhost:6379"
+  database: 0
+  idleTimeout: "1s"
+
+log:
+  log_path: "your/log/filepath"
+  application_name: "your_application_name"
+  debug: true
+
+ratelimit:
+  limit_per_minute: 0
+
+jwt:
+  expiration: "1s"

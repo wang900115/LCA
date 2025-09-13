@@ -1,11 +1,7 @@
 package bootstrap
 
 import (
-	"log"
 	"net/http"
-	"os"
-	"os/signal"
-	"syscall"
 	"time"
 
 	"github.com/wang900115/LCA/internal/adapter/middleware"
@@ -24,7 +20,7 @@ type serverOption struct {
 	ReadHeaderTimeout time.Duration
 }
 
-func defaultOption() serverOption {
+func defaultServerOption() serverOption {
 	return serverOption{
 		RunMode:           gin.DebugMode,
 		HTTPPort:          "8080",
@@ -34,19 +30,16 @@ func defaultOption() serverOption {
 }
 
 func NewServerOption(conf *viper.Viper) serverOption {
-	defaultOptions := defaultOption()
+	defaultOptions := defaultServerOption()
 	if conf.IsSet("app.run_mode") {
 		defaultOptions.RunMode = conf.GetString("app.run_mode")
 	}
-
 	if conf.IsSet("server.http_port") {
 		defaultOptions.HTTPPort = conf.GetString("server.http_port")
 	}
-
 	if conf.IsSet("app.cancel_timeout") {
 		defaultOptions.CancelTimeout = conf.GetDuration("app.cancel_timeout")
 	}
-
 	if conf.IsSet("app.read_header_timeout") {
 		defaultOptions.ReadHeaderTimeout = conf.GetDuration("app.read_header_timeout")
 	}
@@ -65,37 +58,28 @@ func NewServer(routes []router.IRoute, middlewares []middleware.IMiddleware) *Ap
 	}
 }
 
-func Run(a *App, option serverOption) {
+func (a *App) Run(option serverOption) *http.Server {
 	gin.SetMode(option.RunMode)
 
-	router := gin.Default()
+	routerEngine := gin.Default()
 
 	for _, middleware := range a.middlewares {
-		router.Use(middleware.Middleware)
+		routerEngine.Use(middleware.Middleware)
 	}
 
 	for _, route := range a.routes {
-		route.Setup(router.Group("/api"))
+		route.Setup(routerEngine.Group("/api"))
 	}
 
 	if option.RunMode == "debug" {
-		pprof.Register(router)
+		pprof.Register(routerEngine)
 	}
 
 	srv := &http.Server{
 		Addr:              ":" + option.HTTPPort,
-		Handler:           router,
+		Handler:           routerEngine,
 		ReadHeaderTimeout: option.ReadHeaderTimeout,
 	}
 
-	go func() {
-		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			log.Fatalf("listen: %s\n", err)
-		}
-	}()
-
-	quit := make(chan os.Signal, 1)
-	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
-	<-quit
-	log.Println("Shutdown Server ...")
+	return srv
 }

@@ -24,6 +24,7 @@ type AppConfig struct {
 	Postgresql postgresqlOption
 	Promethus  promethusOption
 	Casbin     casbinOption
+	Gocron     schedularOption
 }
 
 func SetEnvironment(v *viper.Viper, env Environment) (*AppConfig, error) {
@@ -45,6 +46,7 @@ func SetEnvironment(v *viper.Viper, env Environment) (*AppConfig, error) {
 		Postgresql: NewPostgresqlOption(v),
 		Promethus:  NewPromethusOption(v),
 		Casbin:     NewCasbinOption(v),
+		Gocron:     NewSchedularOption(v),
 	}
 
 	return appConfig, nil

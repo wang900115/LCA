@@ -1,6 +1,11 @@
 build/
 test/
-config/
+
+*.dev.yaml
+*.test.yaml
+*.stage.yaml
+*.production.yaml
+
 
 *.exe
 *.log

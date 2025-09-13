@@ -17,9 +17,6 @@ jobs:
       with:
         go-version: '1.25.1'
 
-    - name: Clean golangci-lint cache
-      run: golangci-lint cache clean
-        
     - name: Install dependencies
       run: |
         go clean -modcache
@@ -30,7 +27,7 @@ jobs:
       uses: golangci/golangci-lint-action@v6
       with:
         version:  v1.55.2
-        args: --timeout=3m
+        args: cache clean && run --timeout=3m
 
 
     - name: Build project

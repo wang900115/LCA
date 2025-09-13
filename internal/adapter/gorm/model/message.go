@@ -23,6 +23,7 @@ func (m Message) TableName() string {
 func (m Message) ToDomain() *entities.Message {
 	return &entities.Message{
 		ID:      m.ID,
+		Sender:  m.Sender,
 		Content: m.Content,
 	}
 }

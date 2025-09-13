@@ -3,7 +3,6 @@ module github.com/wang900115/LCA
 go 1.25.1
 
 require (
-	github.com/allegro/bigcache v1.2.1
 	github.com/allegro/bigcache/v3 v3.1.0
 	github.com/casbin/casbin/v2 v2.122.0
 	github.com/casbin/gorm-adapter/v3 v3.36.0

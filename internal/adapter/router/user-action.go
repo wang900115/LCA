@@ -2,6 +2,7 @@ package router
 
 import (
 	"github.com/wang900115/LCA/internal/adapter/controller"
+	"github.com/wang900115/LCA/internal/adapter/middleware/casbin"
 	"github.com/wang900115/LCA/internal/adapter/middleware/jwt"
 
 	"github.com/gin-gonic/gin"
@@ -11,10 +12,11 @@ type UserRouter struct {
 	userController controller.UserController
 	userJWT        jwt.USERJWT
 	channelJWT     jwt.CHANNELJWT
+	casbin         casbin.CASBIN
 }
 
-func NewUserRouter(userController *controller.UserController, userJWT *jwt.USERJWT, CHANNELJWT *jwt.CHANNELJWT) IRoute {
-	return &UserRouter{userController: *userController, userJWT: *userJWT, channelJWT: *CHANNELJWT}
+func NewUserRouter(userController *controller.UserController, userJWT *jwt.USERJWT, CHANNELJWT *jwt.CHANNELJWT, casbin *casbin.CASBIN) IRoute {
+	return &UserRouter{userController: *userController, userJWT: *userJWT, channelJWT: *CHANNELJWT, casbin: *casbin}
 }
 
 func (ur *UserRouter) Setup(router *gin.RouterGroup) {

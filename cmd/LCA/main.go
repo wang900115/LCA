@@ -5,6 +5,7 @@ import (
 	"github.com/wang900115/LCA/internal/adapter/controller"
 	response "github.com/wang900115/LCA/internal/adapter/controller/response/json"
 	"github.com/wang900115/LCA/internal/adapter/middleware"
+	rbacMid "github.com/wang900115/LCA/internal/adapter/middleware/casbin"
 	corsMid "github.com/wang900115/LCA/internal/adapter/middleware/cors"
 	jwtMid "github.com/wang900115/LCA/internal/adapter/middleware/jwt"
 	websocketcore "github.com/wang900115/LCA/internal/adapter/websocket/core"
@@ -26,6 +27,7 @@ func main() {
 	redispool := bootstrap.NewRedisPool(appOptions.Redis)
 	zaplogger := bootstrap.NewLogger(appOptions.Logger)
 	postgresql := bootstrap.NewPostgresql(appOptions.Postgresql)
+	casbin := bootstrap.NewCasbin(postgresql, appOptions.Casbin)
 	// promethus := bootstrap.NewPromethus(appOptions.Promethus)
 
 	// gorm.RunMigrations(postgresql)
@@ -49,6 +51,7 @@ func main() {
 	channelController := controller.NewChannelController(response, channelUsecase)
 	websocketController := controller.NewWebSocketController(response, userUsecase, hub)
 
+	rabcMiddle := rbacMid.NewCASBIN(response, casbin)
 	authjwtMiddle := jwtMid.NewUSERJWT(response, tokenRepo)
 	joinjwtMiddle := jwtMid.NewCHANNELJWT(response, tokenRepo)
 
@@ -56,7 +59,7 @@ func main() {
 	secureHeaderMiddle := secureheader.NewSecureHeader()
 	// redisRateMiddle := redisrate.NewRateLimiter(redispool, zaplogger, redisrate.NewOption(conf))
 
-	userRouter := router.NewUserRouter(userController, authjwtMiddle, joinjwtMiddle)
+	userRouter := router.NewUserRouter(userController, authjwtMiddle, joinjwtMiddle, rabcMiddle)
 	channelRouter := router.NewChannelRouter(channelController, authjwtMiddle, joinjwtMiddle)
 	// messageRouter := router.NewMessageRouter(messageController)
 	websocketRouter := router.NewWebSocketRouter(websocketController)

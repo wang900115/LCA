@@ -23,6 +23,7 @@ type AppConfig struct {
 	Redis      redisoption
 	Postgresql postgresqlOption
 	Promethus  promethusOption
+	Casbin     casbinOption
 }
 
 func SetEnvironment(v *viper.Viper, env Environment) (*AppConfig, error) {
@@ -43,6 +44,7 @@ func SetEnvironment(v *viper.Viper, env Environment) (*AppConfig, error) {
 		Redis:      NewRedisOption(v),
 		Postgresql: NewPostgresqlOption(v),
 		Promethus:  NewPromethusOption(v),
+		Casbin:     NewCasbinOption(v),
 	}
 
 	return appConfig, nil

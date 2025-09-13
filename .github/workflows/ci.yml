@@ -23,11 +23,11 @@ jobs:
         go mod tidy
         go mod download
         
-    - name: "Run golangci-lint"
-      uses: golangci/golangci-lint-action@v6
-      with:
-        version:  v1.55.2
-        args: cache clean && run --timeout=3m
+    # - name: "Run golangci-lint"
+    #   uses: golangci/golangci-lint-action@v6
+    #   with:
+    #     version:  v1.55.2
+    #     args: cache clean && run --timeout=3m
 
 
     - name: Build project

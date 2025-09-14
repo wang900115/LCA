@@ -35,6 +35,7 @@ func (c Channel) ToDomain() *entities.Channel {
 		users = append(users, user.ToDomain())
 	}
 	return &entities.Channel{
+		ID:          c.ID,
 		Name:        c.Name,
 		FounderID:   c.FounderID,
 		Founder:     c.Founder.ToDomain(),

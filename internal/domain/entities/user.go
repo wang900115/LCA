@@ -23,3 +23,8 @@ type UserJoin struct {
 	Role     string `json:"role"`
 	LastJoin int64  `json:"lastJoin"`
 }
+
+type UserParticate struct {
+	LastParticate int64  `json:"lastParticate"`
+	Role          string `json:"role"`
+}

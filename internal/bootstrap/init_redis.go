@@ -5,15 +5,15 @@ import (
 	"github.com/spf13/viper"
 )
 
-type redisoption struct {
+type redisOption struct {
 	Addr     string
 	Username string
 	Password string
 	DB       int
 }
 
-func NewRedisOption(conf *viper.Viper) redisoption {
-	return redisoption{
+func NewRedisOption(conf *viper.Viper) redisOption {
+	return redisOption{
 		Addr:     conf.GetString("redis.host"),
 		Username: conf.GetString("redis.user"),
 		Password: conf.GetString("redis.password"),
@@ -21,7 +21,7 @@ func NewRedisOption(conf *viper.Viper) redisoption {
 	}
 }
 
-func NewRedisPool(option redisoption) *redis.Client {
+func NewRedisPool(option redisOption) *redis.Client {
 	redisPool := redis.NewClient(&redis.Options{
 		Addr:     option.Addr,
 		Username: option.Username,

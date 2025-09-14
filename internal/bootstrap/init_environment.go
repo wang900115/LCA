@@ -17,14 +17,16 @@ const (
 )
 
 type AppConfig struct {
-	env        Environment
-	Logger     loggerOption
-	Server     serverOption
-	Redis      redisoption
-	Postgresql postgresqlOption
-	Promethus  promethusOption
-	Casbin     casbinOption
-	Gocron     schedularOption
+	env         Environment
+	Logger      loggerOption
+	Server      serverOption
+	Redis       redisOption
+	kafkaReader kafkaConsumerOption
+	kafkaWriter kafkaProducerOption
+	Postgresql  postgresqlOption
+	Promethus   promethusOption
+	Casbin      casbinOption
+	Gocron      schedularOption
 }
 
 func SetEnvironment(v *viper.Viper, env Environment) (*AppConfig, error) {
@@ -39,14 +41,16 @@ func SetEnvironment(v *viper.Viper, env Environment) (*AppConfig, error) {
 	}
 
 	appConfig := &AppConfig{
-		env:        env,
-		Logger:     NewLoggerOption(v),
-		Server:     NewServerOption(v),
-		Redis:      NewRedisOption(v),
-		Postgresql: NewPostgresqlOption(v),
-		Promethus:  NewPromethusOption(v),
-		Casbin:     NewCasbinOption(v),
-		Gocron:     NewSchedularOption(v),
+		env:         env,
+		Logger:      NewLoggerOption(v),
+		Server:      NewServerOption(v),
+		Redis:       NewRedisOption(v),
+		kafkaReader: NewKafkaConsumerOption(v),
+		kafkaWriter: NewKafkaProducerOption(v),
+		Postgresql:  NewPostgresqlOption(v),
+		Promethus:   NewPromethusOption(v),
+		Casbin:      NewCasbinOption(v),
+		Gocron:      NewSchedularOption(v),
 	}
 
 	return appConfig, nil

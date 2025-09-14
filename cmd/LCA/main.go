@@ -28,16 +28,18 @@ func main() {
 	}
 	redispool := bootstrap.NewRedisPool(appOptions.Redis)
 	zaplogger := bootstrap.NewLogger(appOptions.Logger)
+	kafka := bootstrap.NewKafka(appOptions.Kafka)
 	postgresql := bootstrap.NewPostgresql(appOptions.Postgresql)
 	casbin := bootstrap.NewCasbin(postgresql, appOptions.Casbin)
 
 	job1 := infrastructurejob.NewPostgresqlJob(zaplogger, postgresql)
 	job2 := infrastructurejob.NewRedisJob(zaplogger, redispool)
-
+	job3 := infrastructurejob.NewKafkaJob(zaplogger, kafka)
 	scheduler := bootstrap.NewScheduler(
 		[]task.IJob{
 			job1,
 			job2,
+			job3,
 		})
 	// promethus := bootstrap.NewPromethus(appOptions.Promethus)
 

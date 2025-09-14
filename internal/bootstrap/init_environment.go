@@ -21,8 +21,9 @@ type AppConfig struct {
 	Logger      loggerOption
 	Server      serverOption
 	Redis       redisOption
-	kafkaReader kafkaConsumerOption
-	kafkaWriter kafkaProducerOption
+	Kafka       kafkaOption
+	KafkaReader kafkaConsumerOption
+	KafkaWriter kafkaProducerOption
 	Postgresql  postgresqlOption
 	Promethus   promethusOption
 	Casbin      casbinOption
@@ -45,8 +46,9 @@ func SetEnvironment(v *viper.Viper, env Environment) (*AppConfig, error) {
 		Logger:      NewLoggerOption(v),
 		Server:      NewServerOption(v),
 		Redis:       NewRedisOption(v),
-		kafkaReader: NewKafkaConsumerOption(v),
-		kafkaWriter: NewKafkaProducerOption(v),
+		Kafka:       NewKafkaOption(v),
+		KafkaReader: NewKafkaConsumerOption(v),
+		KafkaWriter: NewKafkaProducerOption(v),
 		Postgresql:  NewPostgresqlOption(v),
 		Promethus:   NewPromethusOption(v),
 		Casbin:      NewCasbinOption(v),

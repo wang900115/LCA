@@ -75,7 +75,7 @@ func (uc *UserController) Logout(c *gin.Context) {
 }
 
 func (uc *UserController) Particate(c *gin.Context) {
-	id := c.GetUint("user")
+	id := c.GetUint("user_id")
 	var request validator.UserParticateRequest
 	if err := c.ShouldBindJSON(&request); err != nil {
 		uc.response.ValidatorFail(c, INVALID_PARAM_ERROR)
@@ -90,7 +90,7 @@ func (uc *UserController) Particate(c *gin.Context) {
 }
 
 func (uc *UserController) Join(c *gin.Context) {
-	id := c.GetUint("user")
+	id := c.GetUint("user_id")
 	var request validator.UserJoinRequest
 	if err := c.ShouldBindJSON(&request); err != nil {
 		uc.response.ValidatorFail(c, INVALID_PARAM_ERROR)
@@ -118,8 +118,8 @@ func (uc *UserController) Join(c *gin.Context) {
 }
 
 func (uc *UserController) Leave(c *gin.Context) {
-	id := c.GetUint("user")
-	channelId := c.GetUint("channel")
+	id := c.GetUint("user_id")
+	channelId := c.GetUint("channel_id")
 	if err := uc.user.LeaveChannel(c, id, channelId); err != nil {
 		uc.response.FailWithError(c, COMMON_INTERNAL_ERROR, err)
 		return

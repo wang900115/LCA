@@ -12,16 +12,17 @@ import (
 )
 
 type WebSocketController struct {
-	hub      websocketcore.Hub
+	hub      *websocketcore.Hub
 	user     usecase.UserUsecase
+	channel  usecase.ChannelUsecase
 	response iresponse.IResponse
 }
 
-func NewWebSocketController(response iresponse.IResponse, user *usecase.UserUsecase, hub *websocketcore.Hub) *WebSocketController {
-	return &WebSocketController{response: response, user: *user, hub: *hub}
+func NewWebSocketController(response iresponse.IResponse, user *usecase.UserUsecase, channel *usecase.ChannelUsecase, hub *websocketcore.Hub) *WebSocketController {
+	return &WebSocketController{response: response, user: *user, channel: *channel, hub: hub}
 }
 
-// TODO 要判斷
+// TODO decision origin
 var upgrader = websocket.Upgrader{
 	CheckOrigin: func(r *http.Request) bool {
 		return true
@@ -31,11 +32,6 @@ var upgrader = websocket.Upgrader{
 func (wsc *WebSocketController) Handle(c *gin.Context) {
 	id := c.GetUint("user_id")
 	channelId := c.GetUint("channel_id")
-	conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
-	if err != nil {
-		wsc.response.FailWithError(c, COMMON_INTERNAL_ERROR, err)
-		return
-	}
 
 	user, err := wsc.user.ReadUser(c, id)
 	if err != nil {
@@ -43,9 +39,20 @@ func (wsc *WebSocketController) Handle(c *gin.Context) {
 		return
 	}
 
-	client := websocketcore.NewClient(conn, channelId, *user)
+	channel, err := wsc.channel.ReadChannel(c, channelId)
+	if err != nil {
+		wsc.response.FailWithError(c, COMMON_INTERNAL_ERROR, err)
+		return
+	}
+	conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
+	if err != nil {
+		wsc.response.FailWithError(c, COMMON_INTERNAL_ERROR, err)
+		return
+	}
+
+	client := websocketcore.NewClient(wsc.hub, conn, *channel, *user)
 	wsc.hub.Register <- client
 
-	go client.ReadPump(&wsc.hub)
+	go client.ReadPump()
 	go client.WritePump()
 }

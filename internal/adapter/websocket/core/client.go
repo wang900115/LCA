@@ -1,30 +1,47 @@
 package websocketcore
 
 import (
+	"encoding/json"
+
 	"github.com/gorilla/websocket"
+	websocketevent "github.com/wang900115/LCA/internal/adapter/websocket/event"
+	websocketmodel "github.com/wang900115/LCA/internal/adapter/websocket/model"
 	"github.com/wang900115/LCA/internal/domain/entities"
 )
 
 type Client struct {
-	Conn      *websocket.Conn
-	ChannelID uint
-	User      entities.User
-	Send      chan []byte
+	Hub     *Hub
+	Conn    *websocket.Conn
+	Channel entities.Channel
+	User    entities.User
+	Send    chan []byte
 }
 
-func NewClient(conn *websocket.Conn, channelId uint, user entities.User) *Client {
+func NewClient(hub *Hub, conn *websocket.Conn, channel entities.Channel, user entities.User) *Client {
 	return &Client{
-		Conn:      conn,
-		ChannelID: channelId,
-		User:      user,
-		Send:      make(chan []byte, 256),
+		Hub:     hub,
+		Conn:    conn,
+		Channel: channel,
+		User:    user,
+		Send:    make(chan []byte, 256),
 	}
 }
 
-// Reads messages from websocket connection and sends them to the hub's broadcast channel.
-func (c *Client) ReadPump(hub *Hub) {
+func (c *Client) HandleMessage(msg websocketmodel.WSMessage) {
+	switch msg.Type {
+	case websocketevent.EVENT_USER_COMMENT:
+		c.Hub.Comment <- msg
+	case websocketevent.EVENT_USER_EDIT:
+		c.Hub.Edit <- msg
+	case websocketevent.EVENT_USER_DELETE:
+		c.Hub.Delete <- msg
+	}
+}
+
+// Reads messages from websocket connection and sends them to the hub's responding channel.
+func (c *Client) ReadPump() {
 	defer func() {
-		hub.Unregister <- c
+		c.Hub.Unregister <- c
 		c.Conn.Close()
 	}()
 
@@ -34,10 +51,12 @@ func (c *Client) ReadPump(hub *Hub) {
 			break
 		}
 
-		hub.Broadcast <- BroadcastMessage{
-			ChannelID: c.ChannelID,
-			Message:   message,
+		var msg websocketmodel.WSMessage
+		if err := json.Unmarshal(message, &msg); err != nil {
+			// todo
+			continue
 		}
+		c.HandleMessage(msg)
 	}
 }
 

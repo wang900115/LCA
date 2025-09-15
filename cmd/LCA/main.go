@@ -62,7 +62,7 @@ func main() {
 
 	userController := controller.NewUserController(response, userUsecase, channelUsecase, messageUsecase)
 	channelController := controller.NewChannelController(response, channelUsecase)
-	websocketController := controller.NewWebSocketController(response, userUsecase, hub)
+	websocketController := controller.NewWebSocketController(response, userUsecase, channelUsecase, hub)
 
 	rabcMiddle := rbacMid.NewCASBIN(response, casbin)
 	authjwtMiddle := jwtMid.NewUSERJWT(response, tokenRepo)

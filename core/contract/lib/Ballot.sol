@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: MIT
+/// @author Perry
 pragma solidity ^0.8.20;
 
-contract ChannelBallot {
+contract Ballot {
     struct Voter {
         uint weight;
         uint vote;

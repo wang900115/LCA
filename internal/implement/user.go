@@ -8,7 +8,6 @@ import (
 	"errors"
 	"fmt"
 	"log"
-	"strconv"
 	"strings"
 	"time"
 
@@ -38,8 +37,13 @@ type UserImplement interface {
 	VerifyLogout(context.Context, string) (*uint, error)
 	CreateLogin(context.Context, uint, entities.UserLogin) error
 	UpdateLoginTime(context.Context, uint, int64) (*entities.UserLogin, error)
+	DeleteLogin(context.Context, uint, uint) error
 	CreateJoin(context.Context, uint, uint, entities.UserJoin) error
 	UpdateJoinTime(context.Context, uint, uint, int64) (*entities.UserJoin, error)
+	DeleteJoin(context.Context, uint, uint) error
+	CreateParticate(context.Context, uint, uint, entities.UserParticate) error
+	UpdateParticateTime(context.Context, uint, uint, int64) (*entities.UserParticate, error)
+	DeleteParticate(context.Context, uint, uint) error
 }
 
 type UserRepository struct {
@@ -144,7 +148,7 @@ func (r *UserRepository) CreateLogin(ctx context.Context, id uint, userLogin ent
 	if err := r.gorm.WithContext(ctx).Create(&userLoginModel).Error; err != nil {
 		return err
 	}
-	key := rediskey.REDIS_USER_LOGIN_TABLE + strconv.FormatUint(uint64(userLoginModel.ID), 10)
+	key := rediskey.REDIS_USER_LOGIN_TABLE + fmt.Sprintf("%d", id)
 	fields := map[string]interface{}{
 		rediskey.REDIS_USER_LOGIN_FIELD_IPADDRESS:  userLogin.IPAddress,
 		rediskey.REDIS_USER_LOGIN_FIELD_DEVICEINFO: userLogin.DeviceInfo,
@@ -160,13 +164,13 @@ func (r *UserRepository) CreateLogin(ctx context.Context, id uint, userLogin ent
 	return nil
 }
 
-func (r *UserRepository) UpdateLoginTime(ctx context.Context, login_id uint, loginTime int64) (*entities.UserLogin, error) {
+func (r *UserRepository) UpdateLoginTime(ctx context.Context, id uint, loginTime int64) (*entities.UserLogin, error) {
 	var userLogin gormmodel.UserLogin
-	if err := r.gorm.WithContext(ctx).Where("id = ?", login_id).First(&userLogin).Update("last_login", loginTime).Error; err != nil {
+	if err := r.gorm.WithContext(ctx).Where("id = ?", id).First(&userLogin).Update("last_login", loginTime).Error; err != nil {
 		return nil, err
 	}
 
-	key := rediskey.REDIS_USER_LOGIN_TABLE + strconv.FormatUint(uint64(login_id), 10)
+	key := rediskey.REDIS_USER_LOGIN_TABLE + fmt.Sprintf("%d", id)
 	go func(ctx context.Context, key string, lastLogin int64) {
 		if err := r.redis.HSet(ctx, key, rediskey.REDIS_USER_LOGIN_FIELD_LASTLOGIN, lastLogin).Err(); err != nil {
 			log.Printf("redis HSet error: %v", err)
@@ -174,6 +178,20 @@ func (r *UserRepository) UpdateLoginTime(ctx context.Context, login_id uint, log
 		r.redis.Expire(ctx, key, 7*24*time.Hour)
 	}(ctx, key, loginTime)
 	return userLogin.ToDomain(), nil
+}
+
+func (r *UserRepository) DeleteLogin(ctx context.Context, id uint, login_id uint) error {
+	var userLogin gormmodel.UserLogin
+	if err := r.gorm.WithContext(ctx).Where("user_id = ? && id = ?", id, login_id).Delete(&userLogin).Error; err != nil {
+		return err
+	}
+	key := rediskey.REDIS_USER_LOGIN_TABLE + fmt.Sprintf("%d:%d", id, login_id)
+	go func(ctx context.Context, key string) {
+		if err := r.redis.Del(ctx, key).Err(); err != nil {
+			log.Printf("redis Del error: %v", err)
+		}
+	}(ctx, key)
+	return nil
 }
 
 func (r *UserRepository) CreateJoin(ctx context.Context, id uint, channel_id uint, userJoin entities.UserJoin) error {
@@ -198,10 +216,8 @@ func (r *UserRepository) CreateJoin(ctx context.Context, id uint, channel_id uin
 	}
 	key := rediskey.REDIS_USER_CHANNEL_TABLE + fmt.Sprintf("%d:%d", id, channel_id)
 	fields := map[string]interface{}{
-		rediskey.REDIS_USER_CHANNEL_FIELD_USERID:    id,
-		rediskey.REDIS_USER_CHANNEL_FIELD_CHANNELID: channel_id,
-		rediskey.REDIS_USER_CHANNEL_FIELD_LASTJOIN:  userJoin.LastJoin,
-		rediskey.REDIS_USER_CHANNEL_FIELD_ROLE:      userJoin.Role,
+		rediskey.REDIS_USER_CHANNEL_FIELD_LASTJOIN: userJoin.LastJoin,
+		rediskey.REDIS_USER_CHANNEL_FIELD_ROLE:     userJoin.Role,
 	}
 
 	go func(ctx context.Context, key string, fields map[string]interface{}) {
@@ -227,6 +243,84 @@ func (r *UserRepository) UpdateJoinTime(ctx context.Context, id uint, channel_id
 		r.redis.Expire(ctx, key, 7*24*time.Hour)
 	}(ctx, key, joinTime)
 	return userChannel.ToDomain(), nil
+}
+
+func (r *UserRepository) DeleteJoin(ctx context.Context, id uint, channel_id uint) error {
+	var userJoin gormmodel.MiddleChannelUser
+	if err := r.gorm.WithContext(ctx).Where("user_id = ? && channel_id = ?", id, channel_id).Delete(&userJoin).Error; err != nil {
+		return err
+	}
+	key := rediskey.REDIS_USER_CHANNEL_TABLE + fmt.Sprintf("%d:%d", id, channel_id)
+	go func(ctx context.Context, key string) {
+		if err := r.redis.Del(ctx, key).Err(); err != nil {
+			log.Printf("redis Del error: %v", err)
+		}
+	}(ctx, key)
+	return nil
+}
+
+func (r *UserRepository) CreateParticate(ctx context.Context, id uint, event_id uint, userParticate entities.UserParticate) error {
+	var user gormmodel.User
+	if err := r.gorm.WithContext(ctx).Where("id = ?", id).First(&user).Error; err != nil {
+		return err
+	}
+	var event gormmodel.Event
+	if err := r.gorm.WithContext(ctx).Where("id = ?", event_id).First(&event).Error; err != nil {
+		return err
+	}
+
+	userJoinModel := gormmodel.MiddleEventUser{
+		UserID:        id,
+		EventID:       event_id,
+		Role:          userParticate.Role,
+		LastParticate: userParticate.LastParticate,
+	}
+
+	if err := r.gorm.WithContext(ctx).Create(&userJoinModel).Error; err != nil {
+		return err
+	}
+	key := rediskey.REDIS_USER_EVENT_TABLE + fmt.Sprintf("%d:%d", id, event_id)
+	fields := map[string]interface{}{
+		rediskey.REDIS_USER_EVENT_FIELD_LASTPARTICATE: userParticate.LastParticate,
+		rediskey.REDIS_USER_EVENT_FIELD_ROLE:          userParticate.Role,
+	}
+
+	go func(ctx context.Context, key string, fields map[string]interface{}) {
+		if err := r.redis.HSet(ctx, key, fields).Err(); err != nil {
+			log.Printf("redis HSet error: %v", err)
+		}
+		r.redis.Expire(ctx, key, 24*time.Hour)
+	}(ctx, key, fields)
+	return nil
+}
+
+func (r *UserRepository) UpdateParticateTime(ctx context.Context, id uint, event_id uint, particateTime int64) (*entities.UserParticate, error) {
+	var userEvent gormmodel.MiddleEventUser
+	if err := r.gorm.WithContext(ctx).Where("user_id = ? && event_id =?", id, event_id).First(&userEvent).Update("last_particate", particateTime).Error; err != nil {
+		return nil, err
+	}
+	key := rediskey.REDIS_USER_EVENT_TABLE + fmt.Sprintf("%d:%d", id, event_id)
+	go func(ctx context.Context, key string, lastParticate int64) {
+		if err := r.redis.HSet(ctx, key, rediskey.REDIS_USER_EVENT_FIELD_LASTPARTICATE, lastParticate).Err(); err != nil {
+			log.Printf("redis HSet error: %v", err)
+		}
+		r.redis.Expire(ctx, key, 7*24*time.Hour)
+	}(ctx, key, particateTime)
+	return userEvent.ToDomain(), nil
+}
+
+func (r *UserRepository) DeleteParticate(ctx context.Context, id uint, event_id uint) error {
+	var userParticate gormmodel.MiddleEventUser
+	if err := r.gorm.WithContext(ctx).Where("user_id = ? && event_id = ?", id, event_id).Delete(&userParticate).Error; err != nil {
+		return err
+	}
+	key := rediskey.REDIS_USER_EVENT_TABLE + fmt.Sprintf("%d:%d", id, event_id)
+	go func(ctx context.Context, key string) {
+		if err := r.redis.Del(ctx, key).Err(); err != nil {
+			log.Printf("redis Del error: %v", err)
+		}
+	}(ctx, key)
+	return nil
 }
 
 func hashPasswordArgon2id(password string) (string, error) {

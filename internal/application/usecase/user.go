@@ -62,7 +62,7 @@ func (u *UserUsecase) JoinChannel(ctx context.Context, id uint, req validator.Us
 	tokenClaims := entities.ChannelTokenClaims{
 		UserID:     id,
 		ChannelID:  req.ChannelID,
-		JoinStatus: *channel,
+		JoinStatus: channel,
 	}
 	token, err := u.tokenRepo.CreateChannelToken(ctx, tokenClaims)
 	if err != nil {
@@ -86,7 +86,7 @@ func (u *UserUsecase) Login(ctx context.Context, req validator.UserLoginRequest)
 	}
 	tokenClaims := entities.UserTokenClaims{
 		UserID:      *id,
-		LoginStatus: *status,
+		LoginStatus: status,
 	}
 	token, err := u.tokenRepo.CreateUserToken(ctx, tokenClaims)
 	if err != nil {

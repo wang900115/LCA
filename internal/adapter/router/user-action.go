@@ -32,14 +32,20 @@ func (ur *UserRouter) Setup(router *gin.RouterGroup) {
 	}
 	userJoinGroup := router.Group("v1/user/channel", ur.userJWT.Middleware)
 	{
-		userJoinGroup.POST("particate", ur.userController.Particate)
+		userJoinGroup.POST("first/join", ur.userController.FirstJoin)
 		userJoinGroup.POST("join", ur.userController.Join)
-		userJoinGroup.POST("leave", ur.channelJWT.Middleware, ur.userController.Leave)
+		userJoinGroup.POST("leave", ur.channelJWT.Middleware, ur.userController.LeaveChannel)
 	}
 	userSpeakGroup := router.Group("v1/user/channel/message", ur.userJWT.Middleware, ur.channelJWT.Middleware)
 	{
 		userSpeakGroup.POST("comment", ur.userController.Comment)
 		userSpeakGroup.POST("edited", ur.userController.Edite)
 		userSpeakGroup.POST("delete", ur.userController.Regain)
+	}
+	userEventGroup := router.Group("v1/user/event", ur.userJWT.Middleware)
+	{
+		userEventGroup.POST("first/particate")
+		userEventGroup.POST("particate")
+		userEventGroup.POST("leave")
 	}
 }

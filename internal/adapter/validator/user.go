@@ -22,7 +22,7 @@ type UserDeleteRequest struct {
 	Password string `json:"password" binding:"required"`
 }
 
-type UserParticateRequest struct {
+type UserFirstJoinRequest struct {
 	ChannelID uint  `json:"channel" binding:"required"`
 	JoinTime  int64 `json:"joinTime" binding:"required"`
 }
@@ -30,6 +30,20 @@ type UserParticateRequest struct {
 type UserJoinRequest struct {
 	ChannelID uint  `json:"channel" binding:"required"`
 	JoinTime  int64 `json:"joinTime" binding:"required"`
+}
+
+type UserFirstParticateEventRequest struct {
+	EventID       uint  `josn:"event" binding:"required"`
+	ParticateTime int64 `json:"particateTime" binding:"required"`
+}
+
+type UserParticateEventRequest struct {
+	EventID       uint  `jsOn:"event" binding:"required"`
+	ParticateTime int64 `json:"particateTime" binding:"required"`
+}
+
+type UserLeaveEventRequst struct {
+	EventID uint `json:"event" binding:"required"`
 }
 
 type UserCommentRequest struct {

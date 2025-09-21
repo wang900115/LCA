@@ -46,7 +46,7 @@ func (u *UserUsecase) DeleteUser(ctx context.Context, id uint) error {
 	return u.userRepo.Delete(ctx, id)
 }
 
-func (u *UserUsecase) ParticateChannel(ctx context.Context, id uint, req validator.UserParticateRequest) error {
+func (u *UserUsecase) FirstJoinChannel(ctx context.Context, id uint, req validator.UserFirstJoinRequest) error {
 	userJoin := entities.UserJoin{
 		Role:     "general",
 		LastJoin: req.JoinTime,
@@ -73,6 +73,35 @@ func (u *UserUsecase) JoinChannel(ctx context.Context, id uint, req validator.Us
 
 func (u *UserUsecase) LeaveChannel(ctx context.Context, id uint, channel_id uint) error {
 	return u.tokenRepo.DeleteChannelToken(ctx, id, channel_id)
+}
+
+func (u *UserUsecase) FirstParticateEvent(ctx context.Context, id uint, req validator.UserFirstParticateEventRequest) error {
+	userParticate := entities.UserParticate{
+		Role:          "general",
+		LastParticate: req.ParticateTime,
+	}
+	return u.userRepo.CreateParticate(ctx, id, req.EventID, userParticate)
+}
+
+func (u *UserUsecase) ParticateEvent(ctx context.Context, id uint, req validator.UserParticateEventRequest) (string, *entities.UserParticate, error) {
+	event, err := u.userRepo.UpdateParticateTime(ctx, id, req.EventID, req.ParticateTime)
+	if err != nil {
+		return "", nil, err
+	}
+	tokenClaims := entities.EventTokenClaims{
+		UserID:          id,
+		EventID:         req.EventID,
+		ParticateStatus: event,
+	}
+	token, err := u.tokenRepo.CreateEventToken(ctx, tokenClaims)
+	if err != nil {
+		return "", nil, err
+	}
+	return token, event, nil
+}
+
+func (u *UserUsecase) LeaveEvent(ctx context.Context, id uint, event_id uint) error {
+	return u.tokenRepo.DeleteEventToken(ctx, id, event_id)
 }
 
 func (u *UserUsecase) Login(ctx context.Context, req validator.UserLoginRequest) (string, *entities.UserLogin, error) {

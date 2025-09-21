@@ -29,27 +29,34 @@ type TokenImplement interface {
 	GenerateSalt(int) []byte
 	CreateUserToken(context.Context, entities.UserTokenClaims) (string, error)
 	CreateChannelToken(context.Context, entities.ChannelTokenClaims) (string, error)
+	CreateEventToken(context.Context, entities.EventTokenClaims) (string, error)
 	ValidateUserToken(string) (*entities.UserTokenClaims, error)
 	ValidateChannelToken(string) (*entities.ChannelTokenClaims, error)
+	ValidateEventToken(string) (*entities.EventTokenClaims, error)
 	DeleteUserToken(context.Context, uint) error
 	DeleteChannelToken(context.Context, uint, uint) error
+	DeleteEventToken(context.Context, uint, uint) error
 }
 
 type TokenRepository struct {
-	redis           *redis.Client
-	loginExpiration time.Duration
-	joinExpiration  time.Duration
-	loginSecret     []byte
-	joinSecret      []byte
+	redis               *redis.Client
+	loginExpiration     time.Duration
+	joinExpiration      time.Duration
+	particateExpiration time.Duration
+	loginSecret         []byte
+	joinSecret          []byte
+	particateSecret     []byte
 }
 
-func NewTokenRepository(redis *redis.Client, loginExpiration time.Duration, joinExpiration time.Duration, loginSecret []byte, joinSecret []byte) TokenImplement {
+func NewTokenRepository(redis *redis.Client, loginExpiration time.Duration, joinExpiration time.Duration, particateExpiration time.Duration, loginSecret []byte, joinSecret []byte, particateSecret []byte) TokenImplement {
 	return &TokenRepository{
-		redis:           redis,
-		loginExpiration: loginExpiration,
-		joinExpiration:  joinExpiration,
-		loginSecret:     loginSecret,
-		joinSecret:      joinSecret,
+		redis:               redis,
+		loginExpiration:     loginExpiration,
+		joinExpiration:      joinExpiration,
+		particateExpiration: particateExpiration,
+		loginSecret:         loginSecret,
+		joinSecret:          joinSecret,
+		particateSecret:     particateSecret,
 	}
 }
 
@@ -95,6 +102,24 @@ func (r *TokenRepository) CreateChannelToken(ctx context.Context, channelClaims 
 		return "", err
 	}
 	return jwt.NewWithClaims(jwt.SigningMethodHS256, channelClaimsModel).SignedString(append(r.joinSecret, salt...))
+}
+
+func (r *TokenRepository) CreateEventToken(ctx context.Context, eventClaims entities.EventTokenClaims) (string, error) {
+	salt := r.GenerateSalt(saltSize)
+	eventClaimsModel := redismodel.EventTokenClaims{
+		UserID:        eventClaims.UserID,
+		EventID:       eventClaims.EventID,
+		Role:          eventClaims.ParticateStatus.Role,
+		LastParticate: eventClaims.ParticateStatus.LastParticate,
+	}
+	eventClaimsModel.ExpiresAt = jwt.NewNumericDate(time.Now().Add(r.joinExpiration))
+	id := strconv.FormatUint(uint64(eventClaims.UserID), 10)
+	eventId := strconv.FormatUint(uint64(eventClaims.EventID), 10)
+	_, err := r.redis.Set(ctx, jwtsaltPrefix+id+eventId, string(salt), r.joinExpiration).Result()
+	if err != nil {
+		return "", err
+	}
+	return jwt.NewWithClaims(jwt.SigningMethodHS256, eventClaimsModel).SignedString(append(r.particateSecret, salt...))
 }
 
 func (r *TokenRepository) ValidateUserToken(token string) (*entities.UserTokenClaims, error) {
@@ -170,6 +195,45 @@ func (r *TokenRepository) ValidateChannelToken(token string) (*entities.ChannelT
 	return tokenClaimsModel.ToDomain(), nil
 }
 
+func (r *TokenRepository) ValidateEventToken(token string) (*entities.EventTokenClaims, error) {
+	unvertifiedToken, _, err := new(jwt.Parser).ParseUnverified(token, jwt.MapClaims{})
+	if err != nil {
+		return nil, err
+	}
+	mapClaims, ok := unvertifiedToken.Claims.(jwt.MapClaims)
+	if !ok {
+		return nil, errors.New("token map failed")
+	}
+	user, ok := mapClaims["user"].(string)
+	if !ok {
+		return nil, errors.New("token map user failed")
+	}
+	event, ok := mapClaims["event"].(string)
+	if !ok {
+		return nil, errors.New("token map event failed")
+	}
+
+	salt, err := r.redis.Get(context.Background(), jwtsaltPrefix+user+event).Result()
+	if err != nil {
+		return nil, err
+	}
+	key := bytes.Join([][]byte{r.particateSecret, []byte(salt)}, []byte{})
+	tokenClaims, parseErr := jwt.ParseWithClaims(token, &redismodel.ChannelTokenClaims{}, func(token *jwt.Token) (interface{}, error) {
+		return key, nil
+	})
+	if parseErr != nil {
+		return nil, parseErr
+	}
+	if !tokenClaims.Valid {
+		return nil, ErrTokenExpired
+	}
+	tokenClaimsModel, ok := tokenClaims.Claims.(*redismodel.EventTokenClaims)
+	if !ok {
+		return nil, ErrInvalidToken
+	}
+	return tokenClaimsModel.ToDomain(), nil
+}
+
 func (r *TokenRepository) DeleteUserToken(ctx context.Context, userId uint) error {
 	id := strconv.FormatUint(uint64(userId), 10)
 	return r.redis.Del(context.Background(), jwtsaltPrefix+id).Err()
@@ -179,4 +243,10 @@ func (r *TokenRepository) DeleteChannelToken(ctx context.Context, userId uint, c
 	id := strconv.FormatUint(uint64(userId), 10)
 	channel_id := strconv.FormatUint(uint64(channelId), 10)
 	return r.redis.Del(context.Background(), jwtsaltPrefix+id+channel_id).Err()
+}
+
+func (r *TokenRepository) DeleteEventToken(ctx context.Context, userId uint, eventId uint) error {
+	id := strconv.FormatUint(uint64(userId), 10)
+	event_id := strconv.FormatUint(uint64(eventId), 10)
+	return r.redis.Del(context.Background(), jwtsaltPrefix+id+event_id).Err()
 }

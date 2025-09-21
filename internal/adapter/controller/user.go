@@ -19,7 +19,7 @@ func NewUserController(response iresponse.IResponse, user *usecase.UserUsecase, 
 	return &UserController{response: response, user: *user, channel: *channel}
 }
 
-// todo email and otp
+// !todo email and otp
 func (uc *UserController) Register(c *gin.Context) {
 	var request validator.UserCreateRequest
 	if err := c.ShouldBindJSON(&request); err != nil {
@@ -74,14 +74,14 @@ func (uc *UserController) Logout(c *gin.Context) {
 	uc.response.Success(c, SUCCESS)
 }
 
-func (uc *UserController) Particate(c *gin.Context) {
+func (uc *UserController) FirstJoin(c *gin.Context) {
 	id := c.GetUint("user_id")
-	var request validator.UserParticateRequest
+	var request validator.UserFirstJoinRequest
 	if err := c.ShouldBindJSON(&request); err != nil {
 		uc.response.ValidatorFail(c, INVALID_PARAM_ERROR)
 		return
 	}
-	err := uc.user.ParticateChannel(c, id, request)
+	err := uc.user.FirstJoinChannel(c, id, request)
 	if err != nil {
 		uc.response.FailWithError(c, COMMON_INTERNAL_ERROR, err)
 		return
@@ -117,7 +117,70 @@ func (uc *UserController) Join(c *gin.Context) {
 	})
 }
 
-func (uc *UserController) Leave(c *gin.Context) {
+func (uc *UserController) FirstParticate(c *gin.Context) {
+	id := c.GetUint("user_id")
+	var request validator.UserFirstParticateEventRequest
+	if err := c.ShouldBindJSON(&request); err != nil {
+		uc.response.ValidatorFail(c, INVALID_PARAM_ERROR)
+		return
+	}
+	err := uc.user.FirstParticateEvent(c, id, request)
+	if err != nil {
+		uc.response.FailWithError(c, COMMON_INTERNAL_ERROR, err)
+		return
+	}
+	uc.response.Success(c, SUCCESS)
+}
+
+func (uc *UserController) Particate(c *gin.Context) {
+	id := c.GetUint("user_id")
+	var request validator.UserParticateEventRequest
+	if err := c.ShouldBindJSON(&request); err != nil {
+		uc.response.ValidatorFail(c, INVALID_PARAM_ERROR)
+		return
+	}
+	token, userParticate, err := uc.user.ParticateEvent(c, id, request)
+	if token == "" || userParticate == nil || err != nil {
+		uc.response.FailWithError(c, COMMON_INTERNAL_ERROR, err)
+		return
+	}
+	_, err = uc.user.ReadUser(c, id)
+	if err != nil {
+		uc.response.FailWithError(c, COMMON_INTERNAL_ERROR, err)
+		return
+	}
+	// !todo
+	// err = uc.channel.UserJoin(c, request.ChannelID, user.ID)
+	// if err != nil {
+	// 	uc.response.FailWithError(c, COMMON_INTERNAL_ERROR, err)
+	// 	return
+	// }
+	uc.response.SuccessWithData(c, ACCEPTED_SUCCESS, map[string]interface{}{
+		"token": token,
+		"info":  userParticate,
+	})
+}
+
+func (uc *UserController) LeaveEvent(c *gin.Context) {
+	id := c.GetUint("user_id")
+	var request validator.UserLeaveEventRequst
+	if err := c.ShouldBindJSON(&request); err != nil {
+		uc.response.ValidatorFail(c, INVALID_PARAM_ERROR)
+		return
+	}
+	if err := uc.user.LeaveEvent(c, id, request.EventID); err != nil {
+		uc.response.FailWithError(c, COMMON_INTERNAL_ERROR, err)
+		return
+	}
+	// !todo
+	// if err := uc.channel.UserLeave(c, channelId, id); err != nil {
+	// 	uc.response.FailWithError(c, COMMON_INTERNAL_ERROR, err)
+	// 	return
+	// }
+	uc.response.Success(c, SUCCESS)
+}
+
+func (uc *UserController) LeaveChannel(c *gin.Context) {
 	id := c.GetUint("user_id")
 	channelId := c.GetUint("channel_id")
 	if err := uc.user.LeaveChannel(c, id, channelId); err != nil {

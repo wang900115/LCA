@@ -49,7 +49,7 @@ func main() {
 	messageRepo := implement.NewMessageRepository(postgresql, redispool)
 	channelRepo := implement.NewChannelRepository(postgresql, redispool)
 	// !todo
-	tokenRepo := implement.NewTokenRepository(redispool, conf.GetDuration("jwt.login_expiration"), conf.GetDuration("jwt.join_expiration"), []byte("0"), []byte("0"))
+	tokenRepo := implement.NewTokenRepository(redispool, conf.GetDuration("jwt.login_expiration"), conf.GetDuration("jwt.join_expiration"), conf.GetDuration("jwt.particate_expiration"), []byte("0x"), []byte("0x"), []byte("0x"))
 
 	userUsecase := usecase.NewUserUsecase(userRepo, tokenRepo)
 	messageUsecase := usecase.NewMessageUsecase(messageRepo)

@@ -12,6 +12,7 @@ require (
 	github.com/go-redis/redis_rate/v10 v10.0.1
 	github.com/golang-jwt/jwt/v5 v5.2.2
 	github.com/gorilla/websocket v1.5.3
+	github.com/holiman/uint256 v1.3.2
 	github.com/prometheus/client_golang v1.23.2
 	github.com/redis/go-redis/v9 v9.0.2
 	github.com/segmentio/kafka-go v0.4.49

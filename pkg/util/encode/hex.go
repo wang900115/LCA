@@ -20,9 +20,10 @@ import (
 	"encoding/hex"
 	"fmt"
 	"math/big"
-	"math/bits"
 	"strconv"
 )
+
+const uintSize = 32 << (^uint(0) >> 63)
 
 var (
 	ErrEmptyString   = &encodeError{"empty hex string"}
@@ -32,7 +33,7 @@ var (
 	ErrEmptyNumber   = &encodeError{"hex string \"0x\""}
 	ErrLeadingZero   = &encodeError{"hex number with leading zero digits"}
 	ErrUint64Range   = &encodeError{"hex number > 64 bits"}
-	ErrUintRange     = &encodeError{fmt.Sprintf("hex number > %d bits", bits.UintSize)}
+	ErrUintRange     = &encodeError{fmt.Sprintf("hex number > %d bits", uintSize)}
 	ErrBig256Range   = &encodeError{"hex number > 256 bits"}
 )
 

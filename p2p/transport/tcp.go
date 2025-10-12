@@ -7,7 +7,6 @@ import (
 	"net"
 
 	"github.com/wang900115/LCA/p2p"
-	"github.com/wang900115/LCA/p2p/encode"
 	"github.com/wang900115/LCA/p2p/node"
 	"github.com/wang900115/LCA/p2p/packet"
 )
@@ -21,7 +20,6 @@ type TCPTransportOpts struct {
 type TCPTransport struct {
 	TCPTransportOpts
 	listener net.Listener
-	Decoder  encode.Decoder
 	rpcch    chan packet.RPC
 }
 

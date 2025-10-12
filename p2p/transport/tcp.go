@@ -3,6 +3,7 @@ package transport
 import (
 	"errors"
 	"fmt"
+	"io"
 	"log"
 	"net"
 
@@ -13,6 +14,7 @@ import (
 type TCPTransportOpts struct {
 	ListenAddr    string
 	HandShakeFunc p2p.HandShakeFunc
+	Decoder       func(io.Reader, interface{}) error
 	OnPeer        func(p2p.Peer) error
 }
 
@@ -50,7 +52,7 @@ func (t *TCPTransport) Dial(addr string) error {
 	return nil
 }
 
-func (t *TCPTransport) ListenAndAccept() error {
+func (t *TCPTransport) Listen() error {
 	var err error
 	t.listener, err = net.Listen("tcp", t.ListenAddr)
 	if err != nil {
@@ -81,11 +83,12 @@ func (t *TCPTransport) handleConn(conn net.Conn, outBound bool) {
 	}()
 
 	peer := node.NewPeer(conn, outBound)
-
 	if err = t.HandShakeFunc(peer); err != nil {
 		return
 	}
-
+	if err = peer.HandShake(); err != nil {
+		return
+	}
 	if t.OnPeer(peer) != nil {
 		if err = t.OnPeer(peer); err != nil {
 			return
@@ -93,15 +96,13 @@ func (t *TCPTransport) handleConn(conn net.Conn, outBound bool) {
 	}
 
 	for {
-		rpc := packet.RPC{}
-		err := t.Decoder.Decode(conn, &rpc)
+		pk := p2p.Packet{}
+		err := t.Decoder(conn, &pk)
 		if err != nil {
 			return
 		}
 
-		rpc.From = conn.RemoteAddr().String()
-
-		if rpc.Stream {
+		if peer.IsStream() {
 			if p, err := peer.OpenStream(); err != nil {
 				log.Printf("open stream error with peer: %+v\n", p)
 				return
@@ -112,6 +113,6 @@ func (t *TCPTransport) handleConn(conn net.Conn, outBound bool) {
 			continue
 		}
 
-		t.rpcch <- rpc
+		t.ch <- pk
 	}
 }

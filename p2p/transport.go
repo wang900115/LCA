@@ -19,7 +19,7 @@ type Transport interface {
 type Peer interface {
 	net.Conn
 	SendPacket(Packet) error
-	Receive() ([]byte, error)
+	ReceivePacket() (*Packet, error)
 	GetID() string
 	GetMeta() map[string]string
 	SetMeta(map[string]string)

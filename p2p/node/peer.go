@@ -8,14 +8,16 @@ import (
 )
 
 type Peer struct {
+	net.Conn
 	ID        string
-	Conn      net.Conn
 	Protocol  *p2p.Protcol
 	Meta      map[string]string
 	wg        *sync.WaitGroup
 	outBound  bool
 	handShake bool
 	stream    bool
+
+	rpcch <-chan p2p.RPC
 }
 
 func NewPeer(conn net.Conn, outBound bool) *Peer {
@@ -23,6 +25,7 @@ func NewPeer(conn net.Conn, outBound bool) *Peer {
 		Conn:     conn,
 		outBound: outBound,
 		wg:       &sync.WaitGroup{},
+		rpcch:    make(<-chan p2p.RPC),
 	}
 }
 
@@ -37,7 +40,7 @@ func (p *Peer) GetMeta() map[string]string {
 }
 
 // OpenStream increments the waitgroup counter and returns a new peer
-func (p *Peer) OpenStream() (*Peer, error) {
+func (p *Peer) OpenStream() (p2p.Peer, error) {
 	p.wg.Add(1)
 	peer := *p
 	peer.stream = true
@@ -57,12 +60,6 @@ func (p *Peer) CloseStream() {
 // IsStream returns true if the peer is a stream
 func (p *Peer) IsStream() bool {
 	return p.stream
-}
-
-// Send sends packet to the peer
-func (p *Peer) Send(data []byte) error {
-	_, err := p.Conn.Write(data)
-	return err
 }
 
 // IsHandShake returns true if the handshake is done
@@ -93,4 +90,31 @@ func (p *Peer) SetMeta(meta map[string]string) {
 // Close closes the peer connection
 func (p *Peer) Close() error {
 	return p.Conn.Close()
+}
+
+// Receive reads data from the peer connection
+func (p *Peer) ReceivePacket() (*p2p.Packet, error) {
+	buf := make([]byte, 4096) // or any appropriate buffer size
+	n, err := p.Conn.Read(buf)
+	if err != nil {
+		return nil, err
+	}
+	packet, err := p2p.Decode(buf[:n])
+	if err != nil {
+		return nil, err
+	}
+	return packet, nil
+}
+
+// SendPacket sends a packet to the peer
+func (p *Peer) SendPacket(packet p2p.Packet) error {
+	data, err := packet.Encode()
+	if err != nil {
+		return err
+	}
+	_, err = p.Conn.Write(data)
+	if err != nil {
+		return err
+	}
+	return nil
 }

@@ -3,6 +3,7 @@ package transport
 import (
 	"errors"
 	"fmt"
+	"log"
 	"net"
 
 	"github.com/wang900115/LCA/p2p"
@@ -82,7 +83,7 @@ func (t *TCPTransport) handleConn(conn net.Conn, outBound bool) {
 		conn.Close()
 	}()
 
-	peer := node.NewTCPPeer(conn, outBound)
+	peer := node.NewPeer(conn, outBound)
 
 	if err = t.HandShakeFunc(peer); err != nil {
 		return
@@ -104,9 +105,12 @@ func (t *TCPTransport) handleConn(conn net.Conn, outBound bool) {
 		rpc.From = conn.RemoteAddr().String()
 
 		if rpc.Stream {
-			peer.AddWG()
+			if p, err := peer.OpenStream(); err != nil {
+				log.Printf("open stream error with peer: %+v\n", p)
+				return
+			}
 			fmt.Printf("[%s] incoming stream, waiting...\n", conn.RemoteAddr())
-			peer.WaitWG()
+			peer.WaitSream()
 			fmt.Printf("[%s] stream closed, resuming read loop\n", conn.RemoteAddr())
 			continue
 		}

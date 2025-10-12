@@ -7,6 +7,12 @@ const (
 
 type RPC struct {
 	From    string
-	Payload []byte
+	Content Message
 	Stream  bool
+}
+
+type Message struct {
+	To        string
+	Payload   []byte
+	Timestamp int64
 }

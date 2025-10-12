@@ -3,35 +3,94 @@ package node
 import (
 	"net"
 	"sync"
+
+	"github.com/wang900115/LCA/p2p"
 )
 
-type TCPPeer struct {
-	net.Conn
-	outBound bool // if we dial and retrieve a conn => outbound is true else false
-	wg       *sync.WaitGroup
+type Peer struct {
+	ID        string
+	Conn      net.Conn
+	Protocol  *p2p.Protcol
+	Meta      map[string]string
+	wg        *sync.WaitGroup
+	outBound  bool
+	handShake bool
+	stream    bool
 }
 
-func NewTCPPeer(conn net.Conn, outBound bool) *TCPPeer {
-	return &TCPPeer{
+func NewPeer(conn net.Conn, outBound bool) *Peer {
+	return &Peer{
 		Conn:     conn,
 		outBound: outBound,
 		wg:       &sync.WaitGroup{},
 	}
 }
 
-func (p *TCPPeer) AddWG() {
-	p.wg.Add(1)
+// GetID returns the peer ID
+func (p *Peer) GetID() string {
+	return p.ID
 }
 
-func (p *TCPPeer) WaitWG() {
+// GetMeta returns the peer metadata
+func (p *Peer) GetMeta() map[string]string {
+	return p.Meta
+}
+
+// OpenStream increments the waitgroup counter and returns a new peer
+func (p *Peer) OpenStream() (*Peer, error) {
+	p.wg.Add(1)
+	peer := *p
+	peer.stream = true
+	return &peer, nil
+}
+
+// WaitSream waits for all streams to be closed
+func (p *Peer) WaitSream() {
 	p.wg.Wait()
 }
 
-func (p *TCPPeer) CloseStream() {
+// CloseStream decrements the waitgroup counter
+func (p *Peer) CloseStream() {
 	p.wg.Done()
 }
 
-func (p *TCPPeer) Send(b []byte) error {
-	_, err := p.Conn.Write(b)
+// IsStream returns true if the peer is a stream
+func (p *Peer) IsStream() bool {
+	return p.stream
+}
+
+// Send sends packet to the peer
+func (p *Peer) Send(data []byte) error {
+	_, err := p.Conn.Write(data)
 	return err
+}
+
+// IsHandShake returns true if the handshake is done
+func (p *Peer) IsHandShake() bool {
+	return p.handShake
+}
+
+// HandShake marks the peer as handshaked
+func (p *Peer) HandShake() error {
+	p.handShake = true
+	return nil
+}
+
+// HandShakeWithData marks the peer as handshaked and sets the metadata
+func (p *Peer) HandShakeWithData(data []byte) error {
+	p.handShake = true
+	p.Meta = map[string]string{
+		"handshake_data": string(data),
+	}
+	return nil
+}
+
+// SetMeta sets the peer metadata
+func (p *Peer) SetMeta(meta map[string]string) {
+	p.Meta = meta
+}
+
+// Close closes the peer connection
+func (p *Peer) Close() error {
+	return p.Conn.Close()
 }

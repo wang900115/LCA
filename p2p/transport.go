@@ -2,8 +2,6 @@ package p2p
 
 import (
 	"net"
-
-	"github.com/wang900115/LCA/p2p/packet"
 )
 
 // p2p.transport interface represents handles the communication between the nodes in the network
@@ -13,13 +11,14 @@ type Transport interface {
 	Listen() error
 	Dial(string) error
 	Close() error
-	Consume() chan packet.RPC
+	Consume() chan Packet
+	Peers() []Peer
 }
 
 // p2p.peer interface represents a peer in the network
 type Peer interface {
 	net.Conn
-	Send([]byte) error
+	SendPacket(Packet) error
 	Receive() ([]byte, error)
 	GetID() string
 	GetMeta() map[string]string

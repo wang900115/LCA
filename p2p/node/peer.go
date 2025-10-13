@@ -20,7 +20,7 @@ type Peer struct {
 	rpcch <-chan p2p.RPC
 }
 
-func NewPeer(conn net.Conn, outBound bool) *Peer {
+func NewPeer(conn net.Conn, outBound bool) p2p.Peer {
 	return &Peer{
 		Conn:     conn,
 		outBound: outBound,
@@ -93,7 +93,7 @@ func (p *Peer) Close() error {
 }
 
 // Receive reads data from the peer connection
-func (p *Peer) ReceivePacket() (*p2p.Packet, error) {
+func (p *Peer) ReceivePacket() (p2p.Packet, error) {
 	buf := make([]byte, 4096) // or any appropriate buffer size
 	n, err := p.Conn.Read(buf)
 	if err != nil {

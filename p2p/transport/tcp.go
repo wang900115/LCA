@@ -3,7 +3,6 @@ package transport
 import (
 	"errors"
 	"fmt"
-	"io"
 	"log"
 	"net"
 
@@ -11,19 +10,21 @@ import (
 	"github.com/wang900115/LCA/p2p/node"
 )
 
+// TCPTransportOpts holds configuration options for the TCPTransport.
 type TCPTransportOpts struct {
 	ListenAddr    string
 	HandShakeFunc p2p.HandShakeFunc
-	Decoder       func(io.Reader, interface{}) error
 	OnPeer        func(p2p.Peer) error
 }
 
+// TCPTransport implements a TCP-based transport layer for P2P communication.
 type TCPTransport struct {
 	TCPTransportOpts
 	listener net.Listener
 	ch       chan p2p.Packet
 }
 
+// NewTCPTransport creates a new TCPTransport with the given options.
 func NewTCPTransport(opts TCPTransportOpts) *TCPTransport {
 	return &TCPTransport{
 		TCPTransportOpts: opts,
@@ -31,18 +32,22 @@ func NewTCPTransport(opts TCPTransportOpts) *TCPTransport {
 	}
 }
 
+// Addr returns the listening address of the TCPTransport.
 func (t *TCPTransport) Addr() string {
 	return t.ListenAddr
 }
 
+// Consume returns a channel to receive incoming packets.
 func (t *TCPTransport) Consume() <-chan p2p.Packet {
 	return t.ch
 }
 
+// Close shuts down the TCP listener.
 func (t *TCPTransport) Close() error {
 	return t.listener.Close()
 }
 
+// Dial connects to a remote TCP address and starts handling the connection.
 func (t *TCPTransport) Dial(addr string) error {
 	conn, err := net.Dial("tcp", addr)
 	if err != nil {
@@ -52,6 +57,7 @@ func (t *TCPTransport) Dial(addr string) error {
 	return nil
 }
 
+// Listen starts the TCP listener and begins accepting incoming connections.
 func (t *TCPTransport) Listen() error {
 	var err error
 	t.listener, err = net.Listen("tcp", t.ListenAddr)
@@ -63,6 +69,7 @@ func (t *TCPTransport) Listen() error {
 	return nil
 }
 
+// startAcceptLoop continuously accepts incoming connections.
 func (t *TCPTransport) startAcceptLoop() {
 	for {
 		conn, err := t.listener.Accept()
@@ -76,6 +83,7 @@ func (t *TCPTransport) startAcceptLoop() {
 	}
 }
 
+// handleConn performs the handshake and processes incoming packets for a connection.
 func (t *TCPTransport) handleConn(conn net.Conn, outBound bool) {
 	var err error
 	defer func() {
@@ -96,12 +104,15 @@ func (t *TCPTransport) handleConn(conn net.Conn, outBound bool) {
 	}
 
 	for {
-		pk := p2p.Packet{}
-		err := t.Decoder(conn, &pk)
+		buf := make([]byte, 4096)
+		n, err := conn.Read(buf)
 		if err != nil {
 			return
 		}
-
+		pk, err := p2p.Decode(buf[:n])
+		if err != nil {
+			return
+		}
 		if peer.IsStream() {
 			if p, err := peer.OpenStream(); err != nil {
 				log.Printf("open stream error with peer: %+v\n", p)
@@ -112,7 +123,6 @@ func (t *TCPTransport) handleConn(conn net.Conn, outBound bool) {
 			fmt.Printf("[%s] stream closed, resuming read loop\n", conn.RemoteAddr())
 			continue
 		}
-
 		t.ch <- pk
 	}
 }

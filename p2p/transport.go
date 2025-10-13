@@ -4,7 +4,7 @@ import (
 	"net"
 )
 
-// p2p.transport interface represents handles the communication between the nodes in the network
+// p2p.Transport interface represents handles the communication between the nodes in the network
 // ex: tcp, udp, websocket, rpc ...
 type Transport interface {
 	Addr() string
@@ -15,11 +15,11 @@ type Transport interface {
 	Peers() []Peer
 }
 
-// p2p.peer interface represents a peer in the network
+// p2p.Peer interface represents a peer in the network
 type Peer interface {
 	net.Conn
 	SendPacket(Packet) error
-	ReceivePacket() (*Packet, error)
+	ReceivePacket() (Packet, error)
 	GetID() string
 	GetMeta() map[string]string
 	SetMeta(map[string]string)
@@ -28,9 +28,11 @@ type Peer interface {
 	IsHandShake() bool
 	OpenStream() (Peer, error)
 	CloseStream()
+	IsStream() bool
+	WaitSream()
 }
 
-// p2p.protocol interface represents the protocol used in the p2p network
+// p2p.Protocol interface represents the protocol used in the p2p network
 type Protocol interface {
 	IsVersionSupported() (bool, error)
 	IsPortSupported() (bool, error)
@@ -38,4 +40,22 @@ type Protocol interface {
 	GetDefaultVersion() string
 	GetDefaultPort() int
 	GetDefaultProtocol() string
+}
+
+// p2p.Packet interface represents a packet in the network
+type Packet interface {
+	GetCommand() Command
+	GetLength() uint32
+	GetPayload() []byte
+	GetCheckSum() uint32
+	Check() error
+	Encode() ([]byte, error)
+	// Decode([]byte) (*Packet, error)
+}
+
+// p2p.RPC interface represents the rpc mechanism used in the p2p network
+type RPC interface {
+	Call(method string, args interface{}, reply interface{}) error
+	Encode(interface{}) ([]byte, error)
+	// Decode([]byte, interface{}) error
 }

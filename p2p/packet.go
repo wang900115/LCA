@@ -1,36 +1,15 @@
 package p2p
 
-import "errors"
+import (
+	"errors"
+	// Removed import to avoid cycle: "github.com/wang900115/LCA/p2p"
+)
 
 // 1 bytes for command
 // 4 bytes for length
 // n bytes for payload
 // 1+4 = 5 bytes header
 // 4 bytes footer (checksum)
-
-type Command byte
-
-const (
-	HEARTBEAT       Command = 0x00
-	PEERINFO        Command = 0x01
-	PEERACK         Command = 0x02
-	PEERERROR       Command = 0x03
-	BETCREATE       Command = 0x10
-	BETACK          Command = 0x11
-	BETERROR        Command = 0x12
-	RESETTLECREATE  Command = 0x20
-	RESETTLEACK     Command = 0x21
-	RESETTLEERROR   Command = 0x22
-	ROUNDSTART      Command = 0x30
-	ROUNDSTARTACK   Command = 0x31
-	ROUNDSTARTERROR Command = 0x32
-	ROUNDEND        Command = 0x33
-	ROUNDENDACK     Command = 0x34
-	ROUNDENDERROR   Command = 0x35
-	ROUNDWAIT       Command = 0x36
-	ROUNDWAITACK    Command = 0x37
-	ROUNDWAITERROR  Command = 0x38
-)
 
 const (
 	MaxPacketSize = 4 * 1024 * 1024
@@ -49,7 +28,7 @@ type PacketContent struct {
 }
 
 // NewPacket creates a new packet with the given command and payload
-func NewPacket(command byte, playload []byte) Packet {
+func NewPacket(command byte, playload []byte) *PacketContent {
 	return &PacketContent{
 		Command:  command,
 		Length:   uint32(len(playload)),
@@ -59,8 +38,8 @@ func NewPacket(command byte, playload []byte) Packet {
 }
 
 // Getters for Packet fields
-func (p *PacketContent) GetCommand() Command {
-	return Command(p.Command)
+func (p *PacketContent) GetCommand() byte {
+	return p.Command
 }
 
 // Getters for Packet fields
@@ -95,6 +74,6 @@ func (p *PacketContent) Encode() ([]byte, error) {
 }
 
 // Decode binary packet to Packet
-func Decode(data []byte) (Packet, error) {
+func Decode2Packet(data []byte) (*PacketContent, error) {
 	return nil, nil
 }

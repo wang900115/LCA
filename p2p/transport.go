@@ -48,18 +48,16 @@ type Protocol interface {
 
 // p2p.Packet interface represents a packet in the network
 type Packet interface {
-	GetCommand() Command
+	GetCommand() byte
 	GetLength() uint32
 	GetPayload() []byte
 	GetCheckSum() uint32
 	Check() error
 	Encode() ([]byte, error)
-	// Decode([]byte) (*Packet, error)
 }
 
 // p2p.RPC interface represents the rpc mechanism used in the p2p network
 type RPC interface {
 	Call(method string, args interface{}, reply interface{}) error
-	Encode(interface{}) ([]byte, error)
-	// Decode([]byte, interface{}) error
+	Encode(interface{}) (Packet, error)
 }

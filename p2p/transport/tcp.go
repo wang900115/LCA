@@ -102,14 +102,13 @@ func (t *TCPTransport) handleConn(conn net.Conn, outBound bool) {
 			return
 		}
 	}
-
 	for {
 		buf := make([]byte, 4096)
 		n, err := conn.Read(buf)
 		if err != nil {
 			return
 		}
-		pk, err := p2p.Decode(buf[:n])
+		pk, err := p2p.Decode2Packet(buf[:n])
 		if err != nil {
 			return
 		}

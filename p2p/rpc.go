@@ -1,16 +1,43 @@
 package p2p
 
-type RPCtype [1]byte
-
-var (
-	INCOMMINGMESSAGE = RPCtype{0x01}
-	INCOMMINGSTREAM  = RPCtype{0x02}
-	OUTGOINGMESSAGE  = RPCtype{0x03}
-	OUTGOINGSTREAM   = RPCtype{0x04}
-)
-
 type RPCContext struct {
 	From string
-	Msg  interface{} // can be either *Message or *Stream
+	Msg  []byte // is will coming to message struct
 	Sig  []byte
+}
+
+// GetFrom returns the sender of the RPC
+func (r *RPCContext) GetFrom() string {
+	return r.From
+}
+
+// getMsg returns the message of the RPC
+func (r *RPCContext) getMsg() interface{} {
+	return r.Msg
+}
+
+// getSig returns the signature of the RPC
+func (r *RPCContext) getSig() []byte {
+	return r.Sig
+}
+
+func (r *RPCContext) Encode(msg interface{}) ([]byte, error) {
+
+	return nil, nil
+}
+
+// DecodeRPC2MSG decodes a byte slice into a message
+func DecodeRPC2MSG(data []byte) (Message, error) {
+	var msg Message
+	return msg, nil
+}
+
+func ValidateRPC(rpc interface{}) error {
+
+	return nil
+}
+
+// Call performs an RPC call to the given method with args and fills the reply
+func (r *RPCContext) Call(method string, args interface{}, reply interface{}) error {
+	return nil
 }

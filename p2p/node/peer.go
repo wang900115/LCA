@@ -104,7 +104,7 @@ func (p *Peer) ReceivePacket() (p2p.Packet, error) {
 	if err != nil {
 		return nil, err
 	}
-	packet, err := p2p.Decode(buf[:n])
+	packet, err := p2p.Decode2Packet(buf[:n])
 	if err != nil {
 		return nil, err
 	}

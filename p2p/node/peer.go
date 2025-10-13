@@ -10,7 +10,7 @@ import (
 type Peer struct {
 	net.Conn
 	ID        string
-	Protocol  *p2p.Protcol
+	Protocol  p2p.Protocol
 	Meta      map[string]string
 	wg        *sync.WaitGroup
 	outBound  bool
@@ -87,6 +87,11 @@ func (p *Peer) SetMeta(meta map[string]string) {
 	p.Meta = meta
 }
 
+// GetProtocol returns the peer protocol
+func (p *Peer) GetProtocol() p2p.Protocol {
+	return p.Protocol
+}
+
 // Close closes the peer connection
 func (p *Peer) Close() error {
 	return p.Conn.Close()
@@ -117,4 +122,19 @@ func (p *Peer) SendPacket(packet p2p.Packet) error {
 		return err
 	}
 	return nil
+}
+
+// IsOutBound returns true if the peer is an outbound connection
+func (p *Peer) IsOutBound() bool {
+	return p.outBound
+}
+
+// SetProtocol sets the peer protocol
+func (p *Peer) SetProtocol(protocol p2p.Protocol) {
+	p.Protocol = protocol
+}
+
+// Consume returns a channel to consume incoming RPCs
+func (p *Peer) Consume() <-chan p2p.RPC {
+	return p.rpcch
 }

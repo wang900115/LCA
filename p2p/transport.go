@@ -30,6 +30,10 @@ type Peer interface {
 	CloseStream()
 	IsStream() bool
 	WaitSream()
+	IsOutBound() bool
+	SetProtocol(Protocol)
+	GetProtocol() Protocol
+	Consume() <-chan RPC
 }
 
 // p2p.Protocol interface represents the protocol used in the p2p network

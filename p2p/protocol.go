@@ -29,8 +29,8 @@ var (
 	ErrTransportProtocolNotSupported = errors.New("transport protocol not supported")
 )
 
-// Protcol defines the protocol used in the p2p network
-type Protcol struct {
+// ProtcolInfo defines the protocol used in the p2p network
+type ProtocolInfo struct {
 	TransportProtocol TransportProtocol
 	Version           ProtocolVersion
 	Port              ProtocolPort

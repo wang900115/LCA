@@ -1,5 +1,10 @@
 package p2p
 
+import (
+	"bytes"
+	"encoding/binary"
+)
+
 type RPCContext struct {
 	From string
 	Msg  []byte // is will coming to message struct
@@ -21,9 +26,22 @@ func (r *RPCContext) getSig() []byte {
 	return r.Sig
 }
 
-func (r *RPCContext) Encode(msg interface{}) ([]byte, error) {
-
-	return nil, nil
+// Encode encodes a rpc into a byte slice
+func (r *RPCContext) Encode() ([]byte, error) {
+	buf := new(bytes.Buffer)
+	err := binary.Write(buf, binary.LittleEndian, r.From)
+	if err != nil {
+		return nil, err
+	}
+	_, err = buf.Write(r.Msg)
+	if err != nil {
+		return nil, err
+	}
+	err = binary.Write(buf, binary.LittleEndian, r.Sig)
+	if err != nil {
+		return nil, err
+	}
+	return buf.Bytes(), nil
 }
 
 // DecodeRPC2MSG decodes a byte slice into a message

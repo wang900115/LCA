@@ -52,7 +52,6 @@ type Packet interface {
 	GetLength() uint32
 	GetPayload() []byte
 	GetCheckSum() uint32
-	Check() error
 	Encode() ([]byte, error)
 }
 

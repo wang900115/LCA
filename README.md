@@ -7,21 +7,21 @@
 ---
 
 ## 📌 Overview
-**LCA** (Lightweight Chat Application) is a secure and lightweight messaging platform.  
-It is designed to support both **RESTful APIs** and **WebSocket communication**, while maintaining **centralized management** for enhanced system security.
+**LCA** (Lightweight Chat Application) is a secure and lightweight and hybrid decentralized communication system.
+It supports RESTful APIs, WebSocket messaging, and RPC protocols, combining centralized management for security
+and decentralized personal data for resilience and privacy.
 
----
+## 🧠 Core Concepts & Features
+- **Core Features**
+  - **DID** — Decentralized Identifiers for user identity management
+  - **DCC**  — Decentralized Communication Channel for peer-to-peer messaging
+  - **External Interface** — Supports fetching and interacting with on-chain data
 
-## 🧠 Knowledge & Core Features
-- **API Protocol**
-  - RESTful APIs for user and message management  
-  - WebSocket channels for real-time communication  
-  - Supports event-driven architecture for scalability  
-
-- **Security**
-  - **PASETO** and **JWT** for authentication and session management  
-  - Strong defense against unauthorized access or tampering  
-
+- **Security Architecture**
+  - **Hybrid Encryption** using Curve25519 + AES
+  - **PASETO** and **JWT** for external api authentication and session management  
+  - **Tamper Resistance** — Protects against unauthorized access and data modification
+  - **Integrity Checking**  — Validates message integrity via CRC/HMAC
 ---
 
 ## 🔧 Prerequisites
@@ -53,12 +53,22 @@ You can download the lastest build here:
     - Linux:
       -  Build: `make build`
       -  Run: `make run`
+## Brief Sample 
+``` mermaid
+graph TD
+    A[Node A] -->|Sign X25519 PubKey with Ed25519| B[Node B]
+    A -->|Sign X25519 PubKey with Ed25519| C[Node C]
+    B -->|Verify Signature & Create Private Channel| A
+    C -->|Verify Signature & Create Private Channel| A
+    C -->|Relay Communication| B
+```
 
-## Question
+## ❓ Question
   If you have any questions, please send me the ISSUE. I will personally understand and check if there are any omissions. Keep doing the best.
 
-## Contributer
+## 👨‍💻 Contributer
   - Main Dev: 
     - Name: Perry
-## Licensing
+    - Name: Aliz
+## 📄 Licensing
   This project, LightWeight Chat Application (LCA), is released under an open-source license to encourage collaboration, transparency, and innovation in decentralized secure communication systems. We currently use the following license: MIT License You are free to: Use, Copy, Modify, Merge, Publish, and Distribute the software Use it for personal, educational, or commercial purposes Provided that: You include the original copyright and license You provide attribution to the original authors For the full license text, refer to the LICENSE file in the repository.

@@ -21,13 +21,13 @@ func HMACSignSHA3(key, data []byte) []byte {
 	return mac.Sum(nil)
 }
 
-// verify SHA2-256
+// verify HMAC-SHA2-256
 func HMACVerifySHA2(key, data, expected []byte) bool {
 	mac := HMACSignSHA2(key, data)
 	return hmac.Equal(mac, expected)
 }
 
-// verify SHA3-256
+// verify HMAC-SHA3-256
 func HMACVerifySHA3(key, data, expected []byte) bool {
 	mac := HMACSignSHA3(key, data)
 	return hmac.Equal(mac, expected)

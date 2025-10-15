@@ -4,6 +4,7 @@ go 1.25.1
 
 require (
 	github.com/allegro/bigcache/v3 v3.1.0
+	github.com/btcsuite/btcutil v1.0.2
 	github.com/casbin/casbin/v2 v2.122.0
 	github.com/casbin/gorm-adapter/v3 v3.36.0
 	github.com/gin-contrib/pprof v1.5.3
@@ -13,6 +14,7 @@ require (
 	github.com/golang-jwt/jwt/v5 v5.2.2
 	github.com/gorilla/websocket v1.5.3
 	github.com/holiman/uint256 v1.3.2
+	github.com/mr-tron/base58 v1.2.0
 	github.com/prometheus/client_golang v1.23.2
 	github.com/redis/go-redis/v9 v9.0.2
 	github.com/segmentio/kafka-go v0.4.49

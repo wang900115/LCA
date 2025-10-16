@@ -13,6 +13,12 @@ var (
 	DIDVersion = 1
 )
 
+type PeerDID interface {
+	ToDocument() *DIDDocument
+	SignDocument() ([]byte, error)
+	VerifyDocument([]byte) (bool, error)
+}
+
 type DIDMetadata struct {
 	CreatedAt  int64
 	Controller string
@@ -25,27 +31,27 @@ type ServiceEndpoint struct {
 	URL  string
 }
 
-type PeerDID struct {
+type DID struct {
 	DID      string
 	KeyPair  *PeerKeyPair
 	Metadata DIDMetadata
 	Services []ServiceEndpoint
 }
 
-func NewPeerDID(services []ServiceEndpoint) (*PeerDID, error) {
-	var peerDID PeerDID
+func NewPeerDID(services []ServiceEndpoint) (*DID, error) {
+	var did DID
 	pair, err := NewPeerKeyPair(rand.Reader)
 	if err != nil {
 		return nil, err
 	}
-	peerDID.DID = pair.generateDID()
-	peerDID.Metadata = DIDMetadata{
+	did.DID = pair.generateDID()
+	did.Metadata = DIDMetadata{
 		CreatedAt:  time.Now().UTC().Unix(),
-		Controller: peerDID.DID,
+		Controller: did.DID,
 		Version:    DIDVersion,
 	}
-	peerDID.Services = services
-	return &peerDID, nil
+	did.Services = services
+	return &did, nil
 }
 
 type DIDDocument struct {
@@ -65,7 +71,7 @@ type VerificationMethod struct {
 	PublicKeyBase58 string `json:"publicKeyBase58"`
 }
 
-func (d *PeerDID) ToDocument() *DIDDocument {
+func (d *DID) ToDocument() *DIDDocument {
 	id := d.DID
 	return &DIDDocument{
 		Context: "https://www.w3.org/ns/did/v1",
@@ -88,7 +94,7 @@ func (d *PeerDID) ToDocument() *DIDDocument {
 	}
 }
 
-func (d *PeerDID) SignDocument() ([]byte, error) {
+func (d *DID) SignDocument() ([]byte, error) {
 	doc := d.ToDocument()
 	data, err := json.Marshal(doc)
 	if err != nil {
@@ -101,7 +107,7 @@ func (d *PeerDID) SignDocument() ([]byte, error) {
 	return signature, nil
 }
 
-func (d *PeerDID) VerifyDocument(signature []byte) (bool, error) {
+func (d *DID) VerifyDocument(signature []byte) (bool, error) {
 	doc := d.ToDocument()
 	data, err := json.Marshal(doc)
 	if err != nil {

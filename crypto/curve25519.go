@@ -1,3 +1,24 @@
+/*
+curve25519
+------------------------------------------------------------
+This package provides cryptographic utilities for key management,
+signatures, and shared secret computation using Ed25519 and X25519.
+
+Main Features:
+1. Generate Ed25519 public/private key pairs (for signing/verification)
+2. Generate X25519 public/private key pairs (for ECDH shared secret)
+3. Sign arbitrary data with Ed25519 private key
+4. Verify signatures with Ed25519 public key
+5. Sign X25519 public keys for authenticity
+6. Compute X25519 shared secret key for symmetric encryption
+7. Must* variants panic on error for convenience in trusted contexts
+
+Usage Notes:
+- X25519 keys are used for Diffie-Hellman key exchange.
+- Ed25519 keys are used for digital signatures.
+- Errors are returned if keys are missing or signatures are absent.
+- Must* functions panic instead of returning errors; use only when errors are impossible or should halt execution.
+*/
 package crypto
 
 import (

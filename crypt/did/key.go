@@ -5,7 +5,7 @@ import (
 	"crypto/ed25519"
 	"io"
 
-	c "github.com/wang900115/LCA/crypto"
+	c "github.com/wang900115/LCA/crypt"
 	"github.com/wang900115/LCA/pkg/util/encode"
 )
 

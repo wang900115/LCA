@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/btcsuite/btcutil/base58"
-	"github.com/wang900115/LCA/crypto"
+	crypto "github.com/wang900115/LCA/crypt"
 )
 
 var (

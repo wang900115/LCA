@@ -4,12 +4,13 @@ import (
 	"net"
 	"sync"
 
+	"github.com/wang900115/LCA/crypt/did"
 	"github.com/wang900115/LCA/p2p"
 )
 
 type Peer struct {
 	net.Conn
-	ID        string
+	DID       did.PeerDID
 	Protocol  p2p.Protocol
 	Meta      map[string]string
 	wg        *sync.WaitGroup
@@ -20,18 +21,25 @@ type Peer struct {
 	rpcch <-chan p2p.RPC
 }
 
-func NewPeer(conn net.Conn, outBound bool) p2p.Peer {
+func NewPeer(conn net.Conn, outBound, handShake, stream bool) p2p.Peer {
 	return &Peer{
-		Conn:     conn,
-		outBound: outBound,
-		wg:       &sync.WaitGroup{},
-		rpcch:    make(<-chan p2p.RPC),
+		Conn:      conn,
+		wg:        &sync.WaitGroup{},
+		outBound:  outBound,
+		handShake: handShake,
+		stream:    stream,
+		rpcch:     make(chan p2p.RPC),
 	}
 }
 
-// GetID returns the peer ID
+// GetDocument return peer info
+func (p *Peer) GetDocument() *did.DIDDocument {
+	return p.DID.ToDocument()
+}
+
+// GetID return id
 func (p *Peer) GetID() string {
-	return p.ID
+	return p.DID.GetDID().DID
 }
 
 // GetMeta returns the peer metadata

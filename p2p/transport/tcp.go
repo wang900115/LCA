@@ -90,7 +90,7 @@ func (t *TCPTransport) handleConn(conn net.Conn, outBound bool) {
 		conn.Close()
 	}()
 
-	peer := node.NewPeer(conn, outBound)
+	peer := node.NewPeer(conn, outBound, false, false)
 	if err = t.HandShakeFunc(peer); err != nil {
 		return
 	}

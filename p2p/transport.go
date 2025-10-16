@@ -2,6 +2,8 @@ package p2p
 
 import (
 	"net"
+
+	"github.com/wang900115/LCA/crypt/did"
 )
 
 // p2p.Transport interface represents handles the communication between the nodes in the network
@@ -21,6 +23,7 @@ type Peer interface {
 	SendPacket(Packet) error
 	ReceivePacket() (Packet, error)
 	GetID() string
+	GetDocument() *did.DIDDocument
 	GetMeta() map[string]string
 	SetMeta(map[string]string)
 	HandShake() error

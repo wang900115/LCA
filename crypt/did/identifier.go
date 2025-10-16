@@ -14,6 +14,7 @@ var (
 )
 
 type PeerDID interface {
+	GetDID() *DID
 	ToDocument() *DIDDocument
 	SignDocument() ([]byte, error)
 	VerifyDocument([]byte) (bool, error)
@@ -38,11 +39,11 @@ type DID struct {
 	Services []ServiceEndpoint
 }
 
-func NewPeerDID(services []ServiceEndpoint) (*DID, error) {
+func NewDID(services []ServiceEndpoint) *DID {
 	var did DID
 	pair, err := NewPeerKeyPair(rand.Reader)
 	if err != nil {
-		return nil, err
+		panic(err)
 	}
 	did.DID = pair.generateDID()
 	did.Metadata = DIDMetadata{
@@ -51,7 +52,7 @@ func NewPeerDID(services []ServiceEndpoint) (*DID, error) {
 		Version:    DIDVersion,
 	}
 	did.Services = services
-	return &did, nil
+	return &did
 }
 
 type DIDDocument struct {

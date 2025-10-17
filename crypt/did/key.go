@@ -3,6 +3,7 @@ package did
 import (
 	"crypto/ecdh"
 	"crypto/ed25519"
+	"crypto/sha3"
 	"io"
 
 	c "github.com/wang900115/LCA/crypt"
@@ -38,4 +39,10 @@ func (k *PeerKeyPair) generateDID() string {
 	header := []byte{0xed, 0x01}
 	payload := append(header, k.EdPublic...)
 	return "did:key:z" + encode.Base58Encode(payload)
+}
+
+func (k *PeerKeyPair) generateAddr() string {
+	hash := sha3.Sum256(k.EdPublic)
+	addrBytes := hash[:]
+	return "addr:" + encode.Base58Encode(addrBytes)
 }

@@ -21,7 +21,6 @@ type Peer struct {
 func NewPeer(conn net.Conn, services []did.ServiceEndpoint, transport network.TransportProtocol, inBoundLi, outBoundLi int) p2p.Peer {
 	did := did.NewDID(services)
 	protocol := network.NewProtocolInfo(transport)
-
 	state := NewState(outBoundLi, inBoundLi)
 	channel := NewChannel(make(chan p2p.Packet, 1024), make(chan p2p.Packet, 1024))
 
@@ -36,7 +35,7 @@ func NewPeer(conn net.Conn, services []did.ServiceEndpoint, transport network.Tr
 
 // ID returns the unique identifier of the peer.
 func (p *Peer) ID() string {
-	return p.DID.DIDInfo().DID
+	return p.DID.DIDInfo().ID
 }
 
 // Document returns the DID document of the peer.

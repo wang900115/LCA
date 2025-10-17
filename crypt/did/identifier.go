@@ -14,7 +14,7 @@ var (
 )
 
 type PeerDID interface {
-	DIDInfo() *DID
+	DIDInfo() DID
 	ToDocument() *DIDDocument
 	SignDocument() ([]byte, error)
 	VerifyDocument([]byte) (bool, error)
@@ -33,7 +33,8 @@ type ServiceEndpoint struct {
 }
 
 type DID struct {
-	DID      string
+	ID       string
+	Address  string
 	KeyPair  *PeerKeyPair
 	Metadata DIDMetadata
 	Services []ServiceEndpoint
@@ -45,12 +46,14 @@ func NewDID(services []ServiceEndpoint) PeerDID {
 	if err != nil {
 		panic(err)
 	}
-	did.DID = pair.generateDID()
+	did.ID = pair.generateDID()
 	did.Metadata = DIDMetadata{
 		CreatedAt:  time.Now().UTC().Unix(),
-		Controller: did.DID,
+		Controller: did.ID,
 		Version:    DIDVersion,
 	}
+	did.Address = pair.generateAddr()
+	did.KeyPair = pair
 	did.Services = services
 	return &did
 }
@@ -72,12 +75,12 @@ type VerificationMethod struct {
 	PublicKeyBase58 string `json:"publicKeyBase58"`
 }
 
-func (d *DID) DIDInfo() *DID {
-	return d
+func (d *DID) DIDInfo() DID {
+	return *d
 }
 
 func (d *DID) ToDocument() *DIDDocument {
-	id := d.DID
+	id := d.ID
 	return &DIDDocument{
 		Context: "https://www.w3.org/ns/did/v1",
 		ID:      id,

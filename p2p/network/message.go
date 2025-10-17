@@ -2,44 +2,72 @@ package network
 
 import (
 	"encoding/binary"
-	"errors"
+	"fmt"
 	"io"
 	"time"
+
+	common "github.com/wang900115/LCA/p2p/com"
+)
+
+const (
+	MaxMessagePayloadSize = 32
+)
+
+type decErr struct{ msg string }
+
+func (d *decErr) Error() string { return d.msg }
+
+var (
+	errMessagePayloadExceed = &decErr{"message payload is exceed 32 bytes"}
 )
 
 type Message interface {
 	Encode(w io.Writer) (int, error)
 	Decode(r io.Reader) (int, error)
 	Bytes() []byte
+	Len() int
+	Max() int
 }
 
 type MessageContent struct {
-	Type      byte   // Type of message (e.g., "text", "file", etc.)
-	Payload   []byte // Actual message content or data
-	CreatedAt int64  // Timestamp of message creation
+	Type       common.Message              // Type of message (e.g., "text", "file", etc.)
+	PayloadLen uint8                       // Real payload length
+	Payload    [MaxMessagePayloadSize]byte // Actual message content or data
+	CreatedAt  int64                       // Timestamp of message creation
 }
 
-func NewMessageContent(msgType byte, payload []byte) *MessageContent {
-	return &MessageContent{
-		Type:      msgType,
-		Payload:   payload,
-		CreatedAt: time.Now().UTC().UnixNano(),
+func NewMessageContent(msgType common.Message, payload []byte) (Message, error) {
+	if len(payload) > MaxMessagePayloadSize {
+		return nil, errMessagePayloadExceed
 	}
+	var fixedPayload [MaxMessagePayloadSize]byte
+	copy(fixedPayload[:], payload)
+
+	return &MessageContent{
+		Type:       msgType,
+		PayloadLen: uint8(len(payload)),
+		Payload:    fixedPayload,
+		CreatedAt:  time.Now().UTC().UnixNano(),
+	}, nil
 }
 
 func (m *MessageContent) Encode(w io.Writer) (int, error) {
 	n := 0
 	if err := write(w, m.Type); err != nil {
-		return n, err
+		return n, wrapFieldError(err, "type")
 	}
 	n += 1
-	if written, err := w.Write(m.Payload); err != nil {
-		return n, err
-	} else {
-		n += written
+	if err := write(w, m.PayloadLen); err != nil {
+		return n, wrapFieldError(err, "payload length")
 	}
+	n += 1
+	written, err := w.Write(m.Payload[:m.PayloadLen])
+	if err != nil {
+		return n, wrapFieldError(err, "payload")
+	}
+	n += written
 	if err := write(w, m.CreatedAt); err != nil {
-		return n, err
+		return n, wrapFieldError(err, "createdAt")
 	}
 	n += 8
 	return n, nil
@@ -47,45 +75,59 @@ func (m *MessageContent) Encode(w io.Writer) (int, error) {
 
 func (m *MessageContent) Decode(r io.Reader) (int, error) {
 	n := 0
-	if err := read(r, m.Type); err != nil {
-		return n, err
+	if err := read(r, &m.Type); err != nil {
+		return n, wrapFieldError(err, "type")
 	}
 	n += 1
-	payload, err := io.ReadAll(r)
-	if err != nil {
-		return n, err
+
+	if err := read(r, &m.PayloadLen); err != nil {
+		return n, wrapFieldError(err, "payload length")
 	}
-	if len(payload) < 8 {
-		return n, errors.New("invalid message: missing CreatedAt")
+	n += 1
+	if m.PayloadLen > MaxMessagePayloadSize {
+		return n, errMessagePayloadExceed
 	}
-	payloadLen := len(payload) - 8
-	m.Payload = payload[:payloadLen]
-	m.CreatedAt = int64(binary.BigEndian.Uint64(payload[payloadLen:]))
-	n += len(payload)
+	if _, err := io.ReadFull(r, m.Payload[:m.PayloadLen]); err != nil {
+		return n, wrapFieldError(err, "payload")
+	}
+	n += int(m.PayloadLen)
+	if err := read(r, &m.CreatedAt); err != nil {
+		return n, wrapFieldError(err, "createdAt")
+	}
+	n += 8
 	return n, nil
 }
 
 func (m *MessageContent) Bytes() []byte {
-	buf := make([]byte, 0, 1+len(m.Payload)+8)
-	buf = append(buf, m.Type)
-	buf = append(buf, m.Payload...)
-
+	buf := make([]byte, 0, 1+1+int(m.PayloadLen)+8)
+	buf = append(buf, byte(m.Type))
+	buf = append(buf, m.PayloadLen)
+	buf = append(buf, m.Payload[:m.PayloadLen]...)
 	ts := make([]byte, 8)
 	binary.BigEndian.PutUint64(ts, uint64(m.CreatedAt))
 	buf = append(buf, ts...)
 	return buf
 }
 
+func (m *MessageContent) Len() int {
+	return len(m.Bytes())
+}
+
+func (m *MessageContent) Max() int {
+	return MaxMessagePayloadSize
+}
+
 func write(w io.Writer, data interface{}) error {
-	if err := binary.Write(w, binary.BigEndian, data); err != nil {
-		return err
-	}
-	return nil
+	return binary.Write(w, binary.BigEndian, data)
 }
 
 func read(r io.Reader, dst interface{}) error {
-	if err := binary.Read(r, binary.BigEndian, &dst); err != nil {
-		return err
+	return binary.Read(r, binary.BigEndian, dst)
+}
+
+func wrapFieldError(err error, field string) error {
+	if err == nil {
+		return nil
 	}
-	return nil
+	return &decErr{msg: fmt.Sprintf("field %s: %s", field, err.Error())}
 }

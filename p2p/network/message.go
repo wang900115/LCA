@@ -1,4 +1,4 @@
-package p2p
+package network
 
 type Message struct {
 	ID        string      // Unique identifier for the message

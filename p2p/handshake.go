@@ -1,9 +1,10 @@
 package p2p
 
 // import (
-// 	"errors"
+// 	"fmt"
 
 // 	common "github.com/wang900115/LCA/p2p/com"
+// 	"github.com/wang900115/LCA/p2p/network"
 // )
 
 // type HandShakeFunc func(Peer) error
@@ -16,24 +17,29 @@ package p2p
 // // BasicHandshakeFunc performs a simple handshake by sending a HEARTBEAT
 // // command and expecting a PEERACK or HEARTBEAT response.
 // func BasicHandshakeFunc(peer Peer) error {
-// 	pkt := &PacketContent{
-// 		Command:  byte(common.HEARTBEAT),
-// 		Length:   0,
-// 		Payload:  nil,
-// 		CheckSum: 0,
+// 	network.NewMessageContent(common.PRIVATE)
+// 	network.NewRPCContent()
+// 	pkt := network.NewPacket(common.HEARTBEAT)
+// 	if err := peer.Send(pkt); err != nil {
+// 		return fmt.Errorf("send heartbeat failed: %w", err)
 // 	}
-// 	if err := peer.SendPacket(pkt); err != nil {
-// 		return err
-// 	}
-// 	resp, err := peer.ReceivePacket()
+// 	pkCh, err := peer.Receive()
 // 	if err != nil {
-// 		return err
+// 		return fmt.Errorf("receive failed: %w", err)
 // 	}
-// 	if resp.GetCommand() != 0x02 && resp.GetCommand() != 0x00 {
-// 		return errors.New("invalid handshake response")
+
+// 	for pk := range pkCh {
+// 		cmd := pk.GetCommand()
+// 		if cmd != byte(common.PEERINFO) && cmd != byte(common.PEERACK) {
+// 			return fmt.Errorf("invalid handshake response: 0x%x", cmd)
+// 		}
+// 		break
 // 	}
+
 // 	if err := peer.HandShake(); err != nil {
-// 		return err
+// 		return fmt.Errorf("handshake function failed: %w", err)
 // 	}
+
 // 	return nil
 // }
+// //

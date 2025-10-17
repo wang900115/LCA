@@ -15,7 +15,6 @@ type Transport interface {
 	Dial(string) error
 	Close() error
 	Consume() chan Packet
-	Peers() []Peer
 }
 
 // p2p.Peer interface represents a peer in the network
@@ -26,6 +25,8 @@ type Peer interface {
 	ProtocolInfo() *network.ProtocolInfo
 	Send(Packet) error
 	Receive() (<-chan Packet, error)
+	Peers() map[string]Peer
+	// HandShake() error
 }
 
 // p2p.Packet interface represents a packet in the network

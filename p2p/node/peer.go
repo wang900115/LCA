@@ -90,3 +90,14 @@ func (p *Peer) RemoveInPeer(peer p2p.Peer) {
 	p.State.RemoveInPeer(peer)
 	p.State.DecInBound()
 }
+
+func (p *Peer) Peers() map[string]p2p.Peer {
+	comBined := make(map[string]p2p.Peer)
+	for k, v := range p.State.OutPeers() {
+		comBined[k] = v
+	}
+	for k, v := range p.State.InPeers() {
+		comBined[k] = v
+	}
+	return comBined
+}

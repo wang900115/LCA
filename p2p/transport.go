@@ -4,6 +4,7 @@ import (
 	"net"
 
 	"github.com/wang900115/LCA/crypt/did"
+	"github.com/wang900115/LCA/p2p/network"
 )
 
 // p2p.Transport interface represents handles the communication between the nodes in the network
@@ -20,33 +21,11 @@ type Transport interface {
 // p2p.Peer interface represents a peer in the network
 type Peer interface {
 	net.Conn
-	SendPacket(Packet) error
-	ReceivePacket() (Packet, error)
-	GetID() string
-	GetDocument() *did.DIDDocument
-	GetMeta() map[string]string
-	SetMeta(map[string]string)
-	HandShake() error
-	HandShakeWithData([]byte) error
-	IsHandShake() bool
-	OpenStream() (Peer, error)
-	CloseStream()
-	IsStream() bool
-	WaitSream()
-	IsOutBound() bool
-	SetProtocol(Protocol)
-	GetProtocol() Protocol
-	Consume() <-chan RPC
-}
-
-// p2p.Protocol interface represents the protocol used in the p2p network
-type Protocol interface {
-	IsVersionSupported() (bool, error)
-	IsPortSupported() (bool, error)
-	IsProtocolSupported() (bool, error)
-	GetDefaultVersion() string
-	GetDefaultPort() int
-	GetDefaultProtocol() string
+	ID() string
+	Document() *did.DIDDocument
+	ProtocolInfo() *network.ProtocolInfo
+	Send(Packet) error
+	Receive() (<-chan Packet, error)
 }
 
 // p2p.Packet interface represents a packet in the network

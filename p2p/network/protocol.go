@@ -1,6 +1,18 @@
-package p2p
+package network
 
-import "errors"
+import (
+	"errors"
+)
+
+type Protocol interface {
+	ProtocolInfo() *ProtocolInfo
+	IsVersionSupported(string) (bool, error)
+	IsPortSupported(int) (bool, error)
+	IsProtocolSupported(string) (bool, error)
+	GetDefaultVersion() string
+	GetDefaultPort() int
+	GetDefaultProtocol() string
+}
 
 type ProtocolVersion string
 
@@ -36,13 +48,27 @@ type ProtocolInfo struct {
 	Port              ProtocolPort
 }
 
+// NewProtocolInfo creates a new ProtocolInfo instance
+func NewProtocolInfo(transport TransportProtocol) Protocol {
+	return &ProtocolInfo{
+		TransportProtocol: transport,
+		Version:           protocolV2,
+		Port:              protocolPortV2,
+	}
+}
+
+// GetProtocolInfo returns the protocol information
+func (pi *ProtocolInfo) ProtocolInfo() *ProtocolInfo {
+	return pi
+}
+
 // supportedVersions returns a list of supported protocol versions
 func supportedVersions() []string {
 	return []string{string(protocolV1), string(protocolV2)}
 }
 
 // IsVersionSupported checks if the given version is supported
-func IsVersionSupported(version string) (bool, error) {
+func (pi *ProtocolInfo) IsVersionSupported(version string) (bool, error) {
 	for _, v := range supportedVersions() {
 		if v == version {
 			return true, nil
@@ -52,7 +78,7 @@ func IsVersionSupported(version string) (bool, error) {
 }
 
 // GetDefaultVersion returns the default protocol version
-func GetDefaultVersion() string {
+func (pi *ProtocolInfo) GetDefaultVersion() string {
 	return string(protocolV2)
 }
 
@@ -62,7 +88,7 @@ func supportedPorts() []int {
 }
 
 // IsPortSupported checks if the given port is supported
-func IsPortSupported(port int) (bool, error) {
+func (pi *ProtocolInfo) IsPortSupported(port int) (bool, error) {
 	for _, p := range supportedPorts() {
 		if p == port {
 			return true, nil
@@ -72,7 +98,7 @@ func IsPortSupported(port int) (bool, error) {
 }
 
 // GetDefaultPort returns the default protocol port
-func GetDefaultPort() int {
+func (pi *ProtocolInfo) GetDefaultPort() int {
 	return int(protocolPortV2)
 }
 
@@ -82,7 +108,7 @@ func supportedProtocols() []string {
 }
 
 // IsProtocolSupported checks if the given protocol is supported
-func IsProtocolSupported(proto string) (bool, error) {
+func (pi *ProtocolInfo) IsProtocolSupported(proto string) (bool, error) {
 	for _, p := range supportedProtocols() {
 		if p == proto {
 			return true, nil
@@ -92,6 +118,6 @@ func IsProtocolSupported(proto string) (bool, error) {
 }
 
 // GetDefaultProtocol returns the default transport protocol
-func GetDefaultProtocol() string {
+func (pi *ProtocolInfo) GetDefaultProtocol() string {
 	return string(TCPProtocol)
 }

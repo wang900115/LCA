@@ -14,7 +14,7 @@ var (
 )
 
 type PeerDID interface {
-	GetDID() *DID
+	DIDInfo() *DID
 	ToDocument() *DIDDocument
 	SignDocument() ([]byte, error)
 	VerifyDocument([]byte) (bool, error)
@@ -39,7 +39,7 @@ type DID struct {
 	Services []ServiceEndpoint
 }
 
-func NewDID(services []ServiceEndpoint) *DID {
+func NewDID(services []ServiceEndpoint) PeerDID {
 	var did DID
 	pair, err := NewPeerKeyPair(rand.Reader)
 	if err != nil {
@@ -70,6 +70,10 @@ type VerificationMethod struct {
 	Type            string `json:"type"`
 	Controller      string `json:"controller"`
 	PublicKeyBase58 string `json:"publicKeyBase58"`
+}
+
+func (d *DID) DIDInfo() *DID {
+	return d
 }
 
 func (d *DID) ToDocument() *DIDDocument {

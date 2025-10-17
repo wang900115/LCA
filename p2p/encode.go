@@ -6,7 +6,7 @@ func Decode2Packet(data []byte) (*PacketContent, error) {
 }
 
 // Decode Packet to rpc
-func Decode2RPC(data []byte) (*RPCContext, error) {
+func Decode2RPC(data []byte) (*RPCContent, error) {
 	return nil, nil
 }
 

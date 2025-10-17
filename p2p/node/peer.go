@@ -2,147 +2,92 @@ package node
 
 import (
 	"net"
-	"sync"
 
 	"github.com/wang900115/LCA/crypt/did"
 	"github.com/wang900115/LCA/p2p"
+	"github.com/wang900115/LCA/p2p/network"
 )
 
 type Peer struct {
 	net.Conn
-	DID       did.PeerDID
-	Protocol  p2p.Protocol
-	Meta      map[string]string
-	wg        *sync.WaitGroup
-	outBound  bool
-	handShake bool
-	stream    bool
+	DID      did.PeerDID
+	Protocol network.Protocol
 
-	rpcch <-chan p2p.RPC
+	State   *state
+	Channel *channel
+	Meta    map[string]string
 }
 
-func NewPeer(conn net.Conn, outBound, handShake, stream bool) p2p.Peer {
+func NewPeer(conn net.Conn, services []did.ServiceEndpoint, transport network.TransportProtocol, inBoundLi, outBoundLi int) p2p.Peer {
+	did := did.NewDID(services)
+	protocol := network.NewProtocolInfo(transport)
+
+	state := NewState(outBoundLi, inBoundLi)
+	channel := NewChannel(make(chan p2p.Packet, 1024), make(chan p2p.Packet, 1024))
+
 	return &Peer{
-		Conn:      conn,
-		wg:        &sync.WaitGroup{},
-		outBound:  outBound,
-		handShake: handShake,
-		stream:    stream,
-		rpcch:     make(chan p2p.RPC),
+		Conn:     conn,
+		DID:      did,
+		State:    state,
+		Channel:  channel,
+		Protocol: protocol,
 	}
 }
 
-// GetDocument return peer info
-func (p *Peer) GetDocument() *did.DIDDocument {
+// ID returns the unique identifier of the peer.
+func (p *Peer) ID() string {
+	return p.DID.DIDInfo().DID
+}
+
+// Document returns the DID document of the peer.
+func (p *Peer) Document() *did.DIDDocument {
 	return p.DID.ToDocument()
 }
 
-// GetID return id
-func (p *Peer) GetID() string {
-	return p.DID.GetDID().DID
+// Protocol returns the protocol information of the peer.
+func (p *Peer) ProtocolInfo() *network.ProtocolInfo {
+	return p.Protocol.ProtocolInfo()
 }
 
-// GetMeta returns the peer metadata
-func (p *Peer) GetMeta() map[string]string {
-	return p.Meta
-}
-
-// OpenStream increments the waitgroup counter and returns a new peer
-func (p *Peer) OpenStream() (p2p.Peer, error) {
-	p.wg.Add(1)
-	peer := *p
-	peer.stream = true
-	return &peer, nil
-}
-
-// WaitSream waits for all streams to be closed
-func (p *Peer) WaitSream() {
-	p.wg.Wait()
-}
-
-// CloseStream decrements the waitgroup counter
-func (p *Peer) CloseStream() {
-	p.wg.Done()
-}
-
-// IsStream returns true if the peer is a stream
-func (p *Peer) IsStream() bool {
-	return p.stream
-}
-
-// IsHandShake returns true if the handshake is done
-func (p *Peer) IsHandShake() bool {
-	return p.handShake
-}
-
-// HandShake marks the peer as handshaked
-func (p *Peer) HandShake() error {
-	p.handShake = true
+// SendPacket sends a packet to the peer.
+func (p *Peer) Send(packet p2p.Packet) error {
+	p.Channel.Produce() <- packet
 	return nil
 }
 
-// HandShakeWithData marks the peer as handshaked and sets the metadata
-func (p *Peer) HandShakeWithData(data []byte) error {
-	p.handShake = true
-	p.Meta = map[string]string{
-		"handshake_data": string(data),
-	}
-	return nil
+// ReceivePacket returns a channel to receive packets from the peer.
+func (p *Peer) Receive() (<-chan p2p.Packet, error) {
+	return p.Channel.Consume(), nil
 }
 
-// SetMeta sets the peer metadata
-func (p *Peer) SetMeta(meta map[string]string) {
-	p.Meta = meta
-}
-
-// GetProtocol returns the peer protocol
-func (p *Peer) GetProtocol() p2p.Protocol {
-	return p.Protocol
-}
-
-// Close closes the peer connection
-func (p *Peer) Close() error {
-	return p.Conn.Close()
-}
-
-// Receive reads data from the peer connection
-func (p *Peer) ReceivePacket() (p2p.Packet, error) {
-	buf := make([]byte, 4096) // or any appropriate buffer size
-	n, err := p.Conn.Read(buf)
-	if err != nil {
-		return nil, err
-	}
-	packet, err := p2p.Decode2Packet(buf[:n])
-	if err != nil {
-		return nil, err
-	}
-	return packet, nil
-}
-
-// SendPacket sends a packet to the peer
-func (p *Peer) SendPacket(packet p2p.Packet) error {
-	data, err := packet.Encode()
+// Add peer to the outbound peer map.
+func (p *Peer) AddOutPeer(peer p2p.Peer) error {
+	err := p.State.AddOutPeer(peer)
 	if err != nil {
 		return err
 	}
-	_, err = p.Conn.Write(data)
-	if err != nil {
-		return err
-	}
+	p.State.IncOutBound()
 	return nil
 }
 
-// IsOutBound returns true if the peer is an outbound connection
-func (p *Peer) IsOutBound() bool {
-	return p.outBound
+// Add peer to the inbound peer map.
+func (p *Peer) AddInPeer(peer p2p.Peer) error {
+	err := p.State.AddInPeer(peer)
+	if err != nil {
+		return err
+	}
+	p.State.IncInBound()
+	return nil
 }
 
-// SetProtocol sets the peer protocol
-func (p *Peer) SetProtocol(protocol p2p.Protocol) {
-	p.Protocol = protocol
+// Remove peer from the outbound peer map.
+func (p *Peer) RemoveOutPeer(peer p2p.Peer) {
+	p.State.RemoveOutPeer(peer)
+	p.State.DecOutBound()
 }
 
-// Consume returns a channel to consume incoming RPCs
-func (p *Peer) Consume() <-chan p2p.RPC {
-	return p.rpcch
+// Remove peer from the inbound peer map.
+func (p *Peer) RemoveInPeer(peer p2p.Peer) {
+	p.State.RemoveInPeer(peer)
+	p.State.DecInBound()
 }

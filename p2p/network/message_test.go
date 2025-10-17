@@ -9,10 +9,9 @@ import (
 )
 
 func TestEncodeMessage(t *testing.T) {
-	message, err := NewMessageContent(common.PUBLIC, []byte("Ping"))
+	message, err := NewMessageContent(common.PUBLIC, []byte("Ping"), []byte("SHARED"))
 	assert.Nil(t, err)
 	assert.NotNil(t, message)
-
 	var buf bytes.Buffer
 	n, err := message.Encode(&buf)
 	assert.Nil(t, err)
@@ -22,7 +21,7 @@ func TestEncodeMessage(t *testing.T) {
 }
 
 func TestDecodeMessage(t *testing.T) {
-	original, err := NewMessageContent(common.PUBLIC, []byte("Ping"))
+	original, err := NewMessageContent(common.PUBLIC, []byte("Ping"), []byte("SHARED"))
 	assert.Nil(t, err)
 	var buf bytes.Buffer
 	_, err = original.Encode(&buf)

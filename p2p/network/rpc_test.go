@@ -10,7 +10,7 @@ import (
 )
 
 func TestRPCEncode(t *testing.T) {
-	message, err := NewMessageContent(common.PUBLIC, []byte("Ping"))
+	message, err := NewMessageContent(common.PUBLIC, []byte("Ping"), []byte("SHARED"))
 	assert.NoError(t, err)
 	assert.NotNil(t, message)
 
@@ -32,7 +32,7 @@ func TestRPCEncode(t *testing.T) {
 }
 
 func TestRPCDecode(t *testing.T) {
-	message, err := NewMessageContent(common.PUBLIC, []byte("Ping"))
+	message, err := NewMessageContent(common.PUBLIC, []byte("Ping"), []byte("SHARED"))
 	assert.NoError(t, err)
 	d := did.NewDID([]did.ServiceEndpoint{})
 	assert.NotNil(t, d)
@@ -59,7 +59,7 @@ func TestRPCDecode(t *testing.T) {
 }
 
 func TestRPCVerify(t *testing.T) {
-	message, _ := NewMessageContent(common.PUBLIC, []byte("Ping"))
+	message, _ := NewMessageContent(common.PUBLIC, []byte("Ping"), []byte("SHARED"))
 	d := did.NewDID([]did.ServiceEndpoint{})
 	rpc, _ := NewRPCContent(message, d)
 	err := rpc.Verify(d.DIDInfo().KeyPair.EdPublic)

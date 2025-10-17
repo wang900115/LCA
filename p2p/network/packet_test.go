@@ -10,7 +10,7 @@ import (
 )
 
 func TestPacketEncodeDecode(t *testing.T) {
-	msg, err := NewMessageContent(common.PUBLIC, []byte("Hello Packet"))
+	msg, err := NewMessageContent(common.PUBLIC, []byte("Hello Packet"), []byte("SHARED"))
 	assert.NoError(t, err)
 	d := did.NewDID([]did.ServiceEndpoint{})
 	rpc, err := NewRPCContent(msg, d)
@@ -32,7 +32,7 @@ func TestPacketEncodeDecode(t *testing.T) {
 }
 
 func TestPacketChecksumFail(t *testing.T) {
-	msg, _ := NewMessageContent(common.PUBLIC, []byte("Test"))
+	msg, _ := NewMessageContent(common.PUBLIC, []byte("Test"), []byte("SHARED"))
 	d := did.NewDID([]did.ServiceEndpoint{})
 	rpc, _ := NewRPCContent(msg, d)
 	packet, _ := NewPacket(common.HEARTBEAT, rpc)

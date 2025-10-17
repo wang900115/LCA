@@ -9,3 +9,10 @@ const (
 	MESSAGESEND    Command = 0x04
 	MESSAGESENDACK Command = 0x05
 )
+
+type Message byte
+
+const (
+	PUBLIC  Message = 0x00
+	PRIVATE Message = 0x01
+)

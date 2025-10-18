@@ -36,7 +36,7 @@ type MessageContent struct {
 	Type       common.Message              // Type of message
 	PayloadLen uint8                       // Real payload length
 	Payload    [MaxMessagePayloadSize]byte // Actual message content or data
-	Hash       []byte                      // Payload hash
+	Hash       [32]byte                    // Payload hash
 	CreatedAt  int64                       // Timestamp of message creation
 }
 
@@ -50,7 +50,7 @@ func NewMessageContent(msgType common.Message, payload []byte, sharedKey []byte)
 	var msg MessageContent
 	msg.Type = msgType
 	msg.PayloadLen = uint8(len(payload))
-	msg.Payload = fixedPayload
+	copy(msg.Payload[:], payload)
 	msg.CreatedAt = time.Now().UTC().UnixNano()
 	msg.Hash = msg.computeHash(sharedKey)
 	return &msg, nil
@@ -75,7 +75,7 @@ func (m *MessageContent) Encode(w io.Writer) (int, error) {
 		return n, wrapFieldError(err, "createdAt")
 	}
 	n += 8
-	written, err = w.Write(m.Hash)
+	written, err = w.Write(m.Hash[:])
 	if err != nil {
 		return n, wrapFieldError(err, "hash")
 	}
@@ -105,7 +105,7 @@ func (m *MessageContent) Decode(r io.Reader) (int, error) {
 		return n, wrapFieldError(err, "createdAt")
 	}
 	n += 8
-	readBytes, err := io.ReadFull(r, m.Hash)
+	readBytes, err := io.ReadFull(r, m.Hash[:])
 	if err != nil {
 		return n, wrapFieldError(err, "hash")
 	}
@@ -126,19 +126,14 @@ func (m *MessageContent) Bytes() []byte {
 
 func (m *MessageContent) Verify(sharedKey []byte) bool {
 	expected := m.computeHash(sharedKey)
-	return crypto.HMACVerify(sha3.New256, sharedKey, m.Hash, expected)
+	return crypto.HMACVerify(sha3.New256, sharedKey, m.Hash[:], expected[:])
 }
 
-func (m *MessageContent) computeHash(sharedKey []byte) []byte {
-	buf := make([]byte, 0, 1+1+int(m.PayloadLen)+8)
-	buf = append(buf, byte(m.Type))
-	buf = append(buf, m.PayloadLen)
-	buf = append(buf, m.Payload[:m.PayloadLen]...)
-	ts := make([]byte, 8)
-	binary.BigEndian.PutUint64(ts, uint64(m.CreatedAt))
-	buf = append(buf, ts...)
-
-	return crypto.HMACSign(sha3.New256, sharedKey, buf)
+func (m *MessageContent) computeHash(sharedKey []byte) [32]byte {
+	sum := crypto.HMACSign(sha3.New256, sharedKey, m.Bytes())
+	var out [32]byte
+	copy(out[:], sum)
+	return out
 }
 
 func (m *MessageContent) Len() int {

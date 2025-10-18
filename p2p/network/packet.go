@@ -36,7 +36,7 @@ type Packet interface {
 
 type PacketContent struct {
 	Command    common.Command
-	PayloadLen uint8
+	PayloadLen uint16
 	Payload    [MaxPacketPayloadSize]byte
 	CheckSum   uint64
 }
@@ -45,12 +45,17 @@ func NewPacket(command common.Command, rpc RPC) (Packet, error) {
 	if rpc.Len() > MaxPacketPayloadSize {
 		return nil, errPacketPayloadExceed
 	}
-	checkSum := crypto.CRC64(rpc.Bytes())
+
 	var pkt PacketContent
 	pkt.Command = command
-	pkt.PayloadLen = uint8(rpc.Len())
+	pkt.PayloadLen = uint16(rpc.Len())
 	copy(pkt.Payload[:], rpc.Bytes())
-	pkt.CheckSum = checkSum
+	cmdBytes := []byte{byte(pkt.Command)}
+	lenBytes := make([]byte, 2)
+	binary.BigEndian.PutUint16(lenBytes, pkt.PayloadLen)
+	data := append(cmdBytes, lenBytes...)
+	data = append(data, pkt.Payload[:pkt.PayloadLen]...)
+	pkt.CheckSum = crypto.CRC64(data)
 	return &pkt, nil
 }
 
@@ -63,7 +68,7 @@ func (p *PacketContent) Encode(w io.Writer) (int, error) {
 	if err := write(w, p.PayloadLen); err != nil {
 		return n, wrapFieldError(err, "payload length")
 	}
-	n += 1
+	n += 2
 	written, err := w.Write(p.Payload[:p.PayloadLen])
 	if err != nil {
 		return n, wrapFieldError(err, "payload")
@@ -85,7 +90,7 @@ func (p *PacketContent) Decode(r io.Reader) (int, error) {
 	if err := read(r, &p.PayloadLen); err != nil {
 		return n, wrapFieldError(err, "payload length")
 	}
-	n += 1
+	n += 2
 	if p.PayloadLen > MaxPacketPayloadSize {
 		return n, errPacketPayloadExceed
 	}
@@ -103,19 +108,25 @@ func (p *PacketContent) Decode(r io.Reader) (int, error) {
 }
 
 func (p *PacketContent) Bytes() []byte {
-	buf := make([]byte, 0, 1+1+int(p.PayloadLen)+8)
+	buf := make([]byte, 0, 1+2+int(p.PayloadLen)+8)
 	buf = append(buf, byte(p.Command))
-	buf = append(buf, p.PayloadLen)
+	tmp := make([]byte, 2)
+	binary.BigEndian.PutUint16(tmp, uint16(p.PayloadLen))
+	buf = append(buf, tmp...)
 	buf = append(buf, p.Payload[:p.PayloadLen]...)
-	checksumBytes := make([]byte, 8)
-	binary.BigEndian.PutUint64(checksumBytes, p.CheckSum)
-	buf = append(buf, checksumBytes...)
+	var checksumBytes [8]byte
+	binary.BigEndian.PutUint64(checksumBytes[:], p.CheckSum)
+	buf = append(buf, checksumBytes[:]...)
 	return buf
 }
 
 func (p *PacketContent) Check() error {
-	ok := crypto.VerifyCRC64(p.Payload[:p.PayloadLen], p.CheckSum)
-	if ok {
+	cmdBytes := []byte{byte(p.Command)}
+	lenBytes := make([]byte, 2)
+	binary.BigEndian.PutUint16(lenBytes, p.PayloadLen)
+	data := append(cmdBytes, lenBytes...)
+	data = append(data, p.Payload[:p.PayloadLen]...)
+	if crypto.CRC64(data) == p.CheckSum {
 		return nil
 	}
 	return errPacketChecksumFail

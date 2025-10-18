@@ -38,15 +38,15 @@ func NewRPCContent(msg Message, d did.PeerDID) (RPC, error) {
 	if msg.Len() > MaxRPCPayloadSize {
 		return nil, errRPCPayloadExceed
 	}
-	signature, err := crypto.ED25519Sign(d.DIDInfo().KeyPair.EdPrivate, msg.Bytes())
-	if err != nil {
-		return nil, err
-	}
 	var rpc RPCContent
 	copy(rpc.From[:], []byte(d.DIDInfo().Address))
 	copy(rpc.Payload[:], msg.Bytes())
-	copy(rpc.Sig[:], signature)
 	rpc.PayloadLen = uint8(msg.Len())
+	signature, err := crypto.ED25519Sign(d.DIDInfo().KeyPair.EdPrivate, rpc.dataToSign())
+	if err != nil {
+		return nil, err
+	}
+	copy(rpc.Sig[:], signature)
 	return &rpc, nil
 }
 
@@ -103,19 +103,23 @@ func (rpc *RPCContent) Decode(r io.Reader) (int, error) {
 	return n, nil
 }
 
-func (rpc *RPCContent) Verify(pubKey ed25519.PublicKey) error {
-	ok, err := crypto.ED25519Verify(pubKey, rpc.Payload[:rpc.PayloadLen], rpc.Sig[:])
+func (rpc *RPCContent) dataToSign() []byte {
+	return append(rpc.From[:], rpc.Payload[:rpc.PayloadLen]...)
+}
+
+func (rpc *RPCContent) Verify(pub ed25519.PublicKey) error {
+	ok, err := crypto.ED25519Verify(pub, rpc.dataToSign(), rpc.Sig[:])
 	if err != nil {
 		return err
 	}
-	if !ok {
-		return errRPCPayloadVerify
+	if ok {
+		return nil
 	}
-	return nil
+	return errRPCPayloadVerify
 }
 
 func (rpc *RPCContent) Bytes() []byte {
-	b := make([]byte, 0, 32+1+int(rpc.PayloadLen)+64)
+	b := make([]byte, 0, 50+1+int(rpc.PayloadLen)+64)
 	b = append(b, rpc.From[:]...)
 	b = append(b, rpc.PayloadLen)
 	b = append(b, rpc.Payload[:rpc.PayloadLen]...)

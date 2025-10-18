@@ -15,7 +15,11 @@ type Transport interface {
 	Listen() error
 	Dial(string) error
 	Close() error
-	Consume() chan network.Packet
+	AddOutPeer(Peer) error
+	AddInPeer(Peer) error
+	RemoveOutPeer(Peer)
+	RemoveInPeer(Peer)
+	Peers() map[string]Peer
 }
 
 // p2p.Peer interface represents a peer in the network
@@ -26,7 +30,6 @@ type Peer interface {
 	ProtocolInfo() *network.ProtocolInfo
 	Send(network.Packet) error
 	Receive() (<-chan network.Packet, error)
-	Peers() map[string]Peer
 	// HandShake() error
 	ReadPump(context.Context)
 	WritePump(context.Context)

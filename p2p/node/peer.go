@@ -16,7 +16,6 @@ type Peer struct {
 	DID       did.PeerDID
 	Protocol  network.Protocol
 	Transport network.Packet
-	State     *state
 	Channel   *channel
 	Meta      map[string]string
 }
@@ -24,15 +23,14 @@ type Peer struct {
 func NewPeer(conn net.Conn, services []did.ServiceEndpoint, transport network.TransportProtocol, inBoundLi, outBoundLi int) p2p.Peer {
 	did := did.NewDID(services)
 	protocol := network.NewProtocolInfo(transport)
-	state := NewState(outBoundLi, inBoundLi)
 	channel := NewChannel(make(chan network.Packet, 1024), make(chan network.Packet, 1024))
 
 	return &Peer{
 		Conn:     conn,
 		DID:      did,
-		State:    state,
 		Channel:  channel,
 		Protocol: protocol,
+		Meta:     map[string]string{},
 	}
 }
 
@@ -60,49 +58,6 @@ func (p *Peer) Send(packet network.Packet) error {
 // ReceivePacket returns a channel to receive packets from the peer.
 func (p *Peer) Receive() (<-chan network.Packet, error) {
 	return p.Channel.Consume(), nil
-}
-
-// Add peer to the outbound peer map.
-func (p *Peer) AddOutPeer(peer p2p.Peer) error {
-	err := p.State.AddOutPeer(peer)
-	if err != nil {
-		return err
-	}
-	p.State.IncOutBound()
-	return nil
-}
-
-// Add peer to the inbound peer map.
-func (p *Peer) AddInPeer(peer p2p.Peer) error {
-	err := p.State.AddInPeer(peer)
-	if err != nil {
-		return err
-	}
-	p.State.IncInBound()
-	return nil
-}
-
-// Remove peer from the outbound peer map.
-func (p *Peer) RemoveOutPeer(peer p2p.Peer) {
-	p.State.RemoveOutPeer(peer)
-	p.State.DecOutBound()
-}
-
-// Remove peer from the inbound peer map.
-func (p *Peer) RemoveInPeer(peer p2p.Peer) {
-	p.State.RemoveInPeer(peer)
-	p.State.DecInBound()
-}
-
-func (p *Peer) Peers() map[string]p2p.Peer {
-	comBined := make(map[string]p2p.Peer)
-	for k, v := range p.State.OutPeers() {
-		comBined[k] = v
-	}
-	for k, v := range p.State.InPeers() {
-		comBined[k] = v
-	}
-	return comBined
 }
 
 func (p *Peer) ReadPump(ctx context.Context) {

@@ -26,6 +26,7 @@ var (
 )
 
 type Packet interface {
+	GetCommand() common.Command
 	Encode(w io.Writer) (int, error)
 	Decode(r io.Reader) (int, error)
 	Bytes() []byte
@@ -45,7 +46,6 @@ func NewPacket(command common.Command, rpc RPC) (Packet, error) {
 	if rpc.Len() > MaxPacketPayloadSize {
 		return nil, errPacketPayloadExceed
 	}
-
 	var pkt PacketContent
 	pkt.Command = command
 	pkt.PayloadLen = uint16(rpc.Len())
@@ -57,6 +57,10 @@ func NewPacket(command common.Command, rpc RPC) (Packet, error) {
 	data = append(data, pkt.Payload[:pkt.PayloadLen]...)
 	pkt.CheckSum = crypto.CRC64(data)
 	return &pkt, nil
+}
+
+func (p *PacketContent) GetCommand() common.Command {
+	return p.Command
 }
 
 func (p *PacketContent) Encode(w io.Writer) (int, error) {

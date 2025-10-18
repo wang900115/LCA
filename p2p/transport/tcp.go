@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net"
+	"sync"
 
 	"github.com/wang900115/LCA/p2p"
 	"github.com/wang900115/LCA/p2p/network"
@@ -27,11 +28,16 @@ type TCPTransport struct {
 }
 
 // NewTCPTransport creates a new TCPTransport with the given options.
-func NewTCPTransport(opts TCPTransportOpts) *TCPTransport {
+func NewTCPTransport(opts TCPTransportOpts) p2p.Transport {
 	return &TCPTransport{
 		TCPTransportOpts: opts,
 		State:            NewState(opts.OutBoundLi, opts.InBoundLi),
 	}
+}
+
+// Addr is dial caller address
+func (t *TCPTransport) Addr() string {
+	return t.ListenAddr
 }
 
 // Close shuts down the TCP listener.
@@ -77,18 +83,39 @@ func (t *TCPTransport) startAcceptLoop(ctx context.Context) {
 // handleConn performs the handshake and processes incoming packets for a connection.
 func (t *TCPTransport) handleConn(ctx context.Context, conn net.Conn, outBound bool) {
 	peer := node.NewPeer(conn, nil, network.TCPProtocol, 5, 5)
-
+	if t.hasPeer(peer) {
+		return
+	}
+	if t.HandShake != nil {
+		if err := t.HandShake(peer); err != nil {
+			peer.Close()
+			return
+		}
+	}
 	if outBound {
 		if err := t.AddOutPeer(peer); err != nil {
+			peer.Close()
 			return
 		}
 	} else {
 		if err := t.AddInPeer(peer); err != nil {
+			peer.Close()
 			return
 		}
 	}
-	go peer.ReadPump(ctx)
-	go peer.WritePump(ctx)
+	go func() {
+		var wg sync.WaitGroup
+		wg.Add(2)
+		go func() { defer wg.Done(); peer.ReadPump(ctx) }()
+		go func() { defer wg.Done(); peer.WritePump(ctx) }()
+		wg.Wait()
+		if outBound {
+			t.RemoveOutPeer(peer)
+		} else {
+			t.RemoveInPeer(peer)
+		}
+		peer.Close()
+	}()
 }
 
 // Add peer to the outbound peer map.
@@ -134,4 +161,12 @@ func (t *TCPTransport) Peers() map[string]p2p.Peer {
 		combined[id] = p
 	}
 	return combined
+}
+
+// Existing peer in peerstable
+func (t *TCPTransport) hasPeer(p p2p.Peer) bool {
+	if _, exist := t.Peers()[p.ID()]; exist {
+		return true
+	}
+	return false
 }

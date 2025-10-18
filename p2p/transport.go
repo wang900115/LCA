@@ -12,8 +12,8 @@ import (
 // ex: tcp, udp, websocket, rpc ...
 type Transport interface {
 	Addr() string
-	Listen() error
-	Dial(string) error
+	Listen(context.Context) error
+	Dial(context.Context, string) error
 	Close() error
 	AddOutPeer(Peer) error
 	AddInPeer(Peer) error
@@ -30,7 +30,6 @@ type Peer interface {
 	ProtocolInfo() *network.ProtocolInfo
 	Send(network.Packet) error
 	Receive() (<-chan network.Packet, error)
-	// HandShake() error
 	ReadPump(context.Context)
 	WritePump(context.Context)
 }

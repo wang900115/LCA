@@ -1,6 +1,7 @@
 package node
 
 import (
+	"context"
 	"net"
 
 	"github.com/wang900115/LCA/crypt/did"
@@ -10,12 +11,12 @@ import (
 
 type Peer struct {
 	net.Conn
-	DID      did.PeerDID
-	Protocol network.Protocol
-
-	State   *state
-	Channel *channel
-	Meta    map[string]string
+	DID       did.PeerDID
+	Protocol  network.Protocol
+	Transport network.Packet
+	State     *state
+	Channel   *channel
+	Meta      map[string]string
 }
 
 func NewPeer(conn net.Conn, services []did.ServiceEndpoint, transport network.TransportProtocol, inBoundLi, outBoundLi int) p2p.Peer {
@@ -100,4 +101,34 @@ func (p *Peer) Peers() map[string]p2p.Peer {
 		comBined[k] = v
 	}
 	return comBined
+}
+
+func (p *Peer) ReadPump() {
+	defer p.Conn.Close()
+	for {
+		var pkt network.PacketContent
+		_, err := pkt.Decode(p.Conn)
+		if err != nil {
+			break
+		}
+		p.Channel.Produce() <- &pkt
+	}
+}
+
+func (p *Peer) WritePump(ctx context.Context) {
+	defer p.Conn.Close()
+	for {
+		select {
+		case packet, ok := <-p.Channel.Consume():
+			if !ok {
+				return
+			}
+			_, err := packet.Encode(p.Conn)
+			if err != nil {
+				return
+			}
+		case <-ctx.Done():
+			return
+		}
+	}
 }

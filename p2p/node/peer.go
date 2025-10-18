@@ -2,6 +2,8 @@ package node
 
 import (
 	"context"
+	"errors"
+	"io"
 	"net"
 
 	"github.com/wang900115/LCA/crypt/did"
@@ -103,20 +105,45 @@ func (p *Peer) Peers() map[string]p2p.Peer {
 	return comBined
 }
 
-func (p *Peer) ReadPump() {
-	defer p.Conn.Close()
-	for {
-		var pkt network.PacketContent
-		_, err := pkt.Decode(p.Conn)
+func (p *Peer) ReadPump(ctx context.Context) {
+	defer func() {
+		err := p.Conn.Close()
 		if err != nil {
-			break
+			panic(err)
 		}
-		p.Channel.Produce() <- &pkt
+	}()
+
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		default:
+			var pkt network.PacketContent
+			_, err := pkt.Decode(p.Conn)
+			if err != nil {
+				if errors.Is(err, io.EOF) {
+					return
+				}
+				return
+			}
+			select {
+			case p.Channel.Produce() <- &pkt:
+			case <-ctx.Done():
+				return
+			}
+		}
 	}
 }
 
 func (p *Peer) WritePump(ctx context.Context) {
-	defer p.Conn.Close()
+
+	defer func() {
+		err := p.Conn.Close()
+		if err != nil {
+			panic(err)
+		}
+	}()
+
 	for {
 		select {
 		case packet, ok := <-p.Channel.Consume():

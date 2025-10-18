@@ -1,6 +1,7 @@
 package p2p
 
 import (
+	"context"
 	"net"
 
 	"github.com/wang900115/LCA/crypt/did"
@@ -27,4 +28,6 @@ type Peer interface {
 	Receive() (<-chan network.Packet, error)
 	Peers() map[string]Peer
 	// HandShake() error
+	ReadPump(context.Context)
+	WritePump(context.Context)
 }

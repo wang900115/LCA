@@ -37,5 +37,3 @@ func BasicHandshakeFunc(peer Peer) error {
 	}
 	return fmt.Errorf("handshake failed")
 }
-
-// //

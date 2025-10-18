@@ -14,7 +14,7 @@ type Transport interface {
 	Listen() error
 	Dial(string) error
 	Close() error
-	Consume() chan Packet
+	Consume() chan network.Packet
 }
 
 // p2p.Peer interface represents a peer in the network
@@ -23,23 +23,8 @@ type Peer interface {
 	ID() string
 	Document() *did.DIDDocument
 	ProtocolInfo() *network.ProtocolInfo
-	Send(Packet) error
-	Receive() (<-chan Packet, error)
+	Send(network.Packet) error
+	Receive() (<-chan network.Packet, error)
 	Peers() map[string]Peer
 	// HandShake() error
-}
-
-// p2p.Packet interface represents a packet in the network
-type Packet interface {
-	GetCommand() byte
-	GetLength() uint32
-	GetPayload() []byte
-	GetCheckSum() uint32
-	Encode() ([]byte, error)
-}
-
-// p2p.RPC interface represents the rpc mechanism used in the p2p network
-type RPC interface {
-	Call(method string, args interface{}, reply interface{}) error
-	Encode(interface{}) (Packet, error)
 }

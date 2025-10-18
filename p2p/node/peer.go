@@ -22,7 +22,7 @@ func NewPeer(conn net.Conn, services []did.ServiceEndpoint, transport network.Tr
 	did := did.NewDID(services)
 	protocol := network.NewProtocolInfo(transport)
 	state := NewState(outBoundLi, inBoundLi)
-	channel := NewChannel(make(chan p2p.Packet, 1024), make(chan p2p.Packet, 1024))
+	channel := NewChannel(make(chan network.Packet, 1024), make(chan network.Packet, 1024))
 
 	return &Peer{
 		Conn:     conn,
@@ -49,13 +49,13 @@ func (p *Peer) ProtocolInfo() *network.ProtocolInfo {
 }
 
 // SendPacket sends a packet to the peer.
-func (p *Peer) Send(packet p2p.Packet) error {
+func (p *Peer) Send(packet network.Packet) error {
 	p.Channel.Produce() <- packet
 	return nil
 }
 
 // ReceivePacket returns a channel to receive packets from the peer.
-func (p *Peer) Receive() (<-chan p2p.Packet, error) {
+func (p *Peer) Receive() (<-chan network.Packet, error) {
 	return p.Channel.Consume(), nil
 }
 

@@ -3,16 +3,16 @@ package node
 import (
 	"sync"
 
-	"github.com/wang900115/LCA/p2p"
+	"github.com/wang900115/LCA/p2p/network"
 )
 
 type channel struct {
-	readCh  <-chan p2p.Packet
-	writeCh chan<- p2p.Packet
+	readCh  <-chan network.Packet
+	writeCh chan<- network.Packet
 	wg      *sync.WaitGroup
 }
 
-func NewChannel(readCh <-chan p2p.Packet, writeCh chan<- p2p.Packet) *channel {
+func NewChannel(readCh <-chan network.Packet, writeCh chan<- network.Packet) *channel {
 	return &channel{
 		readCh:  readCh,
 		writeCh: writeCh,
@@ -20,11 +20,11 @@ func NewChannel(readCh <-chan p2p.Packet, writeCh chan<- p2p.Packet) *channel {
 	}
 }
 
-func (ch *channel) Consume() <-chan p2p.Packet {
+func (ch *channel) Consume() <-chan network.Packet {
 	return ch.readCh
 }
 
-func (ch *channel) Produce() chan<- p2p.Packet {
+func (ch *channel) Produce() chan<- network.Packet {
 	return ch.writeCh
 }
 

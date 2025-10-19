@@ -73,7 +73,7 @@ func (s *state) AddOutPeer(peer p2p.Peer) error {
 	if int(s.outBoundCnt.Load()) > s.outBoundLi {
 		return errExceedOutBoundLimit
 	}
-	s.outBoundPeers[peer.ID()] = peer
+	s.outBoundPeers[peer.Addr()] = peer
 	return nil
 }
 
@@ -81,7 +81,7 @@ func (s *state) AddOutPeer(peer p2p.Peer) error {
 func (s *state) RemoveOutPeer(peer p2p.Peer) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	delete(s.outBoundPeers, peer.ID())
+	delete(s.outBoundPeers, peer.Addr())
 }
 
 // AddInPeer adds a peer to the inbound peer map.
@@ -91,7 +91,7 @@ func (s *state) AddInPeer(peer p2p.Peer) error {
 	if int(s.inBoundCnt.Load()) > s.inBoundLi {
 		return errExceedInBoundLimit
 	}
-	s.inBoundPeers[peer.ID()] = peer
+	s.inBoundPeers[peer.Addr()] = peer
 	return nil
 }
 
@@ -99,5 +99,5 @@ func (s *state) AddInPeer(peer p2p.Peer) error {
 func (s *state) RemoveInPeer(peer p2p.Peer) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	delete(s.inBoundPeers, peer.ID())
+	delete(s.inBoundPeers, peer.Addr())
 }

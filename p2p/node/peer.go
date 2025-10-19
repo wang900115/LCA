@@ -34,6 +34,11 @@ func NewPeer(conn net.Conn, services []did.ServiceEndpoint, transport network.Tr
 	}
 }
 
+// Addr return the peer remote address
+func (p *Peer) Addr() string {
+	return p.Conn.RemoteAddr().String()
+}
+
 // ID returns the unique identifier of the peer.
 func (p *Peer) ID() string {
 	return p.DID.DIDInfo().ID

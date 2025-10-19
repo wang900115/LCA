@@ -82,10 +82,10 @@ func (t *TCPTransport) startAcceptLoop(ctx context.Context) {
 
 // handleConn performs the handshake and processes incoming packets for a connection.
 func (t *TCPTransport) handleConn(ctx context.Context, conn net.Conn, outBound bool) {
-	peer := node.NewPeer(conn, nil, network.TCPProtocol, 5, 5)
-	if t.hasPeer(peer) {
+	if t.hasPeer(conn.RemoteAddr().String()) {
 		return
 	}
+	peer := node.NewPeer(conn, nil, network.TCPProtocol, 5, 5)
 	if t.HandShake != nil {
 		if err := t.HandShake(peer); err != nil {
 			peer.Close()
@@ -154,18 +154,18 @@ func (t *TCPTransport) RemoveInPeer(peer p2p.Peer) {
 func (t *TCPTransport) Peers() map[string]p2p.Peer {
 	combined := make(map[string]p2p.Peer)
 
-	for id, p := range t.State.OutPeers() {
-		combined[id] = p
+	for addr, p := range t.State.OutPeers() {
+		combined[addr] = p
 	}
-	for id, p := range t.State.InPeers() {
-		combined[id] = p
+	for addr, p := range t.State.InPeers() {
+		combined[addr] = p
 	}
 	return combined
 }
 
 // Existing peer in peerstable
-func (t *TCPTransport) hasPeer(p p2p.Peer) bool {
-	if _, exist := t.Peers()[p.ID()]; exist {
+func (t *TCPTransport) hasPeer(addr string) bool {
+	if _, exist := t.Peers()[addr]; exist {
 		return true
 	}
 	return false

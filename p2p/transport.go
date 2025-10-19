@@ -25,6 +25,7 @@ type Transport interface {
 // p2p.Peer interface represents a peer in the network
 type Peer interface {
 	net.Conn
+	Addr() string
 	ID() string
 	Document() *did.DIDDocument
 	ProtocolInfo() *network.ProtocolInfo

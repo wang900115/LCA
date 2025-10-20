@@ -6,11 +6,12 @@ import (
 	"io"
 	"net"
 
-	"github.com/wang900115/LCA/crypt/did"
+	"github.com/wang900115/LCA/did"
 	"github.com/wang900115/LCA/p2p"
 	"github.com/wang900115/LCA/p2p/network"
 )
 
+// Peer represents a peer in the P2P network.
 type Peer struct {
 	net.Conn
 	DID       did.PeerDID
@@ -20,10 +21,13 @@ type Peer struct {
 	Meta      map[string]string
 }
 
+// NewPeer creates a new peer instance.
 func NewPeer(conn net.Conn, services []did.ServiceEndpoint, transport network.TransportProtocol, inBoundLi, outBoundLi int) p2p.Peer {
 	did := did.NewDID(services)
 	protocol := network.NewProtocolInfo(transport)
-	channel := NewChannel(make(chan network.Packet, 1024), make(chan network.Packet, 1024))
+	inCh := make(chan network.Packet, 1024)
+	outCh := make(chan network.Packet, 1024)
+	channel := NewChannel(inCh, outCh)
 
 	return &Peer{
 		Conn:     conn,
@@ -41,7 +45,7 @@ func (p *Peer) Addr() string {
 
 // ID returns the unique identifier of the peer.
 func (p *Peer) ID() string {
-	return p.DID.DIDInfo().ID
+	return p.DID.DID().ID
 }
 
 // Document returns the DID document of the peer.
@@ -65,6 +69,7 @@ func (p *Peer) Receive() (<-chan network.Packet, error) {
 	return p.Channel.Consume(), nil
 }
 
+// ReadPump pumps packets from the peer connection to the channel.
 func (p *Peer) ReadPump(ctx context.Context) {
 	defer func() {
 		err := p.Conn.Close()
@@ -87,7 +92,7 @@ func (p *Peer) ReadPump(ctx context.Context) {
 				return
 			}
 			select {
-			case p.Channel.Produce() <- &pkt:
+			case p.Channel.In() <- &pkt:
 			case <-ctx.Done():
 				return
 			}
@@ -95,18 +100,17 @@ func (p *Peer) ReadPump(ctx context.Context) {
 	}
 }
 
+// WritePump pumps packets from the channel to the peer connection.
 func (p *Peer) WritePump(ctx context.Context) {
-
 	defer func() {
 		err := p.Conn.Close()
 		if err != nil {
 			panic(err)
 		}
 	}()
-
 	for {
 		select {
-		case packet, ok := <-p.Channel.Consume():
+		case packet, ok := <-p.Channel.Out():
 			if !ok {
 				return
 			}

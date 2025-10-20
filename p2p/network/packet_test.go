@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/wang900115/LCA/crypt/did"
+	"github.com/wang900115/LCA/did"
 	common "github.com/wang900115/LCA/p2p/com"
 )
 

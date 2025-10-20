@@ -13,33 +13,37 @@ var (
 	DIDVersion = 1
 )
 
+// PeerDID defines the interface for a Peer DID.
 type PeerDID interface {
-	DIDInfo() DID
+	DID() DID
 	ToDocument() *DIDDocument
 	SignDocument() ([]byte, error)
 	VerifyDocument([]byte) (bool, error)
 }
 
-type DIDMetadata struct {
-	CreatedAt  int64
+// DIDMetadata holds metadata for a DID.
+type Metadata struct {
 	Controller string
 	Version    int
 }
 
+// ServiceEndpointType defines the type of service endpoint.
 type ServiceEndpoint struct {
 	ID   string
 	Type string
 	URL  string
 }
 
+// DID represents a Decentralized Identifier.
 type DID struct {
 	ID       string
 	Address  string
 	KeyPair  *PeerKeyPair
-	Metadata DIDMetadata
+	Metadata Metadata
 	Services []ServiceEndpoint
 }
 
+// NewDID creates a new PeerDID instance.
 func NewDID(services []ServiceEndpoint) PeerDID {
 	var did DID
 	pair, err := NewPeerKeyPair(rand.Reader)
@@ -47,8 +51,7 @@ func NewDID(services []ServiceEndpoint) PeerDID {
 		panic(err)
 	}
 	did.ID = pair.generateDID()
-	did.Metadata = DIDMetadata{
-		CreatedAt:  time.Now().UTC().Unix(),
+	did.Metadata = Metadata{
 		Controller: did.ID,
 		Version:    DIDVersion,
 	}
@@ -58,6 +61,7 @@ func NewDID(services []ServiceEndpoint) PeerDID {
 	return &did
 }
 
+// DIDDocument represents a DID Document.
 type DIDDocument struct {
 	Context            string               `json:"@context"`
 	ID                 string               `json:"id"`
@@ -68,6 +72,7 @@ type DIDDocument struct {
 	Version            int                  `json:"version,omitempty"`
 }
 
+// VerificationMethod represents a verification method in the DID Document.
 type VerificationMethod struct {
 	ID              string `json:"id"`
 	Type            string `json:"type"`
@@ -75,10 +80,12 @@ type VerificationMethod struct {
 	PublicKeyBase58 string `json:"publicKeyBase58"`
 }
 
-func (d *DID) DIDInfo() DID {
+// DID returns the DID information.
+func (d *DID) DID() DID {
 	return *d
 }
 
+// ToDocument converts the DID to a DID Document.
 func (d *DID) ToDocument() *DIDDocument {
 	id := d.ID
 	return &DIDDocument{
@@ -97,11 +104,12 @@ func (d *DID) ToDocument() *DIDDocument {
 			PublicKeyBase58: base58.Encode(d.KeyPair.XPublic.Bytes()),
 		}},
 		Service:   d.Services,
-		CreatedAt: d.Metadata.CreatedAt,
+		CreatedAt: time.Now().UTC().Unix(),
 		Version:   d.Metadata.Version,
 	}
 }
 
+// SignDocument signs the DID Document.
 func (d *DID) SignDocument() ([]byte, error) {
 	doc := d.ToDocument()
 	data, err := json.Marshal(doc)
@@ -115,6 +123,7 @@ func (d *DID) SignDocument() ([]byte, error) {
 	return signature, nil
 }
 
+// VerifyDocument verifies the signature of the DID Document.
 func (d *DID) VerifyDocument(signature []byte) (bool, error) {
 	doc := d.ToDocument()
 	data, err := json.Marshal(doc)

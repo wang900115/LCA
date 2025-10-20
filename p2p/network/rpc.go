@@ -6,7 +6,7 @@ import (
 	"io"
 
 	crypto "github.com/wang900115/LCA/crypt"
-	"github.com/wang900115/LCA/crypt/did"
+	"github.com/wang900115/LCA/did"
 )
 
 const (
@@ -39,10 +39,10 @@ func NewRPCContent(msg Message, d did.PeerDID) (RPC, error) {
 		return nil, errRPCPayloadExceed
 	}
 	var rpc RPCContent
-	copy(rpc.From[:], []byte(d.DIDInfo().Address))
+	copy(rpc.From[:], []byte(d.DID().Address))
 	copy(rpc.Payload[:], msg.Bytes())
 	rpc.PayloadLen = uint8(msg.Len())
-	signature, err := crypto.ED25519Sign(d.DIDInfo().KeyPair.EdPrivate, rpc.dataToSign())
+	signature, err := crypto.ED25519Sign(d.DID().KeyPair.EdPrivate, rpc.dataToSign())
 	if err != nil {
 		return nil, err
 	}

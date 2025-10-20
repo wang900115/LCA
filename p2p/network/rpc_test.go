@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/wang900115/LCA/crypt/did"
+	"github.com/wang900115/LCA/did"
 	common "github.com/wang900115/LCA/p2p/com"
 )
 
@@ -49,7 +49,7 @@ func TestRPCDecode(t *testing.T) {
 	assert.NoError(t, err)
 
 	var expected [50]byte
-	copy(expected[:], []byte(d.DIDInfo().Address))
+	copy(expected[:], []byte(d.DID().Address))
 
 	assert.Equal(t, expected, decoded.From, "source address mismatch")
 	assert.Equal(t, uint8(message.Len()), decoded.PayloadLen, "payload length mismatch")
@@ -62,7 +62,7 @@ func TestRPCVerify(t *testing.T) {
 	message, _ := NewMessageContent(common.PUBLIC, []byte("Ping"), []byte("SHARED"))
 	d := did.NewDID([]did.ServiceEndpoint{})
 	rpc, _ := NewRPCContent(message, d)
-	err := rpc.Verify(d.DIDInfo().KeyPair.EdPublic)
+	err := rpc.Verify(d.DID().KeyPair.EdPublic)
 	assert.NoError(t, err)
 	// otherD := did.NewDID([]did.ServiceEndpoint{})
 	// err = rpc.Verify(otherD.DIDInfo().KeyPair.EdPublic)

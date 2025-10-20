@@ -4,7 +4,7 @@ import (
 	"context"
 	"net"
 
-	"github.com/wang900115/LCA/crypt/did"
+	"github.com/wang900115/LCA/did"
 	"github.com/wang900115/LCA/p2p/network"
 )
 

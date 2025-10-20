@@ -16,7 +16,7 @@ var (
 // PeerDID defines the interface for a Peer DID.
 type PeerDID interface {
 	DID() DID
-	ToDocument() *DIDDocument
+	Document() *DIDDocument
 	SignDocument() ([]byte, error)
 	VerifyDocument([]byte) (bool, error)
 }
@@ -85,8 +85,8 @@ func (d *DID) DID() DID {
 	return *d
 }
 
-// ToDocument converts the DID to a DID Document.
-func (d *DID) ToDocument() *DIDDocument {
+// Document converts the DID to a DID Document.
+func (d *DID) Document() *DIDDocument {
 	id := d.ID
 	return &DIDDocument{
 		Context: "https://www.w3.org/ns/did/v1",
@@ -111,7 +111,7 @@ func (d *DID) ToDocument() *DIDDocument {
 
 // SignDocument signs the DID Document.
 func (d *DID) SignDocument() ([]byte, error) {
-	doc := d.ToDocument()
+	doc := d.Document()
 	data, err := json.Marshal(doc)
 	if err != nil {
 		return nil, err
@@ -125,7 +125,7 @@ func (d *DID) SignDocument() ([]byte, error) {
 
 // VerifyDocument verifies the signature of the DID Document.
 func (d *DID) VerifyDocument(signature []byte) (bool, error) {
-	doc := d.ToDocument()
+	doc := d.Document()
 	data, err := json.Marshal(doc)
 	if err != nil {
 		return false, err

@@ -14,7 +14,7 @@ func TestDocument(t *testing.T) {
 			URL:  "https://example.com/msg",
 		},
 	})
-	doc := did.ToDocument()
+	doc := did.Document()
 	assert.Equal(t, doc.ID, did.DID().ID)
 	assert.Len(t, doc.VerificationMethod, 1)
 	assert.Len(t, doc.KeyAgreement, 1)

@@ -50,7 +50,7 @@ func (p *Peer) ID() string {
 
 // Document returns the DID document of the peer.
 func (p *Peer) Document() *did.DIDDocument {
-	return p.DID.ToDocument()
+	return p.DID.Document()
 }
 
 // Protocol returns the protocol information of the peer.

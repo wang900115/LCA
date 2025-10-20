@@ -8,11 +8,12 @@ import (
 
 // channel implements the Channel interface for peer communication.
 type channel struct {
-	// inbound channel: decoded packets from connection -> consumed by app
+	// inbound channel:  packets from connection -> consumed by app
 	readCh chan network.Packet
 	// outbound channel: packets from app -> written to connection
 	writeCh chan network.Packet
-	wg      *sync.WaitGroup
+	// wait group to track open streams
+	wg *sync.WaitGroup
 }
 
 // Ensure channel implements network.Channel interface
@@ -24,10 +25,12 @@ func NewChannel(readCh chan network.Packet, writeCh chan network.Packet) *channe
 	}
 }
 
+// Consume returns the inbound channel for consuming decoded packets.
 func (ch *channel) Consume() <-chan network.Packet {
 	return ch.readCh
 }
 
+// Produce returns the outbound channel for producing packets to be encoded and sent.
 func (ch *channel) Produce() chan<- network.Packet {
 	return ch.writeCh
 }
@@ -44,6 +47,11 @@ func (ch *channel) Out() <-chan network.Packet {
 	return ch.writeCh
 }
 
-func (ch *channel) OpenStream()  { ch.wg.Add(1) }
+// OpenStream indicates that a new stream has been opened on this channel.
+func (ch *channel) OpenStream() { ch.wg.Add(1) }
+
+// CloseStream indicates that a stream has been closed on this channel.
 func (ch *channel) CloseStream() { ch.wg.Done() }
-func (ch *channel) WaitStream()  { ch.wg.Wait() }
+
+// WaitStream blocks until all opened streams have been closed.
+func (ch *channel) WaitStream() { ch.wg.Wait() }

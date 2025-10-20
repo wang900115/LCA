@@ -37,6 +37,9 @@ func NewTCPTransport(opts TCPTransportOpts) p2p.Transport {
 
 // Addr is dial caller address
 func (t *TCPTransport) Addr() string {
+	if t.listener != nil {
+		return t.listener.Addr().String()
+	}
 	return t.ListenAddr
 }
 

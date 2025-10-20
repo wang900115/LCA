@@ -12,8 +12,10 @@ type stateError struct{ msg string }
 func (e *stateError) Error() string { return e.msg }
 
 var (
-	errExceedOutBoundLimit = &stateError{"exceed outbound peer limit"}
-	errExceedInBoundLimit  = &stateError{"exceed inbound peer limit"}
+	errExceedOutBoundLimit      = &stateError{"exceed outbound peer limit"}
+	errExceedInBoundLimit       = &stateError{"exceed inbound peer limit"}
+	errPeerNotFoundInboundKeys  = &stateError{"peer not found in inbound keys"}
+	errPeerNotFoundOutboundKeys = &stateError{"peer not found in outbound keys"}
 )
 
 type state struct {
@@ -27,6 +29,8 @@ type state struct {
 	inBoundLi     int
 	outBoundPeers map[string]p2p.Peer
 	inBoundPeers  map[string]p2p.Peer
+	outKeys       map[string][]byte
+	inKeys        map[string][]byte
 }
 
 func NewState(outBoundLimit, inBoundLimit int) *state {
@@ -100,4 +104,40 @@ func (s *state) RemoveInPeer(peer p2p.Peer) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	delete(s.inBoundPeers, peer.Addr())
+}
+
+// SetOutKey sets the outbound encryption key for a given peer address.
+func (s *state) SetOutKey(addr string, key []byte) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.outKeys[addr] = key
+}
+
+// SetInKey sets the inbound encryption key for a given peer address.
+func (s *state) SetInKey(addr string, key []byte) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.inKeys[addr] = key
+}
+
+// GetOutKey retrieves the outbound encryption key for a given peer address.
+func (s *state) GetOutKey(addr string) ([]byte, error) {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	key, exist := s.outKeys[addr]
+	if !exist {
+		return nil, errPeerNotFoundOutboundKeys
+	}
+	return key, nil
+}
+
+// GetInKey retrieves the inbound encryption key for a given peer address.
+func (s *state) GetInKey(addr string) ([]byte, error) {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	key, exist := s.inKeys[addr]
+	if !exist {
+		return nil, errPeerNotFoundInboundKeys
+	}
+	return key, nil
 }

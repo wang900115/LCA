@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/btcsuite/btcutil/base58"
-	crypto "github.com/wang900115/LCA/crypt"
 )
 
 var (
@@ -15,7 +14,7 @@ var (
 
 // PeerDID defines the interface for a Peer DID.
 type PeerDID interface {
-	DID() DID
+	Original() DID
 	Document() *DIDDocument
 	SignDocument() ([]byte, error)
 	VerifyDocument([]byte) (bool, error)
@@ -38,7 +37,7 @@ type ServiceEndpoint struct {
 type DID struct {
 	ID       string
 	Address  string
-	KeyPair  *PeerKeyPair
+	KeyPair  KeyPair
 	Metadata Metadata
 	Services []ServiceEndpoint
 }
@@ -50,12 +49,12 @@ func NewDID(services []ServiceEndpoint) PeerDID {
 	if err != nil {
 		panic(err)
 	}
-	did.ID = pair.generateDID()
+	did.ID = pair.GenerateDID()
 	did.Metadata = Metadata{
 		Controller: did.ID,
 		Version:    DIDVersion,
 	}
-	did.Address = pair.generateAddr()
+	did.Address = pair.GenerateAddr()
 	did.KeyPair = pair
 	did.Services = services
 	return &did
@@ -80,8 +79,8 @@ type VerificationMethod struct {
 	PublicKeyBase58 string `json:"publicKeyBase58"`
 }
 
-// DID returns the DID information.
-func (d *DID) DID() DID {
+// Original returns the DID information.
+func (d *DID) Original() DID {
 	return *d
 }
 
@@ -95,13 +94,13 @@ func (d *DID) Document() *DIDDocument {
 			ID:              id + "#keys-1",
 			Type:            "Ed25519VerificationKey2018",
 			Controller:      d.Metadata.Controller,
-			PublicKeyBase58: base58.Encode(d.KeyPair.EdPublic),
+			PublicKeyBase58: base58.Encode(d.KeyPair.GetEd25519PublicKey()),
 		}},
 		KeyAgreement: []VerificationMethod{{
 			ID:              id + "#keys-2",
 			Type:            "X25519KeyAgreementKey2019",
 			Controller:      d.Metadata.Controller,
-			PublicKeyBase58: base58.Encode(d.KeyPair.XPublic.Bytes()),
+			PublicKeyBase58: base58.Encode(d.KeyPair.GetX25519PublicKey()),
 		}},
 		Service:   d.Services,
 		CreatedAt: time.Now().UTC().Unix(),
@@ -116,7 +115,7 @@ func (d *DID) SignDocument() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	signature, err := crypto.ED25519Sign(d.KeyPair.EdPrivate, data)
+	signature, err := d.KeyPair.SignData(data)
 	if err != nil {
 		return nil, err
 	}
@@ -130,5 +129,5 @@ func (d *DID) VerifyDocument(signature []byte) (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	return crypto.ED25519Verify(d.KeyPair.EdPublic, data, signature)
+	return d.KeyPair.VerifyData(data, signature)
 }

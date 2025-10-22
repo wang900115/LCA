@@ -49,7 +49,7 @@ func TestRPCDecode(t *testing.T) {
 	assert.NoError(t, err)
 
 	var expected [50]byte
-	copy(expected[:], []byte(d.DID().Address))
+	copy(expected[:], []byte(d.Original().Address))
 
 	assert.Equal(t, expected, decoded.From, "source address mismatch")
 	assert.Equal(t, uint8(message.Len()), decoded.PayloadLen, "payload length mismatch")
@@ -62,9 +62,9 @@ func TestRPCVerify(t *testing.T) {
 	message, _ := NewMessageContent(common.PUBLIC, []byte("Ping"), []byte("SHARED"))
 	d := did.NewDID([]did.ServiceEndpoint{})
 	rpc, _ := NewRPCContent(message, d)
-	err := rpc.Verify(d.DID().KeyPair.EdPublic)
+	err := rpc.Verify(d.Original().KeyPair.GetEd25519PublicKey())
 	assert.NoError(t, err)
-	// otherD := did.NewDID([]did.ServiceEndpoint{})
-	// err = rpc.Verify(otherD.DIDInfo().KeyPair.EdPublic)
-	// assert.Error(t, err)
+	otherD := did.NewDID([]did.ServiceEndpoint{})
+	err = rpc.Verify(otherD.Original().KeyPair.GetEd25519PublicKey())
+	assert.Error(t, err)
 }

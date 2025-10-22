@@ -15,7 +15,7 @@ func TestDocument(t *testing.T) {
 		},
 	})
 	doc := did.Document()
-	assert.Equal(t, doc.ID, did.DID().ID)
+	assert.Equal(t, doc.ID, did.Original().ID)
 	assert.Len(t, doc.VerificationMethod, 1)
 	assert.Len(t, doc.KeyAgreement, 1)
 	assert.Len(t, doc.Service, 1)

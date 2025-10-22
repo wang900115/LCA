@@ -39,10 +39,10 @@ func NewRPCContent(msg Message, d did.PeerDID) (RPC, error) {
 		return nil, errRPCPayloadExceed
 	}
 	var rpc RPCContent
-	copy(rpc.From[:], []byte(d.DID().Address))
+	copy(rpc.From[:], []byte(d.Original().Address))
 	copy(rpc.Payload[:], msg.Bytes())
 	rpc.PayloadLen = uint8(msg.Len())
-	signature, err := crypto.ED25519Sign(d.DID().KeyPair.EdPrivate, rpc.dataToSign())
+	signature, err := d.Original().KeyPair.SignData(rpc.dataToSign())
 	if err != nil {
 		return nil, err
 	}

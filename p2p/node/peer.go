@@ -45,7 +45,7 @@ func (p *Peer) Addr() string {
 
 // ID returns the unique identifier of the peer.
 func (p *Peer) ID() string {
-	return p.DID.DID().ID
+	return p.DID.Original().ID
 }
 
 // Document returns the DID document of the peer.

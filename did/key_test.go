@@ -17,7 +17,7 @@ func TestGenerateID(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to generate PeerKeyPair: %v", err)
 	}
-	did := keyPair.generateDID()
+	did := keyPair.GenerateDID()
 	if len(did) == 0 {
 		t.Fatalf("Generated DID is empty")
 	}
@@ -29,7 +29,7 @@ func TestGenerateAddr(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to generate PeerKeyPair: %v", err)
 	}
-	addr := keyPair.generateAddr()
+	addr := keyPair.GenerateAddr()
 	if len(addr) == 0 {
 		t.Fatalf("Generated address is empty")
 	}

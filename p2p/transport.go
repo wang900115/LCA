@@ -27,7 +27,7 @@ type Peer interface {
 	net.Conn
 	Addr() string
 	ID() string
-	Document() *did.DIDDocument
+	Document() *did.Document
 	ProtocolInfo() *network.ProtocolInfo
 	Send(network.Packet) error
 	Receive() (<-chan network.Packet, error)

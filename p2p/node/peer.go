@@ -14,43 +14,46 @@ import (
 // Peer represents a peer in the P2P network.
 type Peer struct {
 	net.Conn
-	DID       did.PeerDID
-	Protocol  network.Protocol
-	Transport network.Packet
-	Channel   *channel
-	Meta      map[string]string
+	Identifier did.IdentifierDID
+	Verifier   did.VerifierDID
+	Protocol   network.Protocol
+	Transport  network.Packet
+	Channel    *channel
+	Meta       map[string]string
 }
 
 // NewPeer creates a new peer instance.
-func NewPeer(conn net.Conn, services []did.ServiceEndpoint, transport network.TransportProtocol, inBoundLi, outBoundLi int) p2p.Peer {
-	did := did.NewDID(services)
+func NewPeer(conn net.Conn, services []did.ServiceEndpoint, verifierConfig did.VerifierConfig, transport network.TransportProtocol, inBoundLi, outBoundLi int) p2p.Peer {
+	identifier := did.NewDIDIdentifier(services)
+	verifier := did.NewDIDVerifier(verifierConfig)
 	protocol := network.NewProtocolInfo(transport)
 	inCh := make(chan network.Packet, 1024)
 	outCh := make(chan network.Packet, 1024)
 	channel := NewChannel(inCh, outCh)
 
 	return &Peer{
-		Conn:     conn,
-		DID:      did,
-		Channel:  channel,
-		Protocol: protocol,
-		Meta:     map[string]string{},
+		Conn:       conn,
+		Identifier: identifier,
+		Verifier:   verifier,
+		Channel:    channel,
+		Protocol:   protocol,
+		Meta:       map[string]string{},
 	}
 }
 
-// Addr return the peer remote address
+// Addr returns the peer address
 func (p *Peer) Addr() string {
-	return p.Conn.RemoteAddr().String()
+	return p.Identifier.Addr()
 }
 
 // ID returns the unique identifier of the peer.
 func (p *Peer) ID() string {
-	return p.DID.Original().ID
+	return p.Identifier.Document().ID
 }
 
 // Document returns the DID document of the peer.
-func (p *Peer) Document() *did.DIDDocument {
-	return p.DID.Document()
+func (p *Peer) Document() *did.Document {
+	return p.Identifier.Document()
 }
 
 // Protocol returns the protocol information of the peer.

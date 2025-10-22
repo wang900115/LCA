@@ -7,6 +7,7 @@ import (
 	"net"
 	"sync"
 
+	"github.com/wang900115/LCA/did"
 	"github.com/wang900115/LCA/p2p"
 	"github.com/wang900115/LCA/p2p/network"
 	"github.com/wang900115/LCA/p2p/node"
@@ -54,7 +55,7 @@ func (t *TCPTransport) Dial(ctx context.Context, addr string) error {
 	if err != nil {
 		return err
 	}
-	go t.handleConn(ctx, conn, true)
+	go t.handleConn(ctx, did.VerifierConfig{}, conn, true)
 	return nil
 }
 
@@ -79,16 +80,16 @@ func (t *TCPTransport) startAcceptLoop(ctx context.Context) {
 		if err != nil {
 			fmt.Printf("TCP accept error: %s\n", err)
 		}
-		go t.handleConn(ctx, conn, false)
+		go t.handleConn(ctx, did.VerifierConfig{}, conn, false)
 	}
 }
 
 // handleConn performs the handshake and processes incoming packets for a connection.
-func (t *TCPTransport) handleConn(ctx context.Context, conn net.Conn, outBound bool) {
+func (t *TCPTransport) handleConn(ctx context.Context, config did.VerifierConfig, conn net.Conn, outBound bool) {
 	if t.hasPeer(conn.RemoteAddr().String()) {
 		return
 	}
-	peer := node.NewPeer(conn, nil, network.TCPProtocol, 5, 5)
+	peer := node.NewPeer(conn, nil, config, network.TCPProtocol, 5, 5)
 	if t.HandShake != nil {
 		if err := t.HandShake(peer); err != nil {
 			peer.Close()

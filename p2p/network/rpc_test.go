@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"testing"
 
+	"github.com/btcsuite/btcutil/base58"
 	"github.com/stretchr/testify/assert"
 	"github.com/wang900115/LCA/did"
 	common "github.com/wang900115/LCA/p2p/com"
@@ -14,7 +15,7 @@ func TestRPCEncode(t *testing.T) {
 	assert.NoError(t, err)
 	assert.NotNil(t, message)
 
-	d := did.NewDID([]did.ServiceEndpoint{})
+	d := did.NewDIDIdentifier([]did.ServiceEndpoint{})
 	assert.NotNil(t, d)
 
 	rpc, err := NewRPCContent(message, d)
@@ -34,7 +35,7 @@ func TestRPCEncode(t *testing.T) {
 func TestRPCDecode(t *testing.T) {
 	message, err := NewMessageContent(common.PUBLIC, []byte("Ping"), []byte("SHARED"))
 	assert.NoError(t, err)
-	d := did.NewDID([]did.ServiceEndpoint{})
+	d := did.NewDIDIdentifier([]did.ServiceEndpoint{})
 	assert.NotNil(t, d)
 
 	original, err := NewRPCContent(message, d)
@@ -49,7 +50,7 @@ func TestRPCDecode(t *testing.T) {
 	assert.NoError(t, err)
 
 	var expected [50]byte
-	copy(expected[:], []byte(d.Original().Address))
+	copy(expected[:], []byte(d.Addr()))
 
 	assert.Equal(t, expected, decoded.From, "source address mismatch")
 	assert.Equal(t, uint8(message.Len()), decoded.PayloadLen, "payload length mismatch")
@@ -60,11 +61,11 @@ func TestRPCDecode(t *testing.T) {
 
 func TestRPCVerify(t *testing.T) {
 	message, _ := NewMessageContent(common.PUBLIC, []byte("Ping"), []byte("SHARED"))
-	d := did.NewDID([]did.ServiceEndpoint{})
+	d := did.NewDIDIdentifier([]did.ServiceEndpoint{})
 	rpc, _ := NewRPCContent(message, d)
-	err := rpc.Verify(d.Original().KeyPair.GetEd25519PublicKey())
+	err := rpc.Verify(base58.Decode(d.Document().VerificationMethod[0].PublicKeyBase58))
 	assert.NoError(t, err)
-	otherD := did.NewDID([]did.ServiceEndpoint{})
-	err = rpc.Verify(otherD.Original().KeyPair.GetEd25519PublicKey())
+	otherD := did.NewDIDIdentifier([]did.ServiceEndpoint{})
+	err = rpc.Verify(base58.Decode(otherD.Document().VerificationMethod[0].PublicKeyBase58))
 	assert.Error(t, err)
 }

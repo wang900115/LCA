@@ -32,11 +32,11 @@ type errCrypto struct{ msg string }
 func (e errCrypto) Error() string { return e.msg }
 
 var (
-	errX25519PrivateKeyMissing      = &errCrypto{"x25519 private key is missing"}
-	errX25519RemotePublicKeyMissing = &errCrypto{"x25519 remote public key is missing"}
-	errED25519PrivateKeyMissing     = &errCrypto{"ed25519 private key is missing"}
-	errED25519PublicKeyMissing      = &errCrypto{"ed25519 public key is missing"}
-	errSignatureMissing             = &errCrypto{"signature missing"}
+	ErrX25519PrivateKeyMissing      = &errCrypto{"x25519 private key is missing"}
+	ErrX25519RemotePublicKeyMissing = &errCrypto{"x25519 remote public key is missing"}
+	ErrED25519PrivateKeyMissing     = &errCrypto{"ed25519 private key is missing"}
+	ErrED25519PublicKeyMissing      = &errCrypto{"ed25519 public key is missing"}
+	ErrSignatureMissing             = &errCrypto{"signature missing"}
 )
 
 // generate x25519 pub/pri pair
@@ -63,19 +63,19 @@ func ED25519Sign(privateKey ed25519.PrivateKey, data []byte) ([]byte, error) {
 	if len(privateKey) > 0 {
 		return ed25519.Sign(privateKey, data), nil
 	}
-	return nil, errED25519PrivateKeyMissing
+	return nil, ErrED25519PrivateKeyMissing
 }
 
 // using public key to verify data is correct
 func ED25519Verify(publicKey ed25519.PublicKey, data []byte, signature []byte) (bool, error) {
 	lenSignature := len(signature)
 	if lenSignature == 0 {
-		return false, errSignatureMissing
+		return false, ErrSignatureMissing
 	}
 	if len(publicKey) > 0 {
 		return ed25519.Verify(publicKey, data, signature), nil
 	}
-	return false, errED25519PublicKeyMissing
+	return false, ErrED25519PublicKeyMissing
 }
 
 // using ed25519 private key sign x25519 public key
@@ -109,10 +109,10 @@ func MustVerifyX25519PublicKeySignature(edPub ed25519.PublicKey, xPub *ecdh.Publ
 // compute shared X25519 secret key
 func ComputeX25519SharedKey(privateKey *ecdh.PrivateKey, peerPublicKey *ecdh.PublicKey) ([]byte, error) {
 	if privateKey == nil {
-		return nil, errX25519PrivateKeyMissing
+		return nil, ErrX25519PrivateKeyMissing
 	}
 	if peerPublicKey == nil {
-		return nil, errX25519RemotePublicKeyMissing
+		return nil, ErrX25519RemotePublicKeyMissing
 	}
 	shared, err := privateKey.ECDH(peerPublicKey)
 	if err != nil {

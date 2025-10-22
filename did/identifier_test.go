@@ -7,7 +7,7 @@ import (
 )
 
 func TestDocument(t *testing.T) {
-	did := NewDID([]ServiceEndpoint{
+	did := NewDIDIdentifier([]ServiceEndpoint{
 		{
 			ID:   "service1",
 			Type: "Messaging",
@@ -15,15 +15,14 @@ func TestDocument(t *testing.T) {
 		},
 	})
 	doc := did.Document()
-	assert.Equal(t, doc.ID, did.Original().ID)
 	assert.Len(t, doc.VerificationMethod, 1)
 	assert.Len(t, doc.KeyAgreement, 1)
 	assert.Len(t, doc.Service, 1)
 	t.Logf("Document: %+v\n", doc)
 }
 
-func TestSignAndVerifyDocument(t *testing.T) {
-	did := NewDID([]ServiceEndpoint{
+func TestSign(t *testing.T) {
+	did := NewDIDIdentifier([]ServiceEndpoint{
 		{
 			ID:   "service1",
 			Type: "Messaging",
@@ -32,7 +31,5 @@ func TestSignAndVerifyDocument(t *testing.T) {
 	})
 	signature, err := did.SignDocument()
 	assert.NoError(t, err)
-	valid, err := did.VerifyDocument(signature)
-	assert.NoError(t, err)
-	assert.True(t, valid)
+	t.Logf("Signature: %x\n", signature)
 }

@@ -13,7 +13,7 @@ import (
 
 func TestPeer(t *testing.T) {
 	// Create a new peer instance
-	peer := NewPeer(nil, nil, network.TCPProtocol, 0, 0)
+	peer := NewPeer(nil, nil, did.VerifierConfig{}, network.TCPProtocol, 0, 0)
 	// Test the peer's ID
 	if peer.ID() == "" {
 		t.Error("Expected peer ID to be non-empty")
@@ -33,11 +33,11 @@ func TestConnPeer(t *testing.T) {
 	defer c1.Close()
 	defer c2.Close()
 
-	peer := NewPeer(c1, nil, network.TCPProtocol, 1, 1)
+	peer := NewPeer(c1, nil, did.VerifierConfig{}, network.TCPProtocol, 1, 1)
 	if peer.Addr() != c1.RemoteAddr().String() && peer.Addr() == c1.LocalAddr().String() {
 		t.Errorf("Expected peer address to be %s, got %s", c1.RemoteAddr().String(), peer.Addr())
 	}
-	peer2 := NewPeer(c2, nil, network.TCPProtocol, 1, 1)
+	peer2 := NewPeer(c2, nil, did.VerifierConfig{}, network.TCPProtocol, 1, 1)
 	if peer2.Addr() != c2.RemoteAddr().String() && peer2.Addr() == c2.LocalAddr().String() {
 		t.Errorf("Expected peer address to be %s, got %s", c2.RemoteAddr().String(), peer2.Addr())
 	}
@@ -48,8 +48,8 @@ func TestPeerPumps(t *testing.T) {
 	defer c1.Close()
 	defer c2.Close()
 
-	p1 := NewPeer(c1, nil, network.TCPProtocol, 0, 0)
-	p2 := NewPeer(c2, nil, network.TCPProtocol, 0, 0)
+	p1 := NewPeer(c1, nil, did.VerifierConfig{}, network.TCPProtocol, 0, 0)
+	p2 := NewPeer(c2, nil, did.VerifierConfig{}, network.TCPProtocol, 0, 0)
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
@@ -63,7 +63,7 @@ func TestPeerPumps(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to create message: %v", err)
 	}
-	testDID := did.NewDID(nil)
+	testDID := did.NewDIDIdentifier(nil)
 	rpc, err := network.NewRPCContent(msg, testDID)
 	if err != nil {
 		t.Fatalf("failed to create rpc: %v", err)

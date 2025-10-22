@@ -34,15 +34,15 @@ type RPCContent struct {
 	Sig        [64]byte
 }
 
-func NewRPCContent(msg Message, d did.PeerDID) (RPC, error) {
+func NewRPCContent(msg Message, d did.IdentifierDID) (RPC, error) {
 	if msg.Len() > MaxRPCPayloadSize {
 		return nil, errRPCPayloadExceed
 	}
 	var rpc RPCContent
-	copy(rpc.From[:], []byte(d.Original().Address))
+	copy(rpc.From[:], []byte(d.Addr()))
 	copy(rpc.Payload[:], msg.Bytes())
 	rpc.PayloadLen = uint8(msg.Len())
-	signature, err := d.Original().KeyPair.SignData(rpc.dataToSign())
+	signature, err := d.Sign(rpc.dataToSign())
 	if err != nil {
 		return nil, err
 	}

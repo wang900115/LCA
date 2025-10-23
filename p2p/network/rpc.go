@@ -42,7 +42,7 @@ func NewRPCContent(msg Message, d did.IdentifierDID) (RPC, error) {
 	copy(rpc.From[:], []byte(d.Addr()))
 	copy(rpc.Payload[:], msg.Bytes())
 	rpc.PayloadLen = uint8(msg.Len())
-	signature, err := d.Sign(rpc.dataToSign())
+	signature, err := d.SignMessage(rpc.dataToSign())
 	if err != nil {
 		return nil, err
 	}

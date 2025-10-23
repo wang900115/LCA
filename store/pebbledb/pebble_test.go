@@ -1,4 +1,4 @@
-package store
+package pebbledb
 
 import (
 	"bytes"
@@ -406,8 +406,6 @@ func BenchmarkPebbleStore_ConcurrentReadWrite(b *testing.B) {
 	store, dir := createTestPebbleStore(b)
 	defer cleanupDir(b, dir)
 	defer store.Close()
-
-	const numWorkers = 4
 
 	b.ResetTimer()
 	b.RunParallel(func(pb *testing.PB) {

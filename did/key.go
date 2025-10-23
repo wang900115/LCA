@@ -12,7 +12,7 @@ import (
 
 // KeyPair defines the interface for key pair operations.
 type KeyPair interface {
-	GenerateDID() string
+	GenerateID() string
 	GenerateAddr() string
 	GetEd25519PublicKey() []byte
 	GetX25519PublicKey() []byte
@@ -70,7 +70,7 @@ func (k *PeerKeyPair) VerifyData(data []byte, signature []byte) (bool, error) {
 }
 
 // GenerateDID generates a DID from the Ed25519 public key.
-func (k *PeerKeyPair) GenerateDID() string {
+func (k *PeerKeyPair) GenerateID() string {
 	header := []byte{0xed, 0x01}
 	payload := append(header, k.EdPublic...)
 	return "did:key:z" + encode.Base58Encode(payload)

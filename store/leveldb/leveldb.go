@@ -1,4 +1,4 @@
-package store
+package leveldb
 
 import (
 	"github.com/syndtr/goleveldb/leveldb"

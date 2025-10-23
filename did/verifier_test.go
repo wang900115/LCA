@@ -12,9 +12,9 @@ func TestDIDIdentifierVerifierIntegration(t *testing.T) {
 	t.Run("Full DiD create and verification", func(t *testing.T) {
 		services := []ServiceEndpoint{
 			{
-				ID:   "messaging",
-				Type: "MessagingService",
-				URL:  "https://example.com/messaging",
+				ID:              "messaging",
+				Type:            "MessagingService",
+				ServiceEndpoint: "https://example.com/messaging",
 			},
 		}
 		peerDID := NewDIDIdentifier(services)
@@ -87,7 +87,6 @@ func TestDIDIdentifierVerifierIntegration(t *testing.T) {
 		assert.NoError(t, err)
 		assert.False(t, isValid)
 
-		// 检查统计信息
 		stats := verifier.GetStats()
 		assert.Equal(t, int64(1), stats.TotalVerifications)
 		assert.Equal(t, int64(0), stats.SuccessfulVerifications)
@@ -100,7 +99,7 @@ func TestDIDLifecycleWithVerifier(t *testing.T) {
 		verifier := NewDefaultDIDVerifier()
 
 		did := NewDIDIdentifier([]ServiceEndpoint{
-			{ID: "service1", Type: "Type1", URL: "https://service1.com"},
+			{ID: "service1", Type: "Type1", ServiceEndpoint: "https://service1.com"},
 		})
 
 		doc := did.Document()
@@ -111,8 +110,8 @@ func TestDIDLifecycleWithVerifier(t *testing.T) {
 		assert.True(t, isValid)
 
 		updatedDID := NewDIDIdentifier([]ServiceEndpoint{
-			{ID: "service1", Type: "Type1", URL: "https://service1.com"},
-			{ID: "service2", Type: "Type2", URL: "https://service2.com"},
+			{ID: "service1", Type: "Type1", ServiceEndpoint: "https://service1.com"},
+			{ID: "service2", Type: "Type2", ServiceEndpoint: "https://service2.com"},
 		})
 
 		updatedDoc := updatedDID.Document()
@@ -214,7 +213,7 @@ func TestTimestampValidationWithRealDIDs(t *testing.T) {
 		did := NewDIDIdentifier([]ServiceEndpoint{})
 		doc := did.Document()
 
-		doc.CreatedAt = time.Now().Add(-5 * time.Minute).Unix()
+		doc.Created = time.Now().Add(-5 * time.Minute).Format(time.RFC3339)
 
 		signature, _ := did.SignDocument()
 
@@ -222,7 +221,7 @@ func TestTimestampValidationWithRealDIDs(t *testing.T) {
 		assert.Error(t, err)
 		assert.False(t, isValid)
 		assert.Contains(t, err.Error(), ErrTimestampInvalid.Error())
-		doc.CreatedAt = time.Now().Unix()
+		doc.Created = time.Now().Format(time.RFC3339)
 		signature, _ = did.SignDocument()
 		isValid, err = verifier.VerifyDocument(doc, signature)
 		assert.NoError(t, err)
@@ -237,11 +236,11 @@ func TestPeerToPeerVerification(t *testing.T) {
 
 		// Alice and Bob each create a DID
 		aliceDID := NewDIDIdentifier([]ServiceEndpoint{
-			{ID: "alice-messaging", Type: "MessagingService", URL: "https://alice.com/msg"},
+			{ID: "alice-messaging", Type: "MessagingService", ServiceEndpoint: "https://alice.com/msg"},
 		})
 
 		bobDID := NewDIDIdentifier([]ServiceEndpoint{
-			{ID: "bob-messaging", Type: "MessagingService", URL: "https://bob.com/msg"},
+			{ID: "bob-messaging", Type: "MessagingService", ServiceEndpoint: "https://bob.com/msg"},
 		})
 
 		aliceDoc := aliceDID.Document()

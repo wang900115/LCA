@@ -1,4 +1,4 @@
-package store
+package pebbledb
 
 import "github.com/cockroachdb/pebble"
 

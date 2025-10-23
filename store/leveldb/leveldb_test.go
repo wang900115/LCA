@@ -1,4 +1,4 @@
-package store
+package leveldb
 
 import (
 	"bytes"
@@ -81,9 +81,8 @@ func TestNewLevelDBStore(t *testing.T) {
 			}()
 
 			// Verify store implements LevelStore interface
-			_, ok := store.(LevelStore)
-			if !ok {
-				t.Errorf("NewLevelDBStore() returned store does not implement LevelStore interface")
+			if store == nil {
+				t.Errorf("NewLevelDBStore() returned nil store")
 			}
 		})
 	}

@@ -153,6 +153,7 @@ func (v *DIDVerifier) VerifyDocument(doc *Document, signature []byte) (bool, err
 	return isValid, nil
 }
 
+// AddTrustedRoot adds a trusted root DID to the verifier.
 func (v *DIDVerifier) AddTrustedRoot(rootDID string) {
 	v.cacheMutex.Lock()
 	defer v.cacheMutex.Unlock()
@@ -200,10 +201,13 @@ func (v *DIDVerifier) getCachedResult(key string) (*VerificationResult, error) {
 }
 
 func (v *DIDVerifier) validateTimestamp(doc *Document) error {
-	if doc.CreatedAt == 0 {
+	if doc.Created == "" {
 		return ErrMissingCreatedAt
 	}
-	docTime := time.Unix(doc.CreatedAt, 0).UTC()
+	docTime, err := time.Parse(time.RFC3339, doc.Created)
+	if err != nil {
+		return err
+	}
 	now := time.Now().UTC()
 	if now.Sub(docTime) > v.config.TimestampTolerance {
 		return ErrTimestampInvalid

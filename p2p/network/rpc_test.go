@@ -63,9 +63,9 @@ func TestRPCVerify(t *testing.T) {
 	message, _ := NewMessageContent(common.PUBLIC, []byte("Ping"), []byte("SHARED"))
 	d := did.NewDIDIdentifier([]did.ServiceEndpoint{})
 	rpc, _ := NewRPCContent(message, d)
-	err := rpc.Verify(base58.Decode(d.Document().VerificationMethod[0].PublicKeyBase58))
+	err := rpc.Verify(base58.Decode(d.Document().VerificationMethod[0].PublicKeyMultibase[1:]))
 	assert.NoError(t, err)
 	otherD := did.NewDIDIdentifier([]did.ServiceEndpoint{})
-	err = rpc.Verify(base58.Decode(otherD.Document().VerificationMethod[0].PublicKeyBase58))
+	err = rpc.Verify(base58.Decode(otherD.Document().VerificationMethod[0].PublicKeyMultibase[1:]))
 	assert.Error(t, err)
 }

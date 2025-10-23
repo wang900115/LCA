@@ -18,20 +18,13 @@ type IdentifierDID interface {
 	Addr() string
 	Document() *Document
 	SignDocument() ([]byte, error)
-	Sign(data []byte) ([]byte, error)
+	SignMessage(data []byte) ([]byte, error)
 }
 
 // Metadata holds metadata for a DID.
 type Metadata struct {
 	Controller string
 	Version    int
-}
-
-// ServiceEndpoint represents a service endpoint in the DID
-type ServiceEndpoint struct {
-	ID   string
-	Type string
-	URL  string
 }
 
 // DIDIdentifier represents a Decentralized Identifier.
@@ -51,7 +44,7 @@ func NewDIDIdentifier(services []ServiceEndpoint) IdentifierDID {
 	if err != nil {
 		panic(err)
 	}
-	did.ID = did.KeyPair.GenerateDID()
+	did.ID = did.KeyPair.GenerateID()
 	did.Metadata = Metadata{
 		Controller: did.ID,
 		Version:    DIDVersion,
@@ -68,7 +61,7 @@ func (d *DIDIdentifier) Addr() string {
 
 // Document converts the DID to a DID Document.
 func (d *DIDIdentifier) Document() *Document {
-	return NewDocument(*d, time.Now().Unix())
+	return NewDocument(*d, time.Now())
 }
 
 // SignDocument signs the DID Document.
@@ -86,7 +79,7 @@ func (d *DIDIdentifier) SignDocument() ([]byte, error) {
 }
 
 // SignMessage signs a message using the DID's key pair.
-func (d *DIDIdentifier) Sign(data []byte) ([]byte, error) {
+func (d *DIDIdentifier) SignMessage(data []byte) ([]byte, error) {
 	signature, err := d.KeyPair.SignData(data)
 	if err != nil {
 		return nil, err
@@ -98,7 +91,7 @@ func (d *DIDIdentifier) Sign(data []byte) ([]byte, error) {
 func extract(doc *Document) (ed25519.PublicKey, error) {
 	for _, vm := range doc.VerificationMethod {
 		if vm.Type == VerificationType {
-			return base58.Decode(vm.PublicKeyBase58), nil
+			return base58.Decode(vm.PublicKeyMultibase[1:]), nil
 		}
 	}
 	return nil, crypto.ErrED25519PublicKeyMissing

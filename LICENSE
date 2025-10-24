@@ -18,17 +18,3 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-
-
---------------------------------------------------------
-NOTICE: Third-Party LGPL-3.0 Code
-
-This project includes code from the go-ethereum library:
-
-Copyright 2022 The go-ethereum Authors
-Licensed under the GNU Lesser General Public License v3 (LGPL-3.0)
-https://www.gnu.org/licenses/lgpl-3.0.html
-
-You may use, modify, and distribute this LGPL-3.0 code in compliance
-with the terms of the LGPL-3.0 license. The LGPL-3.0 code is
-included in the `/pkg/..` folder.

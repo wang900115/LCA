@@ -23,6 +23,7 @@ import (
 	"strconv"
 )
 
+// uintSize is the number of bits in an unsigned integer.
 const uintSize = 32 << (^uint(0) >> 63)
 
 var (
@@ -41,6 +42,13 @@ type encodeError struct{ msg string }
 
 func (err encodeError) Error() string { return err.msg }
 
+/*
+Decode decodes a hex string into bytes.
+Example:
+
+	input: "0x68656c6c6f"
+	output: []byte{0x68, 0x65, 0x6c, 0x6c, 0x6f} // "hello"
+*/
 func Decode(input string) ([]byte, error) {
 	if len(input) == 0 {
 		return nil, ErrEmptyString
@@ -63,6 +71,13 @@ func MustDecode(input string) []byte {
 	return dec
 }
 
+/*
+Encode encodes bytes into a hex string with "0x" prefix.
+Example:
+
+	input: []byte{0x68, 0x65, 0x6c, 0x6c, 0x6f} // "hello"
+	output: "0x68656c6c6f"
+*/
 func Encode(b []byte) string {
 	enc := make([]byte, len(b)*2+2)
 	copy(enc, "0x")
@@ -70,6 +85,13 @@ func Encode(b []byte) string {
 	return string(enc)
 }
 
+/*
+DecodeUint64 decodes a hex string into a uint64.
+Example:
+
+	input: "0x2a"
+	output: 42
+*/
 func DecodeUint64(input string) (uint64, error) {
 	raw, err := checkNumber(input)
 	if err != nil {
@@ -77,7 +99,7 @@ func DecodeUint64(input string) (uint64, error) {
 	}
 	dec, err := strconv.ParseUint(raw, 16, 64)
 	if err != nil {
-		return 0, err
+		return 0, mapError(err)
 	}
 	return dec, nil
 }
@@ -90,10 +112,17 @@ func MustDecodeUint64(input string) uint64 {
 	return dec
 }
 
+/*
+EncodeUint64 encodes a uint64 into a hex string with "0x" prefix.
+Example:
+
+	input: 42
+	output: "0x2a"
+*/
 func EncodeUint64(i uint64) string {
 	enc := make([]byte, 2, 10)
 	copy(enc, "0x")
-	return string(strconv.AppendUint(enc, i, 64))
+	return string(strconv.AppendUint(enc, i, 16))
 }
 
 var bigWordNibbles int
@@ -180,14 +209,23 @@ func checkNumber(input string) (raw string, err error) {
 
 const badNibble = ^uint64(0)
 
+/*
+decodeNibble decodes a single hex character into its numerical value.
+Returns badNibble if the input is not a valid hex character.
+
+EXAMPLE:
+
+	input: 'A'
+	output: 10
+*/
 func decodeNibble(in byte) uint64 {
 	switch {
 	case in >= '0' && in <= '9':
 		return uint64(in - '0')
 	case in >= 'A' && in <= 'F':
-		return uint64(in - 'A')
+		return uint64(in - 'A' + 10)
 	case in >= 'a' && in <= 'f':
-		return uint64(in - 'a')
+		return uint64(in - 'a' + 10)
 	default:
 		return badNibble
 	}

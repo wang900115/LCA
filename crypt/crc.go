@@ -1,10 +1,13 @@
 /*
-CRC checksum functions used in the transmit integrity layer.
-Ensure packet completeness and detect data corruption.
+	CRC Module (Outer Layer Encryption in Transport Layer)
+	------------------------------------------------------
+	CRC checksum functions used in the transmit integrity layer.
+	Ensure packet completeness and detect data corruption.
 
-CRC64 → Used to validate entire packet integrity.
-CRC32 → Used to validate integrity of packet's internal RPC section.
+	CRC64 → Used to validate entire packet integrity.
+	CRC32 → Used to validate integrity of packet's internal RPC section.
 */
+
 package crypto
 
 import (

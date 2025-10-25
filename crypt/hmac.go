@@ -1,8 +1,11 @@
 /*
-Hash-based Message Authentication Code with x52119 shared key
-is used in the transmit integrity layer.
-Encrypts packet payload.
+	HMAC Module (Inner Layer Encryption in Transport Layer)
+	------------------------------------------------------
+	Hash-based Message Authentication Code with X25519 shared key
+	is used in the transmit integrity layer.
+	Encrypts packet payload.
 */
+
 package crypto
 
 import (

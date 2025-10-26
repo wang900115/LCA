@@ -26,6 +26,11 @@ and decentralized personal data for resilience and privacy.
   - **Integrity Checking**  — Validates message integrity via CRC/HMAC
 ---
 
+<p align="center">
+  <img src="assets/banner.png" alt="LCA Banner" height="235" width="450" />
+</p>
+
+
 ## 🔧 Prerequisites
 Before you start, make sure you have:
 

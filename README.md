@@ -1,4 +1,4 @@
-<h1 align="center"><strong>Lightweight Chat Application (LCA)</strong></h1>
+<h1 align="center"><strong>Live Communication Autonomous (LCA)</strong></h1>
 <img alt="Static Badge" src="https://img.shields.io/badge/open-source-insight?link=https%3A%2F%2Fdeps.dev%2Fgo%2Fgithub.com%252Fwang900115%252FLCA%2Fv1.1.1"> <img alt="Static Badge" src="https://img.shields.io/badge/golang-org-blue?link=https%3A%2F%2Fpkg.go.dev%2Fgithub.com%2Fwang900115%2FLCA"> <img alt="Static Badge" src="https://img.shields.io/badge/DID-red?link=https%3A%2F%2Fwww.w3.org%2Fns%2Fdid%2F">
 
 
@@ -9,7 +9,7 @@
 ---
 
 ## 📌 Overview
-**LCA** (Lightweight Chat Application) is a secure and lightweight and hybrid decentralized communication system.
+**LCA** (Live Communication Autonomous) is a secure and lightweight and hybrid decentralized communication system.
 It supports RESTful APIs, WebSocket messaging, and RPC protocols, combining centralized management for security
 and decentralized personal data for resilience and privacy.
 
